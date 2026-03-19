@@ -1796,9 +1796,14 @@ In conclusion, environmental conservation is not just about protecting nature fo
         {renderScreen()}
       </AnimatePresence>
 
-      {shouldShowBottomNav && currentStep !== 'welcome' && currentStep !== 'setup' && (
+            {shouldShowBottomNav && currentStep !== 'welcome' && currentStep !== 'setup' && (
         <BottomNav currentStep={currentStep} onNavigate={navigateTo} />
       )}
+
+      {/* Footer Credits */}
+      <footer className="text-center py-3 text-xs text-muted-foreground border-t bg-white/80 backdrop-blur-sm">
+        <p>Developed by: <span className="font-medium text-[#1a5f2a]">Dr. Waleed Mandour</span>, 2026</p>
+      </footer>
     </div>
   );
 }
