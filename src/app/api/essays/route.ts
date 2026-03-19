@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/db';
+import { db, isDatabaseAvailable } from '@/lib/db';
+
+// In-memory storage for when database is not available
+let memoryEssays: any[] = [];
 
 // GET /api/essays - Get all essays
 export async function GET(request: NextRequest) {
@@ -8,9 +11,18 @@ export async function GET(request: NextRequest) {
     const courseId = searchParams.get('courseId');
     const limit = parseInt(searchParams.get('limit') || '20');
 
+    // If database is not available, return memory essays
+    if (!isDatabaseAvailable()) {
+      let filtered = memoryEssays;
+      if (courseId) {
+        filtered = filtered.filter(e => e.courseId === courseId);
+      }
+      return NextResponse.json({ essays: filtered.slice(0, limit) });
+    }
+
     const where = courseId ? { courseId } : {};
 
-    const essays = await db.essay.findMany({
+    const essays = await db?.essay.findMany({
       where,
       include: {
         course: true,
@@ -30,13 +42,10 @@ export async function GET(request: NextRequest) {
       take: limit
     });
 
-    return NextResponse.json({ essays });
+    return NextResponse.json({ essays: essays || [] });
   } catch (error) {
     console.error('Error fetching essays:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch essays' },
-      { status: 500 }
-    );
+    return NextResponse.json({ essays: memoryEssays });
   }
 }
 
@@ -62,7 +71,28 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const essay = await db.essay.create({
+    const essayData = {
+      id: `essay-${Date.now()}`,
+      studentId,
+      studentName,
+      originalText,
+      editedText,
+      imageData,
+      topic,
+      wordCount: wordCount || originalText.split(/\s+/).filter(Boolean).length,
+      courseId,
+      status: 'pending',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+
+    // If database is not available, store in memory
+    if (!isDatabaseAvailable()) {
+      memoryEssays.unshift(essayData);
+      return NextResponse.json({ essay: essayData });
+    }
+
+    const essay = await db?.essay.create({
       data: {
         studentId,
         studentName,
@@ -79,7 +109,7 @@ export async function POST(request: NextRequest) {
       }
     });
 
-    return NextResponse.json({ essay });
+    return NextResponse.json({ essay: essay || essayData });
   } catch (error) {
     console.error('Error creating essay:', error);
     return NextResponse.json(
@@ -102,7 +132,17 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    const essay = await db.essay.update({
+    // If database is not available, update in memory
+    if (!isDatabaseAvailable()) {
+      const index = memoryEssays.findIndex(e => e.id === id);
+      if (index !== -1) {
+        memoryEssays[index] = { ...memoryEssays[index], ...updates, updatedAt: new Date().toISOString() };
+        return NextResponse.json({ essay: memoryEssays[index] });
+      }
+      return NextResponse.json({ error: 'Essay not found' }, { status: 404 });
+    }
+
+    const essay = await db?.essay.update({
       where: { id },
       data: updates,
       include: {
@@ -142,7 +182,13 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    await db.essay.delete({
+    // If database is not available, delete from memory
+    if (!isDatabaseAvailable()) {
+      memoryEssays = memoryEssays.filter(e => e.id !== id);
+      return NextResponse.json({ success: true });
+    }
+
+    await db?.essay.delete({
       where: { id }
     });
 
