@@ -268,7 +268,7 @@ const WelcomeScreen = ({ onGetStarted }: { onGetStarted: () => void }) => {
             transition={{ delay: 0.6, duration: 0.5 }}
             className="text-center text-muted-foreground max-w-xs mb-12 text-sm md:text-base"
           >
-            Sultan Qaboos University's AI-powered essay assessment platform for Foundation and Post-Foundation courses
+            Center for Preparatory Studies's AI-powered essay assessment platform for Foundation and Post-Foundation courses
           </motion.p>
         </motion.div>
 
@@ -1802,7 +1802,7 @@ In conclusion, environmental conservation is not just about protecting nature fo
 
       {/* Footer Credits */}
       <footer className="text-center py-3 text-xs text-muted-foreground border-t bg-white/80 backdrop-blur-sm">
-        <p>Developed by: <span className="font-medium text-[#1a5f2a]">Dr. Waleed Mandour</span>, 2026</p>
+        <p>Developed by: <span className="font-medium text-[#1a5f2a]">Dr. Waleed Mandour</span>, AI Co-Marker Assistance Project, 2026</p>
       </footer>
     </div>
   );
