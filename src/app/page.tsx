@@ -268,7 +268,7 @@ const WelcomeScreen = ({ onGetStarted }: { onGetStarted: () => void }) => {
             transition={{ delay: 0.6, duration: 0.5 }}
             className="text-center text-muted-foreground max-w-xs mb-12 text-sm md:text-base"
           >
-            Center for Preparatory Studies's AI-powered essay assessment platform for Foundation and Post-Foundation courses
+            Center for Preparatory Studies's AI-powered essay assessment platform for Foundation and Credit courses
           </motion.p>
         </motion.div>
 
