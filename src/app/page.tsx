@@ -532,7 +532,7 @@ const SetupScreen = ({ onComplete }: { onComplete: () => void }) => {
 // Course Selection Screen
 const CourseSelectionScreen = ({ onSelect, onBack }: { onSelect: () => void; onBack: () => void }) => {
   const { courses, selectedCourse, setSelectedCourse } = useAppStore();
-  const [activeTab, setActiveTab] = useState<'foundation' | 'post-foundation'>('foundation');
+  const [activeTab, setActiveTab] = useState<'foundation' | 'credit'>('foundation');
 
   const filteredCourses = courses.filter((course) => course.program === activeTab);
 
@@ -564,7 +564,7 @@ const CourseSelectionScreen = ({ onSelect, onBack }: { onSelect: () => void; onB
 
         {/* Tabs */}
         <div className="p-4 pb-0">
-          <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'foundation' | 'post-foundation')}>
+          <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'foundation' | 'credit')}>
             <TabsList className="w-full h-12 p-1 bg-muted rounded-xl">
               <TabsTrigger
                 value="foundation"
@@ -574,11 +574,11 @@ const CourseSelectionScreen = ({ onSelect, onBack }: { onSelect: () => void; onB
                 Foundation
               </TabsTrigger>
               <TabsTrigger
-                value="post-foundation"
+                value="credit"
                 className="flex-1 h-10 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm"
               >
                 <BookOpen className="w-4 h-4 mr-2" />
-                Post-Foundation
+                Credit
               </TabsTrigger>
             </TabsList>
           </Tabs>
