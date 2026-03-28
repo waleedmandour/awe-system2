@@ -131,7 +131,7 @@ async function performGeminiOCR(image: string, geminiApiKey: string) {
     const genAI = new GoogleGenerativeAI(geminiApiKey);
     
     // 2. Use Gemini 3.0 Flash as requested for the latest speed and accuracy
-    const model = genAI.getGenerativeModel({ model: 'gemini-3.0-flash' });
+    const model = genAI.getGenerativeModel({ model: 'gemini-3-flash-preview' });
 
     // 3. Extract Data
     const { base64Data, mimeType } = extractBase64AndMimeType(image);
