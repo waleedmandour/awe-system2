@@ -1118,9 +1118,11 @@ const ReviewScreen = ({ onSubmit, onBack }: { onSubmit: (text: string) => void; 
 
 // Assessment Screen (Processing)
 const AssessmentScreen = ({ onComplete }: { onComplete: (assessment: Assessment) => void }) => {
-  const { selectedCourse, extractedText } = useAppStore();
+  const { selectedCourse, extractedText, geminiApiKey } = useAppStore();
   const [progress, setProgress] = useState(0);
   const [currentPhase, setCurrentPhase] = useState(0);
+  const [error, setError] = useState<string | null>(null);
+  const { toast } = useToast();
 
   const phases = [
     { text: 'Analyzing structure', icon: FileText },
@@ -1131,66 +1133,102 @@ const AssessmentScreen = ({ onComplete }: { onComplete: (assessment: Assessment)
   ];
 
   useEffect(() => {
+    // Start the actual assessment API call
+    const performAssessment = async () => {
+      try {
+        const response = await fetch('/api/assess', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            text: extractedText,
+            courseCode: selectedCourse?.code,
+            topic: null,
+            apiKey: geminiApiKey,
+          }),
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+          throw new Error(result.error || 'Failed to assess essay');
+        }
+
+        // Transform the API response to match Assessment type
+        const assessment: Assessment = {
+          id: `assess-${Date.now()}`,
+          totalScore: result.assessment.totalScore,
+          maxScore: result.assessment.maxScore,
+          percentage: result.assessment.percentage,
+          bandScore: result.assessment.bandScore,
+          overallFeedback: result.assessment.overallFeedback,
+          scores: result.assessment.scores.map((s: any, index: number) => ({
+            criterionId: s.criterionId || `criterion-${index}`,
+            criterionName: s.criterionName,
+            score: s.score,
+            maxScore: s.maxScore,
+            feedback: s.feedback,
+          })),
+          createdAt: result.assessment.createdAt,
+        };
+
+        // Wait for progress to complete before showing results
+        setProgress(100);
+        setTimeout(() => onComplete(assessment), 500);
+      } catch (err) {
+        console.error('Assessment error:', err);
+        setError(err instanceof Error ? err.message : 'Failed to assess essay');
+        toast({
+          title: 'Assessment Failed',
+          description: err instanceof Error ? err.message : 'Failed to assess essay',
+          variant: 'destructive',
+        });
+      }
+    };
+
+    performAssessment();
+
+    // Progress animation
     const progressInterval = setInterval(() => {
-      setProgress((prev) => (prev >= 100 ? 100 : prev + 1.5));
-    }, 50);
+      setProgress((prev) => (prev >= 90 ? 90 : prev + 2)); // Cap at 90% until API returns
+    }, 100);
 
     const phaseInterval = setInterval(() => {
       setCurrentPhase((prev) => (prev < phases.length - 1 ? prev + 1 : prev));
-    }, 1200);
+    }, 1500);
 
     return () => {
       clearInterval(progressInterval);
       clearInterval(phaseInterval);
     };
-  }, []);
+  }, [extractedText, selectedCourse, geminiApiKey, onComplete, toast]);
 
-  useEffect(() => {
-    if (progress >= 100) {
-      // Generate mock assessment
-      const mockAssessment: Assessment = {
-        id: `assess-${Date.now()}`,
-        totalScore: 78,
-        maxScore: 100,
-        percentage: 78,
-        bandScore: 6.5,
-        overallFeedback: 'This is a well-organized essay with clear progression of ideas. The introduction effectively sets up the main argument, and the conclusion summarizes the key points. There is good use of linking words to connect ideas.',
-        scores: [
-          {
-            criterionId: 'task-achievement',
-            criterionName: 'Task Achievement',
-            score: 7,
-            maxScore: 9,
-            feedback: 'Good response to the task with relevant ideas developed well.',
-          },
-          {
-            criterionId: 'coherence',
-            criterionName: 'Coherence & Cohesion',
-            score: 7,
-            maxScore: 9,
-            feedback: 'Clear progression with effective use of cohesive devices.',
-          },
-          {
-            criterionId: 'lexical',
-            criterionName: 'Lexical Resource',
-            score: 6,
-            maxScore: 9,
-            feedback: 'Adequate range of vocabulary with some less common items used appropriately.',
-          },
-          {
-            criterionId: 'grammar',
-            criterionName: 'Grammar Accuracy',
-            score: 6.5,
-            maxScore: 9,
-            feedback: 'Good control of simple and complex sentences with occasional errors.',
-          },
-        ],
-        createdAt: new Date().toISOString(),
-      };
-
-      setTimeout(() => onComplete(mockAssessment), 500);
-    }
-  }, [progress, onComplete]);
+  if (error) {
+    return (
+      <PageTransition>
+        <div className="min-h-screen min-h-[100dvh] flex flex-col items-center justify-center p-6 safe-area-top safe-area-bottom">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="w-full max-w-sm text-center"
+          >
+            <div className="w-20 h-20 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-6">
+              <AlertCircle className="w-10 h-10 text-red-500" />
+            </div>
+            <h2 className="text-xl font-semibold mb-2">Assessment Failed</h2>
+            <p className="text-muted-foreground text-sm mb-6">{error}</p>
+            <Button
+              onClick={() => window.location.reload()}
+              className="bg-[#1a5f2a] hover:bg-[#1a5f2a]/90"
+            >
+              Try Again
+            </Button>
+          </motion.div>
+        </div>
+      </PageTransition>
+    );
+  }
 
   return (
     <PageTransition>
@@ -1272,10 +1310,38 @@ const AssessmentScreen = ({ onComplete }: { onComplete: (assessment: Assessment)
 };
 
 // Results Screen Component
-const ResultsScreen = ({ assessment, onNewAssessment, onBack }: { assessment: Assessment; onNewAssessment: () => void; onBack: () => void }) => {
+const ResultsScreen = ({ assessment, onNewAssessment, onBack }: { assessment: Assessment | null; onNewAssessment: () => void; onBack: () => void }) => {
   const { selectedCourse, extractedText } = useAppStore();
   const [activeTab, setActiveTab] = useState('overview');
+  const [isDownloading, setIsDownloading] = useState(false);
   const { toast } = useToast();
+
+  // Null check - redirect if no assessment
+  if (!assessment) {
+    return (
+      <PageTransition>
+        <div className="min-h-screen min-h-[100dvh] flex flex-col items-center justify-center p-6 safe-area-top safe-area-bottom">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="w-full max-w-sm text-center"
+          >
+            <div className="w-20 h-20 rounded-full bg-amber-100 flex items-center justify-center mx-auto mb-6">
+              <AlertCircle className="w-10 h-10 text-amber-500" />
+            </div>
+            <h2 className="text-xl font-semibold mb-2">No Assessment Found</h2>
+            <p className="text-muted-foreground text-sm mb-6">Please submit an essay for assessment first.</p>
+            <Button
+              onClick={onNewAssessment}
+              className="bg-[#1a5f2a] hover:bg-[#1a5f2a]/90"
+            >
+              Start New Assessment
+            </Button>
+          </motion.div>
+        </div>
+      </PageTransition>
+    );
+  }
 
   const handleShare = async () => {
     try {
@@ -1299,6 +1365,54 @@ const ResultsScreen = ({ assessment, onNewAssessment, onBack }: { assessment: As
         description: 'Unable to share results.',
         variant: 'destructive',
       });
+    }
+  };
+
+  const handleDownloadPDF = async () => {
+    setIsDownloading(true);
+    try {
+      const response = await fetch('/api/pdf/assessment', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          assessment,
+          course: selectedCourse,
+          essayText: extractedText,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to generate PDF');
+      }
+
+      // Get the PDF blob
+      const blob = await response.blob();
+      
+      // Create download link
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `AWE_Assessment_${selectedCourse?.code || 'Report'}_${new Date().toISOString().split('T')[0]}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+
+      toast({
+        title: 'PDF Downloaded',
+        description: 'Your assessment report has been downloaded.',
+      });
+    } catch (error) {
+      console.error('PDF download error:', error);
+      toast({
+        title: 'Download Failed',
+        description: 'Failed to generate PDF report.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsDownloading(false);
     }
   };
 
@@ -1579,11 +1693,16 @@ const ResultsScreen = ({ assessment, onNewAssessment, onBack }: { assessment: As
           <div className="flex gap-3">
             <Button
               variant="outline"
-              onClick={handleShare}
+              onClick={handleDownloadPDF}
+              disabled={isDownloading}
               className="flex-1 h-12 rounded-xl ios-press"
             >
-              <Share2 className="w-4 h-4 mr-2" />
-              Share
+              {isDownloading ? (
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              ) : (
+                <Download className="w-4 h-4 mr-2" />
+              )}
+              {isDownloading ? 'Generating...' : 'Download PDF'}
             </Button>
             <Button
               onClick={onNewAssessment}
