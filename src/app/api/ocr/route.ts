@@ -102,7 +102,7 @@ async function performVisionOCR(image: string, apiKey: string) {
   }
 }
 
-// Perform OCR using Gemini (via z-ai-web-dev-sdk)
+// Perform OCR using Gemini Vision (via z-ai-web-dev-sdk)
 async function performGeminiOCR(image: string, geminiApiKey: string) {
   try {
     const zai = await ZAI.create();
@@ -114,31 +114,28 @@ async function performGeminiOCR(image: string, geminiApiKey: string) {
     const imageTypeMatch = image.match(/data:image\/([a-z]+);base64,/);
     const imageType = imageTypeMatch ? imageTypeMatch[1] : 'jpeg';
 
-    // Create the prompt for text extraction
-    const completion = await zai.chat.completions.create({
+    // Create the data URL for the image
+    const imageUrl = `data:image/${imageType};base64,${base64Data}`;
+
+    // Use createVision for multimodal content
+    const completion = await zai.chat.completions.createVision({
+      model: 'glm-4.6v',
       messages: [
-        {
-          role: 'system',
-          content: 'You are an OCR assistant. Your task is to extract ALL text from the provided image exactly as it appears. Preserve the original formatting, line breaks, and structure. Only output the extracted text, nothing else. Do not add any commentary, explanations, or formatting markers.'
-        },
         {
           role: 'user',
           content: [
-            {
-              type: 'text',
-              text: 'Extract all text from this image. Preserve the original formatting and structure. Output only the extracted text.'
+            { 
+              type: 'text', 
+              text: 'Extract ALL text from this image exactly as it appears. Preserve the original formatting, line breaks, and structure. Output ONLY the extracted text with no additional commentary or explanations.' 
             },
-            {
-              type: 'image_url',
-              image_url: {
-                url: `data:image/${imageType};base64,${base64Data}`
-              }
+            { 
+              type: 'image_url', 
+              image_url: { url: imageUrl } 
             }
           ]
         }
       ],
-      temperature: 0.1,
-      max_tokens: 4000,
+      thinking: { type: 'disabled' }
     });
 
     const extractedText = completion.choices?.[0]?.message?.content || '';

@@ -1161,8 +1161,9 @@ const AssessmentScreen = ({ onComplete }: { onComplete: (assessment: Assessment)
           totalScore: result.assessment.totalScore,
           maxScore: result.assessment.maxScore,
           percentage: result.assessment.percentage,
-          bandScore: result.assessment.bandScore,
           overallFeedback: result.assessment.overallFeedback,
+          wordCount: result.assessment.wordCount,
+          targetWordCount: result.assessment.targetWordCount,
           scores: result.assessment.scores.map((s: any, index: number) => ({
             criterionId: s.criterionId || `criterion-${index}`,
             criterionName: s.criterionName,
@@ -1389,11 +1390,11 @@ const ResultsScreen = ({ assessment, onNewAssessment, onBack }: { assessment: As
       if (navigator.share) {
         await navigator.share({
           title: 'AWE Assessment Results',
-          text: `I scored ${assessment.percentage}% on my ${selectedCourse?.name || 'essay'} assessment!`,
+          text: `I scored ${assessment.percentage}% (${assessment.totalScore}/${assessment.maxScore}) on my ${selectedCourse?.name || 'essay'} assessment!`,
         });
       } else {
         await navigator.clipboard.writeText(
-          `AWE Assessment Results\nScore: ${assessment.percentage}%\nBand: ${assessment.bandScore}`
+          `AWE Assessment Results\nScore: ${assessment.totalScore}/${assessment.maxScore} (${Math.round(assessment.percentage)}%)`
         );
         toast({
           title: 'Copied to Clipboard',
