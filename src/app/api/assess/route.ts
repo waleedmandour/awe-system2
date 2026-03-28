@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import ZAI from 'z-ai-web-dev-sdk';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
 // Detailed assessment rubrics for Foundation courses (0230, 0340)
 const FOUNDATION_RUBRICS = {
   targetWordCount: { min: 110, max: 130, ideal: 120 },
-  criteria: [
+  criteria:[
     {
       name: 'Task Response',
       maxScore: 6,
@@ -54,14 +54,14 @@ const FOUNDATION_RUBRICS = {
       }
     }
   ],
-  specialRules: [
+  specialRules:[
     'If the text is somewhat off-topic, deduct 50% of the mark obtained for Task Response and Lexical Resource.',
     'A completely off-topic text should receive a zero for Task Response and Lexical Resource.'
   ]
 };
 
 // Post-foundation/Credit course criteria (LANC2160)
-const CREDIT_CRITERIA = [
+const CREDIT_CRITERIA =[
   { name: 'Task Achievement', maxScore: 5, description: 'How well the summary captures main points' },
   { name: 'Coherence & Cohesion', maxScore: 5, description: 'Logical organization and linking of ideas' },
   { name: 'Lexical Resource', maxScore: 5, description: 'Range and accuracy of vocabulary' },
@@ -125,15 +125,15 @@ SCORING INSTRUCTIONS:
 5. Calculate the percentage as (totalScore / 24) * 100.
 
 FEEDBACK FORMAT: Structure each criterion's feedback as:
-**Strengths:** [What was done well]
+**Strengths:**[What was done well]
 **Mistakes Found:**
 - "[exact quote from text]" - [explanation of the error]
-- "[another exact quote]" - [explanation]
+- "[another exact quote]" -[explanation]
 **Suggestions:** [How to improve]
 
-Respond in the following JSON format ONLY (no additional text or markdown):
+Respond in the following JSON format ONLY:
 {
-  "scores": [
+  "scores":[
     {
       "criterionName": "Task Response",
       "score": 4,
@@ -197,9 +197,9 @@ FEEDBACK FORMAT: Structure each criterion's feedback as:
 - "[another exact quote]" - [explanation]
 **Suggestions:** [How to improve]
 
-Respond in the following JSON format ONLY (no additional text or markdown):
+Respond in the following JSON format ONLY:
 {
-  "scores": [
+  "scores":[
     {
       "criterionName": "Task Achievement",
       "score": 4,
@@ -237,7 +237,7 @@ export async function POST(request: NextRequest) {
     const wordCount = text.trim().split(/\s+/).filter(Boolean).length;
 
     // Determine course type and build appropriate prompt
-    const isFoundation = ['0230', '0340'].includes(courseCode);
+    const isFoundation =['0230', '0340'].includes(courseCode);
     const prompt = isFoundation 
       ? buildFoundationPrompt(text, topic, wordCount)
       : buildCreditPrompt(text, topic, wordCount);
@@ -245,32 +245,32 @@ export async function POST(request: NextRequest) {
     const criteria = isFoundation 
       ? FOUNDATION_RUBRICS.criteria 
       : CREDIT_CRITERIA;
-    const totalMaxScore = criteria.reduce((sum, c) => sum + c.maxScore, 0);
 
-    // Use the AI SDK for assessment
-    const zai = await ZAI.create();
+    // 1. Initialize Official Google Gemini SDK
+    const genAI = new GoogleGenerativeAI(apiKey);
     
-    const completion = await zai.chat.completions.create({
-      messages: [
-        {
-          role: 'system',
-          content: 'You are an expert writing assessment AI for Foundation and Credit level university courses at Sultan Qaboos University. All students are at CEFR A1-A2 level (Basic User). Your feedback must use simple, clear language appropriate for this proficiency level. Focus on fundamental skills and provide encouraging, constructive guidance. Always highlight specific mistakes by quoting exact words from the student\'s text. You respond only with valid JSON. No markdown formatting or code blocks.'
-        },
-        {
-          role: 'user',
-          content: prompt
-        }
-      ],
-      temperature: 0.3,
-      max_tokens: 4000,
+    // 2. Initialize Model with Strict Instructions
+    const model = genAI.getGenerativeModel({ 
+      model: 'gemini-1.5-pro',
+      systemInstruction: 'You are an expert writing assessment AI for Foundation and Credit level university courses at Sultan Qaboos University. All students are at CEFR A1-A2 level (Basic User). Your feedback must use simple, clear language appropriate for this proficiency level. Focus on fundamental skills and provide encouraging, constructive guidance. Always highlight specific mistakes by quoting exact words from the student\'s text. You respond only with valid JSON. No markdown formatting or code blocks.'
     });
 
-    const responseText = completion.choices?.[0]?.message?.content || '';
+    // 3. Generate Content enforcing application/json output
+    const result = await model.generateContent({
+      contents: [{ role: 'user', parts: [{ text: prompt }] }],
+      generationConfig: {
+        temperature: 0.3,
+        maxOutputTokens: 4000,
+        responseMimeType: "application/json",
+      }
+    });
+
+    const responseText = result.response.text() || '';
     
     // Parse the JSON response
     let assessment;
     try {
-      // Clean the response - remove markdown code blocks if present
+      // Clean the response just in case the model ignores the mimeType instruction
       const cleanedResponse = responseText
         .replace(/```json\n?/g, '')
         .replace(/```\n?/g, '')
