@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import ZAI from 'z-ai-web-dev-sdk';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
-// Google Vision OCR API endpoint
+// POST Endpoint for routing OCR requests
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
 
     // Check which OCR method to use
     if (useGemini && geminiApiKey) {
-      // Use Gemini for OCR
+      // Use Official Google Gemini for OCR
       return await performGeminiOCR(image, geminiApiKey);
     } else if (apiKey) {
       // Use Google Vision API for OCR
@@ -36,9 +36,29 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// Perform OCR using Google Vision API
+// Helper function for bulletproof Base64 parsing
+function extractBase64AndMimeType(imageString: string) {
+  let base64Data = imageString;
+  let mimeType = 'image/jpeg'; // Default
+
+  // If the string includes a Data URI prefix, split it safely
+  if (imageString.startsWith('data:')) {
+    const parts = imageString.split(',');
+    base64Data = parts[1];
+    const mimeMatch = parts[0].match(/:(.*?);/);
+    if (mimeMatch) {
+      mimeType = mimeMatch[1];
+    }
+  }
+
+  return { base64Data, mimeType };
+}
+
+// Perform OCR using Google Vision API via REST
 async function performVisionOCR(image: string, apiKey: string) {
   try {
+    const { base64Data } = extractBase64AndMimeType(image);
+
     // Call Google Vision API
     const visionResponse = await fetch(
       `https://vision.googleapis.com/v1/images:annotate?key=${apiKey}`,
@@ -48,19 +68,18 @@ async function performVisionOCR(image: string, apiKey: string) {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          requests: [
+          requests:[
             {
               image: {
-                content: image.replace(/^data:image\/[a-z]+;base64,/, ''),
+                content: base64Data,
               },
-              features: [
+              features:[
                 {
                   type: 'DOCUMENT_TEXT_DETECTION',
-                  maxResults: 1,
                 },
               ],
               imageContext: {
-                languageHints: ['en'], // English language hint
+                languageHints: ['en'], // Remove or adjust if supporting Arabic/other languages
               },
             },
           ],
@@ -79,18 +98,18 @@ async function performVisionOCR(image: string, apiKey: string) {
 
     const result = await visionResponse.json();
     
-    // Extract text from the response
+    // Extract text from the response safely
     const textAnnotations = result.responses?.[0]?.textAnnotations;
     const extractedText = textAnnotations?.[0]?.description || '';
     
-    // Calculate word count
     const wordCount = extractedText.trim().split(/\s+/).filter(Boolean).length;
+    const confidence = result.responses?.[0]?.fullTextAnnotation?.pages?.[0]?.confidence || 0.9;
 
     return NextResponse.json({
       success: true,
       text: extractedText,
       wordCount,
-      confidence: result.responses?.[0]?.fullTextAnnotation?.pages?.[0]?.confidence || 0.9,
+      confidence,
       method: 'vision',
     });
   } catch (error) {
@@ -102,43 +121,31 @@ async function performVisionOCR(image: string, apiKey: string) {
   }
 }
 
-// Perform OCR using Gemini Vision (via z-ai-web-dev-sdk)
+// Perform OCR using Official Google Gemini SDK
 async function performGeminiOCR(image: string, geminiApiKey: string) {
   try {
-    const zai = await ZAI.create();
-
-    // Extract the base64 data from the data URL
-    const base64Data = image.replace(/^data:image\/[a-z]+;base64,/, '');
+    // 1. Initialize official Gemini Client with the User's API Key
+    const genAI = new GoogleGenerativeAI(geminiApiKey);
     
-    // Determine image type from data URL
-    const imageTypeMatch = image.match(/data:image\/([a-z]+);base64,/);
-    const imageType = imageTypeMatch ? imageTypeMatch[1] : 'jpeg';
+    // Using gemini-1.5-pro as it provides the highest accuracy for complex OCR tasks
+    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-pro' });
 
-    // Create the data URL for the image
-    const imageUrl = `data:image/${imageType};base64,${base64Data}`;
+    // 2. Extract Data
+    const { base64Data, mimeType } = extractBase64AndMimeType(image);
 
-    // Use createVision for multimodal content
-    const completion = await zai.chat.completions.createVision({
-      model: 'glm-4.6v',
-      messages: [
-        {
-          role: 'user',
-          content: [
-            { 
-              type: 'text', 
-              text: 'Extract ALL text from this image exactly as it appears. Preserve the original formatting, line breaks, and structure. Output ONLY the extracted text with no additional commentary or explanations.' 
-            },
-            { 
-              type: 'image_url', 
-              image_url: { url: imageUrl } 
-            }
-          ]
-        }
-      ],
-      thinking: { type: 'disabled' }
-    });
+    // 3. Prepare the request payload
+    const prompt = 'Extract ALL text from this image exactly as it appears. Preserve the original formatting, line breaks, and structure. Output ONLY the extracted text with no additional commentary or explanations.';
+    
+    const imagePart = {
+      inlineData: {
+        data: base64Data,
+        mimeType: mimeType
+      }
+    };
 
-    const extractedText = completion.choices?.[0]?.message?.content || '';
+    // 4. Call the API
+    const result = await model.generateContent([prompt, imagePart]);
+    const extractedText = result.response.text();
     
     // Calculate word count
     const wordCount = extractedText.trim().split(/\s+/).filter(Boolean).length;
