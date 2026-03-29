@@ -1734,10 +1734,10 @@ const ResultsScreen = ({ assessment, onNewAssessment, onBack }: { assessment: As
                 Overview
               </TabsTrigger>
               <TabsTrigger value="criteria" className="flex-1 h-9 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm">
-                Criteria
+                Detailed Feedback
               </TabsTrigger>
               <TabsTrigger value="feedback" className="flex-1 h-9 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm">
-                Feedback
+                Overall Feedback
               </TabsTrigger>
             </TabsList>
           </Tabs>
@@ -2489,8 +2489,8 @@ const BottomNav = ({ currentStep, onNavigate }: { currentStep: string; onNavigat
     { id: 'home', step: 'welcome', icon: Home, label: 'Home' },
     { id: 'courses', step: 'course', icon: BookOpen, label: 'Courses' },
     { id: 'upload', step: 'upload', icon: Camera, label: 'Upload' },
-    { id: 'records', step: 'records', icon: History, label: 'Records' },
     { id: 'results', step: 'results', icon: BarChart3, label: 'Results' },
+    { id: 'records', step: 'records', icon: History, label: 'Records' },
   ];
 
   return (
@@ -2750,7 +2750,8 @@ export default function AWEApp() {
 
       {/* Footer Credits */}
       <footer className="text-center py-3 text-xs text-muted-foreground border-t bg-white/80 backdrop-blur-sm">
-        <p>Developed by: <span className="font-medium text-[#1a5f2a]">Dr. Waleed Mandour</span>, AI Co-Marker Assistance Project, 2026</p>
+        <p>Developed by: <span className="font-medium text-[#1a5f2a]">Dr. Waleed Mandour</span></p>
+        <p>AI Co-Marker Assistance Project, 2026</p>
       </footer>
     </div>
   );
