@@ -251,7 +251,7 @@ export async function POST(request: NextRequest) {
     
     // 2. Initialize Model with Strict Instructions
     const model = genAI.getGenerativeModel({ 
-      model: 'gemini-1.5-pro',
+      model: 'gemini-3-flash-preview',
       systemInstruction: 'You are an expert writing assessment AI for Foundation and Credit level university courses at Sultan Qaboos University. All students are at CEFR A1-A2 level (Basic User). Your feedback must use simple, clear language appropriate for this proficiency level. Focus on fundamental skills and provide encouraging, constructive guidance. Always highlight specific mistakes by quoting exact words from the student\'s text. You respond only with valid JSON. No markdown formatting or code blocks.'
     });
 

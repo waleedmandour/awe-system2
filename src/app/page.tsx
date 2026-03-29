@@ -865,8 +865,11 @@ const UploadScreen = ({ onUpload, onBack }: { onUpload: (imageData: string) => v
 };
 
 // Processing Screen (OCR)
-const ProcessingScreen = ({ onComplete }: { onComplete: () => void }) => {
-  const { processingMessage, setProcessing } = useAppStore();
+// This is a visual-only animation screen. Navigation is controlled by the parent
+// via handleImageUpload — the actual OCR API response triggers navigation,
+// NOT a timer. This prevents the race condition where the timer completed
+// before the OCR result arrived, sending the user to review with empty text.
+const ProcessingScreen = () => {
   const [progress, setProgress] = useState(0);
   const [currentStep, setCurrentStep] = useState(0);
 
@@ -878,31 +881,26 @@ const ProcessingScreen = ({ onComplete }: { onComplete: () => void }) => {
   ];
 
   useEffect(() => {
+    // Animate progress up to 90% — cap it so it stays animated while OCR runs
     const interval = setInterval(() => {
       setProgress((prev) => {
-        if (prev >= 100) {
+        if (prev >= 90) {
           clearInterval(interval);
-          return 100;
+          return 90;
         }
-        return prev + 2;
+        return prev + 1;
       });
-    }, 50);
+    }, 80);
 
     const stepInterval = setInterval(() => {
       setCurrentStep((prev) => (prev < steps.length - 1 ? prev + 1 : prev));
-    }, 1000);
+    }, 1500);
 
     return () => {
       clearInterval(interval);
       clearInterval(stepInterval);
     };
   }, []);
-
-  useEffect(() => {
-    if (progress >= 100) {
-      setTimeout(onComplete, 500);
-    }
-  }, [progress, onComplete]);
 
   return (
     <PageTransition>
@@ -1992,9 +1990,7 @@ export default function AWEApp() {
         );
       case 'processing':
         return (
-          <ProcessingScreen
-            onComplete={() => setStep('review')}
-          />
+          <ProcessingScreen />
         );
       case 'review':
         return (

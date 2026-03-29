@@ -131,13 +131,16 @@ async function performGeminiOCR(image: string, geminiApiKey: string) {
     const genAI = new GoogleGenerativeAI(geminiApiKey);
     
     // 2. Use Gemini 3.0 Flash as requested for the latest speed and accuracy
-    const model = genAI.getGenerativeModel({ model: 'gemini-3-flash-preview' });
+    const model = genAI.getGenerativeModel({ 
+      model: 'gemini-3-flash-preview',
+      systemInstruction: 'You are an expert OCR system specialized in reading handwritten and printed text. Extract ALL text from images with the highest accuracy. Preserve the original formatting, line breaks, paragraphs, and structure exactly as written. If text is handwritten, carefully decipher each word. Do NOT add any commentary, summaries, or explanations. Output ONLY the extracted text itself.'
+    });
 
     // 3. Extract Data
     const { base64Data, mimeType } = extractBase64AndMimeType(image);
 
-    // 4. Prepare the request payload
-    const prompt = 'Extract ALL text from this image exactly as it appears. Preserve the original formatting, line breaks, and structure. Output ONLY the extracted text with no additional commentary or explanations.';
+    // 4. Prepare the request payload with OCR-optimized prompt
+    const prompt = 'Extract ALL text from this image exactly as written. Preserve the original formatting, line breaks, and structure. This may be handwritten text — transcribe it carefully, preserving every word. Output ONLY the extracted text with no additional commentary or explanations.';
     
     const imagePart = {
       inlineData: {
@@ -146,8 +149,23 @@ async function performGeminiOCR(image: string, geminiApiKey: string) {
       }
     };
 
-    // 5. Call the API
-    const result = await model.generateContent([prompt, imagePart]);
+    // 5. Call the API with OCR-optimized generation config
+    //    - mediaResolution HIGH: critical for reading fine/small handwriting
+    //      (supported by the API but not yet in SDK types — using type assertion)
+    //    - temperature 0.1: deterministic, accurate text extraction
+    //    - maxOutputTokens 8192: enough for long essays
+    const result = await model.generateContent({
+      contents: [{
+        role: 'user',
+        parts: [imagePart, { text: prompt }]
+      }],
+      generationConfig: {
+        temperature: 0.1,
+        mediaResolution: 'MEDIA_RESOLUTION_HIGH',
+        maxOutputTokens: 8192,
+      } as any
+    });
+
     const extractedText = result.response.text();
     
     // Calculate word count
