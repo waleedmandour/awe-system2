@@ -72,7 +72,7 @@ const CREDIT_CRITERIA =[
 function buildFoundationPrompt(text: string, topic: string | null, wordCount: number): string {
   const rubrics = FOUNDATION_RUBRICS;
   const wordCountStatus = wordCount < rubrics.targetWordCount.min 
-    ? `WARNING: Word count (${wordCount}) is BELOW the required range of ${rubrics.targetWordCount.min}-${rubrics.targetWordCount.max} words. This may affect the Task Response score.`
+    ? `WARNING: Word count (${wordCount}) is BELOW the required range of ${rubrics.targetWordCount.min}-${rubrics.targetWordCount.max} words. This MUST lower the Task Response score.`
     : wordCount > rubrics.targetWordCount.max
     ? `NOTE: Word count (${wordCount}) exceeds the target range of ${rubrics.targetWordCount.min}-${rubrics.targetWordCount.max} words. Minor flexibility is acceptable.`
     : `Word count (${wordCount}) is within the acceptable range of ${rubrics.targetWordCount.min}-${rubrics.targetWordCount.max} words.`;
@@ -86,16 +86,7 @@ function buildFoundationPrompt(text: string, topic: string | null, wordCount: nu
 
   return `You are an expert writing assessor evaluating a Foundation level student essay for Sultan Qaboos University's Center for Preparatory Studies.
 
-IMPORTANT CONTEXT: Students at this level are at CEFR A1-A2 level (Basic User). Your feedback MUST be appropriate for this proficiency level:
-- A1 (Breakthrough): Can understand and use familiar everyday expressions and very basic phrases aimed at the satisfaction of needs of a concrete type.
-- A2 (Waystage): Can understand sentences and frequently used expressions related to areas of most immediate relevance. Can communicate in simple and routine tasks requiring a simple and direct exchange of information.
-
-When providing feedback:
-- Use simple, clear language that A1-A2 learners can understand
-- Focus on fundamental writing skills appropriate for this level
-- Provide concrete, achievable improvement suggestions
-- Avoid overly technical linguistic terminology
-- Be encouraging while maintaining appropriate standards for the level
+STUDENT LEVEL: CEFR A1-A2 (Basic User). Feedback must use simple, clear language that A1-A2 learners can understand. Be encouraging while maintaining appropriate standards. Avoid overly technical linguistic terminology.
 
 ${topic ? `Essay Topic: ${topic}` : 'No specific topic provided.'}
 
@@ -106,47 +97,61 @@ ${text}
 
 WORD COUNT: ${wordCountStatus}
 
-DETAILED ASSESSMENT RUBRICS (Foundation Courses - FP0230 and FP0340):
+ASSESSMENT RUBRICS (Foundation Courses - FP0230 and FP0340):
 
 ${criteriaDetails}
 
 SPECIAL RULES:
 ${rubrics.specialRules.map((r, i) => `${i + 1}. ${r}`).join('\n')}
 
-SCORING INSTRUCTIONS:
-1. For each criterion, carefully read the rubric descriptors and determine which band best matches the student's performance.
-2. Assign a WHOLE NUMBER score (0, 1, 2, 3, 4, 5, or 6). Do NOT use decimals or half-points.
-3. For each criterion, provide structured feedback that includes:
-   - A brief positive comment on what the student did well
-   - SPECIFIC MISTAKES OR ERRORS found in the text (quote the exact words/phrases from the essay)
-   - Clear explanation of why each is a mistake
-   - Concrete suggestions for improvement
-4. Calculate the total score as the sum of all criterion scores (max 24).
-5. Calculate the percentage as (totalScore / 24) * 100.
+============================================================
+SCORING AND FEEDBACK INSTRUCTIONS (CRITICAL — FOLLOW EXACTLY):
+============================================================
 
-FEEDBACK FORMAT: Structure each criterion's feedback as:
-**Strengths:**[What was done well]
-**Mistakes Found:**
-- "[exact quote from text]" - [explanation of the error]
-- "[another exact quote]" -[explanation]
-**Suggestions:** [How to improve]
+STEP 1 — SCORE each criterion using a WHOLE NUMBER (0, 1, 2, 3, 4, 5, or 6). No decimals.
 
-Respond in the following JSON format ONLY:
+STEP 2 — For EACH criterion, write a "Justification" paragraph that:
+  (a) Explicitly names the score band you chose (e.g. "Score 4: Good")
+  (b) Quotes at least ONE specific phrase or sentence from the student's essay as evidence
+  (c) Explains why the essay fits that band descriptor — connect the evidence to the rubric
+  (d) If the score is below 4, clearly state what is missing compared to the next higher band
+  (e) If the score is 5 or 6, explain what the student did beyond expectations
+
+This justification must make the score transparent and defensible. A reader should understand exactly why that score was given based on the evidence.
+
+STEP 3 — For each criterion, list SPECIFIC errors found in the text. Format each as:
+  - "[exact quoted text]" — explanation of the error and how to fix it
+
+STEP 4 — For each criterion, provide 1-2 concrete, achievable suggestions for improvement appropriate for an A1-A2 learner.
+
+STEP 5 — overallFeedback must be a comprehensive summary (3-5 sentences) that:
+  - Highlights the student's strongest criterion and what they did well
+  - Identifies the weakest area needing the most attention
+  - Gives one prioritized action item to focus on next
+
+STEP 6 — Calculate totalScore = sum of all criterion scores (max 24). Calculate percentage = round(totalScore / 24 * 100).
+
+============================================================
+JSON OUTPUT FORMAT (respond ONLY with valid JSON):
+============================================================
 {
-  "scores":[
+  "scores": [
     {
       "criterionName": "Task Response",
       "score": 4,
       "maxScore": 6,
-      "feedback": "**Strengths:** ...\\n**Mistakes Found:**\\n- \\"...\\",\\n**Suggestions:** ..."
+      "justification": "Score 4: Good. The essay addresses the task by [explanation]. For example, the student writes: \\"[exact quote]\\" which shows [specific rubric alignment].",
+      "strengths": "The student clearly addresses the topic and provides relevant examples. The opening sentence introduces the subject effectively.",
+      "mistakes": [
+        "[exact quoted text]" — Explanation of the error and how to fix it
+      ],
+      "suggestions": "Try to add a clear concluding sentence that summarizes your main point. Use transition words like 'In conclusion' or 'To sum up'."
     }
   ],
   "totalScore": 16,
   "maxScore": 24,
   "percentage": 67,
-  "overallFeedback": "Your comprehensive overall feedback summarizing strengths and main areas for improvement...",
-  "wordCount": ${wordCount},
-  "wordCountPenalty": false
+  "overallFeedback": "Your strongest area is [criterion] where you [specific strength]. The area that needs the most improvement is [criterion] because [reason]. Focus on [one prioritized action] to improve your next essay."
 }`;
 }
 
@@ -157,16 +162,7 @@ function buildCreditPrompt(text: string, topic: string | null, wordCount: number
 
   return `You are an expert writing assessor evaluating a Credit level student essay for Sultan Qaboos University's Center for Preparatory Studies.
 
-IMPORTANT CONTEXT: Students at this level are at CEFR A1-A2 level (Basic User). Your feedback MUST be appropriate for this proficiency level:
-- A1 (Breakthrough): Can understand and use familiar everyday expressions and very basic phrases aimed at the satisfaction of needs of a concrete type.
-- A2 (Waystage): Can understand sentences and frequently used expressions related to areas of most immediate relevance. Can communicate in simple and routine tasks requiring a simple and direct exchange of information.
-
-When providing feedback:
-- Use simple, clear language that A1-A2 learners can understand
-- Focus on fundamental writing skills appropriate for this level
-- Provide concrete, achievable improvement suggestions
-- Avoid overly technical linguistic terminology
-- Be encouraging while maintaining appropriate standards for the level
+STUDENT LEVEL: CEFR A1-A2 (Basic User). Feedback must use simple, clear language that A1-A2 learners can understand. Be encouraging while maintaining appropriate standards. Avoid overly technical linguistic terminology.
 
 ${topic ? `Essay Topic: ${topic}` : 'No specific topic provided.'}
 
@@ -180,37 +176,49 @@ WORD COUNT: ${wordCount} words
 ASSESSMENT CRITERIA (Credit Course - LANC2160):
 ${criteria.map(c => `- ${c.name} (0-${c.maxScore}): ${c.description}`).join('\n')}
 
-SCORING INSTRUCTIONS:
-1. For each criterion, assess the student's performance and assign a WHOLE NUMBER score (0-${criteria[0].maxScore}). Do NOT use decimals or half-points.
-2. For each criterion, provide structured feedback that includes:
-   - A brief positive comment on what the student did well
-   - SPECIFIC MISTAKES OR ERRORS found in the text (quote the exact words/phrases from the essay)
-   - Clear explanation of why each is a mistake
-   - Concrete suggestions for improvement
-3. Calculate the total score as the sum of all criterion scores (max ${totalMaxScore}).
-4. Calculate the percentage as (totalScore / ${totalMaxScore}) * 100.
+============================================================
+SCORING AND FEEDBACK INSTRUCTIONS (CRITICAL — FOLLOW EXACTLY):
+============================================================
 
-FEEDBACK FORMAT: Structure each criterion's feedback as:
-**Strengths:** [What was done well]
-**Mistakes Found:**
-- "[exact quote from text]" - [explanation of the error]
-- "[another exact quote]" - [explanation]
-**Suggestions:** [How to improve]
+STEP 1 — SCORE each criterion using a WHOLE NUMBER (0, 1, 2, 3, 4, or 5). No decimals.
 
-Respond in the following JSON format ONLY:
+STEP 2 — For EACH criterion, write a "Justification" paragraph that:
+  (a) Explicitly states the score you awarded and the reasoning behind it
+  (b) Quotes at least ONE specific phrase or sentence from the student's essay as evidence
+  (c) Explains why the essay earned that score based on the criterion description
+  (d) If the score is below 3, clearly state what is missing compared to a higher score
+  (e) If the score is 4 or 5, explain what the student did beyond basic expectations
+
+STEP 3 — For each criterion, list SPECIFIC errors found in the text. Format each as:
+  - "[exact quoted text]" — explanation of the error and how to fix it
+
+STEP 4 — For each criterion, provide 1-2 concrete, achievable suggestions for improvement appropriate for an A1-A2 learner.
+
+STEP 5 — overallFeedback must be a comprehensive summary (3-5 sentences) that highlights the student's strongest criterion, identifies the weakest area, and gives one prioritized action item.
+
+STEP 6 — Calculate totalScore = sum of all criterion scores (max ${totalMaxScore}). Calculate percentage = round(totalScore / ${totalMaxScore} * 100).
+
+============================================================
+JSON OUTPUT FORMAT (respond ONLY with valid JSON):
+============================================================
 {
-  "scores":[
+  "scores": [
     {
       "criterionName": "Task Achievement",
       "score": 4,
       "maxScore": 5,
-      "feedback": "**Strengths:** ...\\n**Mistakes Found:**\\n- \\"...\\",\\n**Suggestions:** ..."
+      "justification": "The essay achieves the task well by [explanation]. For example, \\"[exact quote]\\" shows [specific alignment with criterion].",
+      "strengths": "The student captures the main points effectively and demonstrates good comprehension of the source material.",
+      "mistakes": [
+        "[exact quoted text]" — Explanation of the error and how to fix it
+      ],
+      "suggestions": "Make sure every main point from the original text is represented in your summary. Use your own words rather than copying phrases."
     }
   ],
   "totalScore": 16,
   "maxScore": ${totalMaxScore},
   "percentage": 80,
-  "overallFeedback": "Your comprehensive overall feedback..."
+  "overallFeedback": "Your strongest area is [criterion] where you [specific strength]. The area that needs the most improvement is [criterion] because [reason]. Focus on [one prioritized action] to improve your next essay."
 }`;
 }
 
@@ -252,15 +260,15 @@ export async function POST(request: NextRequest) {
     // 2. Initialize Model with Strict Instructions
     const model = genAI.getGenerativeModel({ 
       model: 'gemini-3-flash-preview',
-      systemInstruction: 'You are an expert writing assessment AI for Foundation and Credit level university courses at Sultan Qaboos University. All students are at CEFR A1-A2 level (Basic User). Your feedback must use simple, clear language appropriate for this proficiency level. Focus on fundamental skills and provide encouraging, constructive guidance. Always highlight specific mistakes by quoting exact words from the student\'s text. You respond only with valid JSON. No markdown formatting or code blocks.'
+      systemInstruction: 'You are an expert writing assessment AI for Foundation and Credit level university courses at Sultan Qaboos University. All students are at CEFR A1-A2 level (Basic User). Your feedback must use simple, clear language appropriate for this proficiency level. Focus on fundamental skills and provide encouraging, constructive guidance. CRITICAL: For each criterion you MUST (1) quote exact words from the student essay as evidence, (2) explicitly justify why the score matches the rubric band, (3) list specific errors with quoted text, and (4) give actionable suggestions. You respond only with valid JSON. No markdown formatting or code blocks.'
     });
 
     // 3. Generate Content enforcing application/json output
     const result = await model.generateContent({
       contents: [{ role: 'user', parts: [{ text: prompt }] }],
       generationConfig: {
-        temperature: 0.3,
-        maxOutputTokens: 4000,
+        temperature: 0.2,
+        maxOutputTokens: 6000,
         responseMimeType: "application/json",
       }
     });
@@ -297,26 +305,57 @@ export async function POST(request: NextRequest) {
     const missingCriteria = criteria.filter(c => !assessedCriteria.includes(c.name));
     
     if (missingCriteria.length > 0) {
-      // Add missing criteria with default scores
       missingCriteria.forEach(c => {
         assessment.scores.push({
           criterionName: c.name,
           score: 0,
           maxScore: c.maxScore,
+          justification: 'Unable to assess this criterion from the provided text.',
+          strengths: '',
+          mistakes: [],
+          suggestions: 'Unable to provide suggestions.',
           feedback: 'Unable to assess this criterion from the provided text.'
         });
       });
     }
 
-    // Round all scores to whole numbers
+    // Normalize scores: round to whole numbers, build feedback string, clamp
     assessment.scores.forEach((s: any) => {
-      s.score = Math.round(s.score);
+      s.score = Math.round(Number(s.score) || 0);
+      s.maxScore = Math.round(Number(s.maxScore) || 0);
+
+      // Build a structured feedback string from the individual fields
+      // This preserves backwards compatibility with the frontend parseFeedback()
+      const parts: string[] = [];
+
+      if (s.strengths) {
+        parts.push(`**Strengths:** ${s.strengths}`);
+      }
+      if (s.justification) {
+        parts.push(`**Justification:** ${s.justification}`);
+      }
+      if (Array.isArray(s.mistakes) && s.mistakes.length > 0) {
+        const mistakeLines = s.mistakes
+          .map((m: any) => {
+            const text = typeof m === 'string' ? m : (m.quote || m.text || '');
+            const explanation = typeof m === 'string' ? '' : (m.explanation || m.reason || '');
+            return `- "${text}" — ${explanation}`;
+          })
+          .join('\n');
+        parts.push(`**Mistakes Found:**\n${mistakeLines}`);
+      }
+      if (s.suggestions) {
+        parts.push(`**Suggestions:** ${s.suggestions}`);
+      }
+
+      // Use the built structured string, fallback to raw feedback if empty
+      s.feedback = parts.length > 0 ? parts.join('\n\n') : (s.feedback || 'No feedback provided.');
     });
 
     // Recalculate total score to ensure accuracy
-    assessment.totalScore = assessment.scores.reduce((sum: number, s: any) => sum + Math.round(s.score), 0);
+    assessment.totalScore = assessment.scores.reduce((sum: number, s: any) => sum + s.score, 0);
     assessment.maxScore = assessment.scores.reduce((sum: number, s: any) => sum + s.maxScore, 0);
-    assessment.percentage = Math.round((assessment.totalScore / assessment.maxScore) * 100);
+    assessment.percentage = assessment.maxScore > 0 ? Math.round((assessment.totalScore / assessment.maxScore) * 100) : 0;
 
     // Add word count info
     assessment.wordCount = wordCount;

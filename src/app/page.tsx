@@ -1312,24 +1312,32 @@ const AssessmentScreen = ({ onComplete }: { onComplete: (assessment: Assessment)
 const parseFeedback = (feedback: string) => {
   const sections = {
     strengths: '',
+    justification: '',
     mistakes: [] as { quote: string; explanation: string }[],
     suggestions: ''
   };
 
   try {
     // Extract strengths
-    const strengthsMatch = feedback.match(/\*\*Strengths:\*\*\s*([\s\S]*?)(?=\*\*Mistakes|$)/i);
+    const strengthsMatch = feedback.match(/\*\*Strengths:\*\*\s*([\s\S]*?)(?=\*\*(?:Justification|Mistakes)|$)/i);
     if (strengthsMatch) {
       sections.strengths = strengthsMatch[1].trim();
     }
 
-    // Extract mistakes
-    const mistakesMatch = feedback.match(/\*\*Mistakes Found:\*\*\s*([\s\S]*?)(?=\*\*Suggestions|$)/i);
+    // Extract justification
+    const justMatch = feedback.match(/\*\*Justification:\*\*\s*([\s\S]*?)(?=\*\*(?:Strengths|Mistakes|Suggestions)|$)/i);
+    if (justMatch) {
+      sections.justification = justMatch[1].trim();
+    }
+
+    // Extract mistakes — support both em dash (—) and plain dash (-) separators
+    const mistakesMatch = feedback.match(/\*\*Mistakes Found:\*\*\s*([\s\S]*?)(?=\*\*(?:Suggestions|Justification)|$)/i);
     if (mistakesMatch) {
       const mistakesText = mistakesMatch[1];
-      const mistakeLines = mistakesText.match(/-\s*"[^"]+"\s*-\s*[^\n]+/g) || [];
+      // Match lines starting with "- " and containing a quoted string
+      const mistakeLines = mistakesText.match(/^-\s*"[^"]+"\s*[—\-]+\s*[^\n]+/gm) || [];
       mistakeLines.forEach((line: string) => {
-        const match = line.match(/-\s*"([^"]+)"\s*-\s*(.+)/);
+        const match = line.match(/-\s*"([^"]+)"\s*[—\-]+\s*(.+)/);
         if (match) {
           sections.mistakes.push({ quote: match[1], explanation: match[2].trim() });
         }
@@ -1673,6 +1681,13 @@ const ResultsScreen = ({ assessment, onNewAssessment, onBack }: { assessment: As
                           </div>
                           
                           {/* Structured Feedback */}
+                          {parsedFeedback.justification && (
+                            <div className="mb-3 bg-muted/40 p-3 rounded-lg">
+                              <p className="text-xs font-medium text-[#1a5f2a] mb-1">Score Justification:</p>
+                              <p className="text-sm text-muted-foreground leading-relaxed">{parsedFeedback.justification}</p>
+                            </div>
+                          )}
+
                           {parsedFeedback.strengths && (
                             <div className="mb-3">
                               <p className="text-xs font-medium text-[#1a5f2a] mb-1">Strengths:</p>
