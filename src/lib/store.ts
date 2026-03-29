@@ -52,7 +52,15 @@ export interface Essay {
   createdAt: string;
 }
 
-export type AppStep = 'welcome' | 'setup' | 'course' | 'upload' | 'processing' | 'review' | 'assessing' | 'results';
+export type AppStep = 'welcome' | 'setup' | 'course' | 'upload' | 'processing' | 'review' | 'assessing' | 'results' | 'records';
+
+export interface AssessmentRecord {
+  id: string;
+  assessment: Assessment;
+  course: Course | null;
+  essayText: string;
+  createdAt: string;
+}
 
 interface AppState {
   // Navigation
@@ -92,6 +100,12 @@ interface AppState {
   currentAssessment: Assessment | null;
   setCurrentAssessment: (assessment: Assessment | null) => void;
   
+  // Records
+  records: AssessmentRecord[];
+  addRecord: (record: AssessmentRecord) => void;
+  deleteRecord: (id: string) => void;
+  clearAllRecords: () => void;
+
   // UI state
   showInstallPrompt: boolean;
   setShowInstallPrompt: (show: boolean) => void;
@@ -173,6 +187,14 @@ export const useAppStore = create<AppState>()(
       currentAssessment: null,
       setCurrentAssessment: (assessment) => set({ currentAssessment: assessment }),
       
+      // Records
+      records: [],
+      addRecord: (record) => set((state) => ({ records: [record, ...state.records] })),
+      deleteRecord: (id) => set((state) => ({
+        records: state.records.filter((r) => r.id !== id),
+      })),
+      clearAllRecords: () => set({ records: [] }),
+
       // UI state
       showInstallPrompt: false,
       setShowInstallPrompt: (show) => set({ showInstallPrompt: show }),
@@ -195,7 +217,8 @@ export const useAppStore = create<AppState>()(
         visionApiKey: state.visionApiKey,
         theme: state.theme,
         selectedCourse: state.selectedCourse,
-        essays: state.essays.slice(0, 10) // Keep last 10 essays
+        essays: state.essays.slice(0, 10), // Keep last 10 essays
+        records: state.records, // Keep all records
       })
     }
   )
