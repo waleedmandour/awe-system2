@@ -132,7 +132,14 @@ STEP 5 — overallFeedback must be a comprehensive summary (3-5 sentences) that:
 STEP 6 — Calculate totalScore = sum of all criterion scores (max 24). Calculate percentage = round(totalScore / 24 * 100).
 
 ============================================================
-JSON OUTPUT FORMAT (respond ONLY with valid JSON):
+CRITICAL OUTPUT RULES:
+- Respond with ONLY the raw JSON object. No markdown, no code fences, no commentary.
+- Do NOT wrap the JSON in triple-backtick code blocks.
+- Use straight double quotes, not smart/curly quotes.
+- Do NOT add trailing commas after the last item in arrays or objects.
+- All string values must have properly escaped quotes inside them.
+
+JSON OUTPUT FORMAT:
 ============================================================
 {
   "scores": [
@@ -199,7 +206,14 @@ STEP 5 — overallFeedback must be a comprehensive summary (3-5 sentences) that 
 STEP 6 — Calculate totalScore = sum of all criterion scores (max ${totalMaxScore}). Calculate percentage = round(totalScore / ${totalMaxScore} * 100).
 
 ============================================================
-JSON OUTPUT FORMAT (respond ONLY with valid JSON):
+CRITICAL OUTPUT RULES:
+- Respond with ONLY the raw JSON object. No markdown, no code fences, no commentary.
+- Do NOT wrap the JSON in triple-backtick code blocks.
+- Use straight double quotes, not smart/curly quotes.
+- Do NOT add trailing commas after the last item in arrays or objects.
+- All string values must have properly escaped quotes inside them.
+
+JSON OUTPUT FORMAT:
 ============================================================
 {
   "scores": [
@@ -220,6 +234,197 @@ JSON OUTPUT FORMAT (respond ONLY with valid JSON):
   "percentage": 80,
   "overallFeedback": "Your strongest area is [criterion] where you [specific strength]. The area that needs the most improvement is [criterion] because [reason]. Focus on [one prioritized action] to improve your next essay."
 }`;
+}
+
+/**
+ * Robustly extract a JSON object from LLM output that may be:
+ *  - Wrapped in markdown code fences (```json ... ```)
+ *  - Preceded or followed by conversational text
+ *  - Containing control characters or BOM markers
+ *  - Truncated (incomplete JSON due to token limit)
+ *  - Using smart quotes instead of straight quotes
+ */
+function extractJSON(raw: string): any {
+  let text = raw.trim();
+
+  // Remove BOM if present
+  if (text.charCodeAt(0) === 0xFEFF) {
+    text = text.slice(1);
+  }
+
+  // Remove markdown code fences
+  text = text.replace(/```json\s*/gi, '');
+  text = text.replace(/```\s*/g, '');
+
+  // Replace smart/curly quotes with straight quotes (LLMs often produce these)
+  text = text.replace(/[\u2018\u2019]/g, "'");   // ' → '
+  text = text.replace(/[\u201C\u201D]/g, '"');   // " → "
+
+  // Find the first '{' and last '}' to extract just the JSON object
+  const firstBrace = text.indexOf('{');
+  const lastBrace = text.lastIndexOf('}');
+  if (firstBrace !== -1 && lastBrace > firstBrace) {
+    text = text.substring(firstBrace, lastBrace + 1);
+  }
+
+  // Remove control characters (except newline, tab, carriage return)
+  text = text.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '');
+
+  // Attempt 1: Direct parse
+  try {
+    return JSON.parse(text);
+  } catch (_e) {
+    // continue to cleanup
+  }
+
+  // Attempt 2: Remove trailing commas (common LLM artifact)
+  // Remove commas before } or ] (with optional whitespace)
+  let cleaned = text.replace(/,\s*([\]}])/g, '$1');
+
+  try {
+    return JSON.parse(cleaned);
+  } catch (_e) {
+    // continue
+  }
+
+  // Attempt 3: Fix unescaped quotes in string values
+  // This handles cases where the LLM puts unescaped double quotes inside strings
+  cleaned = attemptFixUnescapedQuotes(cleaned);
+
+  try {
+    return JSON.parse(cleaned);
+  } catch (_e) {
+    // continue
+  }
+
+  // Attempt 4: If all else fails, try to extract using a bracket-matching approach
+  const extracted = extractJsonObject(cleaned);
+  if (extracted) {
+    return JSON.parse(extracted);
+  }
+
+  throw new Error('Could not extract valid JSON from AI response');
+}
+
+/**
+ * Attempt to fix unescaped double quotes inside JSON string values.
+ * This is a best-effort heuristic — not a full JSON parser.
+ */
+function attemptFixUnescapedQuotes(json: string): string {
+  const result: string[] = [];
+  let i = 0;
+  let inString = false;
+  let escaped = false;
+
+  while (i < json.length) {
+    const ch = json[i];
+
+    if (escaped) {
+      result.push(ch);
+      escaped = false;
+      i++;
+      continue;
+    }
+
+    if (ch === '\\') {
+      result.push(ch);
+      escaped = true;
+      i++;
+      continue;
+    }
+
+    if (ch === '"') {
+      if (inString) {
+        // Check if the next non-whitespace char looks like it's outside a string
+        // (i.e., it's a JSON structural character)
+        const afterStr = json.substring(i + 1).trimStart();
+        const nextChar = afterStr[0];
+        if (nextChar === ':' || nextChar === ',' || nextChar === '}' || nextChar === ']' || nextChar === undefined) {
+          // This quote ends the string — normal JSON behavior
+          inString = false;
+        } else {
+          // This quote is likely an unescaped quote inside the string — escape it
+          result.push('\\"');
+          i++;
+          continue;
+        }
+      } else {
+        inString = true;
+      }
+      result.push(ch);
+      i++;
+      continue;
+    }
+
+    result.push(ch);
+    i++;
+  }
+
+  return result.join('');
+}
+
+/**
+ * Extract a JSON object by finding balanced braces from the first '{'.
+ * Returns the substring from first '{' to its matching '}'.
+ */
+function extractJsonObject(text: string): string | null {
+  const start = text.indexOf('{');
+  if (start === -1) return null;
+
+  let depth = 0;
+  let inStr = false;
+  let escaped = false;
+
+  for (let i = start; i < text.length; i++) {
+    const ch = text[i];
+
+    if (escaped) {
+      escaped = false;
+      continue;
+    }
+
+    if (ch === '\\' && inStr) {
+      escaped = true;
+      continue;
+    }
+
+    if (ch === '"' && !escaped) {
+      inStr = !inStr;
+      continue;
+    }
+
+    if (!inStr) {
+      if (ch === '{') depth++;
+      if (ch === '}') {
+        depth--;
+        if (depth === 0) {
+          return text.substring(start, i + 1);
+        }
+      }
+    }
+  }
+
+  // If we got here, JSON is truncated — try to close it manually
+  if (depth > 0) {
+    let partial = text.substring(start);
+    // Remove any trailing incomplete key/value
+    partial = partial.replace(/,\s*"[^"]*"\s*:?\s*$/, '');
+    // Add closing braces
+    while (depth > 0) {
+      partial += '}';
+      depth--;
+    }
+    // Try to fix any trailing issues
+    partial = partial.replace(/,\s*([\]}])/g, '$1');
+    try {
+      JSON.parse(partial);
+      return partial;
+    } catch (_e) {
+      // still broken
+    }
+  }
+
+  return null;
 }
 
 export async function POST(request: NextRequest) {
@@ -263,31 +468,28 @@ export async function POST(request: NextRequest) {
       systemInstruction: 'You are an expert writing assessment AI for Foundation and Credit level university courses at Sultan Qaboos University. All students are at CEFR A1-A2 level (Basic User). Your feedback must use simple, clear language appropriate for this proficiency level. Focus on fundamental skills and provide encouraging, constructive guidance. CRITICAL: For each criterion you MUST (1) quote exact words from the student essay as evidence, (2) explicitly justify why the score matches the rubric band, (3) list specific errors with quoted text, and (4) give actionable suggestions. You respond only with valid JSON. No markdown formatting or code blocks.'
     });
 
-    // 3. Generate Content enforcing application/json output
+    // 3. Generate Content — do NOT use responseMimeType because
+    //    gemini-3-flash-preview doesn't reliably support it.
+    //    Instead, ask for JSON in the prompt and parse robustly.
     const result = await model.generateContent({
       contents: [{ role: 'user', parts: [{ text: prompt }] }],
       generationConfig: {
         temperature: 0.2,
-        maxOutputTokens: 6000,
-        responseMimeType: "application/json",
+        maxOutputTokens: 8192,
       }
     });
 
     const responseText = result.response.text() || '';
     
-    // Parse the JSON response
+    // Parse the JSON response with aggressive cleanup
     let assessment;
     try {
-      // Clean the response just in case the model ignores the mimeType instruction
-      const cleanedResponse = responseText
-        .replace(/```json\n?/g, '')
-        .replace(/```\n?/g, '')
-        .trim();
-      assessment = JSON.parse(cleanedResponse);
+      assessment = extractJSON(responseText);
     } catch (parseError) {
-      console.error('Failed to parse assessment response:', responseText);
+      console.error('Failed to parse assessment response. Raw text:', responseText.substring(0, 500));
+      console.error('Parse error:', parseError);
       return NextResponse.json(
-        { error: 'Failed to parse AI assessment response' },
+        { error: 'Failed to parse AI assessment response', details: 'The AI returned an invalid response. Please try again.' },
         { status: 500 }
       );
     }

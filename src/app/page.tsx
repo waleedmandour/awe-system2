@@ -2098,7 +2098,6 @@ const RecordsScreen = ({ onBack, onNewAssessment }: { onBack: () => void; onNewA
 
   // Detail view for a record (read-only full results)
   const renderRecordDetail = (record: AssessmentRecord) => {
-    const parsed = parseFeedback(record.assessment.overallFeedback || '');
     return (
       <PageTransition direction="right">
         <div className="min-h-screen min-h-[100dvh] flex flex-col safe-area-top safe-area-bottom">
@@ -2123,68 +2122,108 @@ const RecordsScreen = ({ onBack, onNewAssessment }: { onBack: () => void; onNewA
                   {getPerformanceBadge(record.assessment.percentage).label}
                 </Badge>
               </div>
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-base">Score Breakdown</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  {record.assessment.scores.map((score) => {
-                    const pct = (score.score / score.maxScore) * 100;
-                    return (
-                      <div key={score.criterionId}>
-                        <div className="flex items-center justify-between mb-1">
-                          <span className="text-sm font-medium">{score.criterionName}</span>
-                          <span className={`text-sm font-bold ${pct >= 80 ? 'text-green-600' : pct >= 60 ? 'text-[#c9a227]' : pct >= 40 ? 'text-orange-500' : 'text-red-500'}`}>
-                            {score.score}/{score.maxScore}
-                          </span>
+
+              {/* Per-criterion detailed feedback */}
+              {record.assessment.scores.map((score, idx) => {
+                const pct = score.maxScore > 0 ? (score.score / score.maxScore) * 100 : 0;
+                const parsed = parseFeedback(score.feedback || '');
+                return (
+                  <motion.div
+                    key={score.criterionId || idx}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: idx * 0.05 }}
+                  >
+                    <Card>
+                      <CardContent className="p-4">
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="flex items-center gap-3">
+                            <div
+                              className="w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold"
+                              style={{
+                                background: `linear-gradient(135deg, ${pct >= 70 ? '#1a5f2a' : '#c9a227'}, ${pct >= 70 ? '#2a7f3a' : '#d9b237'})`,
+                              }}
+                            >
+                              {score.score}
+                            </div>
+                            <div>
+                              <h4 className="font-semibold text-sm">{score.criterionName}</h4>
+                              <p className="text-xs text-muted-foreground">out of {score.maxScore}</p>
+                            </div>
+                          </div>
+                          <Badge variant="secondary">
+                            {Math.round(pct)}%
+                          </Badge>
                         </div>
-                        <Progress value={pct} className="h-2" />
-                      </div>
-                    );
-                  })}
-                </CardContent>
-              </Card>
-              {parsed.strengths && (
-                <Card className="border-[#1a5f2a]/20">
+
+                        <div className="mb-3">
+                          <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+                            <div
+                              className="h-full rounded-full bg-[#1a5f2a]"
+                              style={{ width: `${pct}%` }}
+                            />
+                          </div>
+                        </div>
+
+                        {parsed.justification && (
+                          <div className="mb-3 bg-muted/40 p-3 rounded-lg">
+                            <p className="text-xs font-medium text-[#1a5f2a] mb-1">Score Justification:</p>
+                            <p className="text-sm text-muted-foreground leading-relaxed">{parsed.justification}</p>
+                          </div>
+                        )}
+
+                        {parsed.strengths && (
+                          <div className="mb-3">
+                            <p className="text-xs font-medium text-[#1a5f2a] mb-1">Strengths:</p>
+                            <p className="text-sm text-muted-foreground">{parsed.strengths}</p>
+                          </div>
+                        )}
+
+                        {parsed.mistakes.length > 0 && (
+                          <div className="mb-3">
+                            <p className="text-xs font-medium text-red-600 mb-1">Mistakes Found:</p>
+                            <div className="space-y-2">
+                              {parsed.mistakes.map((m, i) => (
+                                <div key={i} className="bg-red-50 dark:bg-red-950/20 p-2 rounded-lg">
+                                  <p className="text-sm font-medium text-red-700 dark:text-red-400">&ldquo;{m.quote}&rdquo;</p>
+                                  <p className="text-xs text-muted-foreground mt-1">{m.explanation}</p>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {parsed.suggestions && (
+                          <div>
+                            <p className="text-xs font-medium text-[#c9a227] mb-1">Suggestions:</p>
+                            <p className="text-sm text-muted-foreground">{parsed.suggestions}</p>
+                          </div>
+                        )}
+
+                        {!parsed.justification && !parsed.strengths && !parsed.mistakes.length && !parsed.suggestions && score.feedback && (
+                          <p className="text-sm text-muted-foreground">{score.feedback}</p>
+                        )}
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                );
+              })}
+
+              {/* Overall Feedback */}
+              {record.assessment.overallFeedback && (
+                <Card className="border-2 border-[#1a5f2a]/20">
                   <CardHeader className="pb-3">
-                    <CardTitle className="text-base flex items-center gap-2">
-                      <Award className="w-4 h-4 text-[#c9a227]" /> Strengths
-                    </CardTitle>
+                    <div className="flex items-center gap-2">
+                      <MessageSquare className="w-5 h-5 text-[#1a5f2a]" />
+                      <CardTitle className="text-base">Overall Feedback</CardTitle>
+                    </div>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-sm leading-relaxed whitespace-pre-wrap">{parsed.strengths}</p>
+                    <p className="text-sm leading-relaxed">{record.assessment.overallFeedback}</p>
                   </CardContent>
                 </Card>
               )}
-              {parsed.mistakes.length > 0 && (
-                <Card className="border-red-200">
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-base flex items-center gap-2">
-                      <AlertCircle className="w-4 h-4 text-red-500" /> Mistakes Found
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-2">
-                    {parsed.mistakes.map((m, i) => (
-                      <div key={i} className="bg-red-50 dark:bg-red-950/20 p-3 rounded-lg">
-                        <p className="text-sm font-medium text-red-700 dark:text-red-400">&ldquo;{m.quote}&rdquo;</p>
-                        <p className="text-xs text-muted-foreground mt-1">{m.explanation}</p>
-                      </div>
-                    ))}
-                  </CardContent>
-                </Card>
-              )}
-              {parsed.suggestions && (
-                <Card>
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-base flex items-center gap-2">
-                      <Sparkles className="w-4 h-4 text-[#1a5f2a]" /> Suggestions
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm leading-relaxed whitespace-pre-wrap">{parsed.suggestions}</p>
-                  </CardContent>
-                </Card>
-              )}
+
               {record.assessment.wordCount && (
                 <div className="text-center py-2">
                   <p className="text-sm text-muted-foreground">Word Count: <span className="font-semibold">{record.assessment.wordCount}</span></p>
