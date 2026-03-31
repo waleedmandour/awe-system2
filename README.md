@@ -2,7 +2,7 @@
 
 A Multimodal, LLM-based Automated Writing Evaluation (AWE) System for Formative Assessment
 
-**For Foundation and Post-Foundation Year Students At Sultan Qaboos University**
+**For Foundation and Credit Course Students At Sultan Qaboos University**
 
 ---
 
