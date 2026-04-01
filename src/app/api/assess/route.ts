@@ -116,14 +116,15 @@ ${rubrics.specialRules.map((r, i) => `${i + 1}. ${r}`).join('\n')}
 SCORING AND FEEDBACK INSTRUCTIONS (CRITICAL — FOLLOW EXACTLY):
 ============================================================
 
-STEP 1 — SCORE each criterion using a WHOLE NUMBER (0, 1, 2, 3, 4, 5, or 6). No decimals.
+STEP 1 — SCORE each criterion using WHOLE or HALF numbers (0, 0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5, 5.5, or 6). If the essay's quality falls between two adjacent score bands, award a half-point (e.g., 3.5). Use 0.5 increments only — never use 0.25 or 0.75.
 
 STEP 2 — For EACH criterion, write a "Justification" paragraph that:
-  (a) Explicitly names the score band you chose (e.g. "Score 4: Good")
+  (a) Explicitly names the score band you chose (e.g. "Score 3.5" meaning between Satisfactory and Good)
   (b) Quotes at least ONE specific phrase or sentence from the student's essay as evidence
   (c) Explains why the essay fits that band descriptor — connect the evidence to the rubric
-  (d) If the score is below 4, clearly state what is missing compared to the next higher band
-  (e) If the score is 5 or 6, explain what the student did beyond expectations
+  (d) If you awarded a half-point, explain which aspects place it in the lower band and which aspects place it in the higher band
+  (e) If the score is below 4, clearly state what is missing compared to the next higher band
+  (f) If the score is 5 or 6, explain what the student did beyond expectations
 
 This justification must make the score transparent and defensible. A reader should understand exactly why that score was given based on the evidence.
 
@@ -137,7 +138,7 @@ STEP 5 — overallFeedback must be a comprehensive summary (3-5 sentences) that:
   - Identifies the weakest area needing the most attention
   - Gives one prioritized action item to focus on next
 
-STEP 6 — Calculate totalScore = sum of all criterion scores (max 24). Calculate percentage = round(totalScore / 24 * 100).
+STEP 6 — Calculate totalScore = sum of all criterion scores (max 24). Scores may include 0.5 increments (e.g., 3.5, 4.5). Calculate percentage = round(totalScore / 24 * 100).
 
 ============================================================
 CRITICAL OUTPUT RULES:
@@ -195,14 +196,15 @@ ${criteria.map(c => `- ${c.name} (0-${c.maxScore}): ${c.description}`).join('\n'
 SCORING AND FEEDBACK INSTRUCTIONS (CRITICAL — FOLLOW EXACTLY):
 ============================================================
 
-STEP 1 — SCORE each criterion using a WHOLE NUMBER (0, 1, 2, 3, 4, or 5). No decimals.
+STEP 1 — SCORE each criterion using WHOLE or HALF numbers (0, 0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, or 5). If the essay's quality falls between two adjacent score bands, award a half-point (e.g., 2.5). Use 0.5 increments only — never use 0.25 or 0.75.
 
 STEP 2 — For EACH criterion, write a "Justification" paragraph that:
-  (a) Explicitly states the score you awarded and the reasoning behind it
+  (a) Explicitly names the score band you chose (e.g. "Score 2.5" meaning between Unsatisfactory and Satisfactory)
   (b) Quotes at least ONE specific phrase or sentence from the student's essay as evidence
   (c) Explains why the essay earned that score based on the criterion description
-  (d) If the score is below 3, clearly state what is missing compared to a higher score
-  (e) If the score is 4 or 5, explain what the student did beyond basic expectations
+  (d) If you awarded a half-point, explain which aspects place it in the lower band and which aspects place it in the higher band
+  (e) If the score is below 3, clearly state what is missing compared to a higher score
+  (f) If the score is 4 or 5, explain what the student did beyond basic expectations
 
 STEP 3 — For each criterion, list SPECIFIC errors found in the text. Format each as:
   - "[exact quoted text]" — explanation of the error and how to fix it
@@ -639,9 +641,11 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Normalize scores: round to whole numbers, build feedback string, clamp
+    // Normalize scores: allow 0.5 increments, round to nearest 0.5, clamp
     assessment.scores.forEach((s: any) => {
-      s.score = Math.round(Number(s.score) || 0);
+      const rawScore = Number(s.score) || 0;
+      // Round to nearest 0.5
+      s.score = Math.round(rawScore * 2) / 2;
       s.maxScore = Math.round(Number(s.maxScore) || 0);
 
       // Build a structured feedback string from the individual fields
