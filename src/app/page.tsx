@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useAppStore, type Course, type Assessment, type Score, type AssessmentRecord, type WritingType } from '@/lib/store';
+import { useAppStore, type Course, type Assessment, type Score, type AssessmentRecord, type WritingType, SUMMARY_SOURCE_TEXTS } from '@/lib/store';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -533,7 +533,7 @@ const SetupScreen = ({ onComplete }: { onComplete: () => void }) => {
 
 // Course Selection Screen
 const CourseSelectionScreen = ({ onSelect, onBack }: { onSelect: () => void; onBack: () => void }) => {
-  const { courses, selectedCourse, setSelectedCourse, selectedExamType, setSelectedExamType, selectedWritingType, setSelectedWritingType } = useAppStore();
+  const { courses, selectedCourse, setSelectedCourse, selectedExamType, setSelectedExamType, selectedWritingType, setSelectedWritingType, selectedSourceTextId, setSelectedSourceTextId } = useAppStore();
   const [activeTab, setActiveTab] = useState<'foundation' | 'credit'>('foundation');
 
   // Whether the currently selected course requires an exam-type choice
@@ -541,9 +541,10 @@ const CourseSelectionScreen = ({ onSelect, onBack }: { onSelect: () => void; onB
 
   // Whether the currently selected course requires a writing-type choice
   const needsWritingType = selectedCourse?.code === 'LANC2160';
+  const needsSourceText = needsWritingType && selectedWritingType === 'summary';
 
   // Whether the Continue button should be enabled
-  const canContinue = selectedCourse && (!needsExamType || selectedExamType) && (!needsWritingType || selectedWritingType);
+  const canContinue = selectedCourse && (!needsExamType || selectedExamType) && (!needsWritingType || selectedWritingType) && (!needsSourceText || selectedSourceTextId);
 
   const filteredCourses = courses.filter((course) => {
     if (activeTab === 'credit') return course.program === 'post-foundation';
@@ -740,6 +741,65 @@ const CourseSelectionScreen = ({ onSelect, onBack }: { onSelect: () => void; onB
               </motion.div>
             )}
           </AnimatePresence>
+
+          {/* Source Text Selection for Summary Writing */}
+          <AnimatePresence>
+            {needsSourceText && (
+              <motion.div
+                initial={{ opacity: 0, y: 15, height: 0 }}
+                animate={{ opacity: 1, y: 0, height: 'auto' }}
+                exit={{ opacity: 0, y: -10, height: 0 }}
+                transition={{ duration: 0.3 }}
+                className="overflow-hidden"
+              >
+                <div className="px-4 pt-2 pb-4 space-y-2">
+                  <p className="text-sm font-medium text-muted-foreground px-1">
+                    Select source text to summarize:
+                  </p>
+                  <div className="space-y-2">
+                    {SUMMARY_SOURCE_TEXTS.map((source) => {
+                      const isSelected = selectedSourceTextId === source.id;
+                      return (
+                        <motion.div
+                          key={source.id}
+                          whileTap={{ scale: 0.98 }}
+                        >
+                          <button
+                            onClick={() => setSelectedSourceTextId(source.id)}
+                            className={`w-full text-left p-4 rounded-xl border-2 transition-all duration-200 ${
+                              isSelected
+                                ? 'border-[#c9a227] bg-[#c9a227]/5'
+                                : 'border-muted-foreground/20 bg-white hover:border-[#c9a227]/30'
+                            }`}
+                          >
+                            <div className="flex items-start gap-3">
+                              <div className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${
+                                isSelected
+                                  ? 'bg-[#c9a227] text-white'
+                                  : 'bg-muted text-muted-foreground'
+                              }`}>
+                                <FileText className="w-5 h-5" />
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className={`text-sm font-semibold leading-tight ${
+                                  isSelected ? 'text-[#c9a227]' : 'text-foreground'
+                                }`}>
+                                  {source.title}
+                                </p>
+                                <p className="text-xs text-muted-foreground mt-0.5">
+                                  {source.wordCount} words &middot; Target summary: {source.targetMin}&ndash;{source.targetMax} words
+                                </p>
+                              </div>
+                            </div>
+                          </button>
+                        </motion.div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </ScrollArea>
 
         {/* Footer */}
@@ -757,7 +817,7 @@ const CourseSelectionScreen = ({ onSelect, onBack }: { onSelect: () => void; onB
             )}
             {needsWritingType && selectedWritingType && (
               <span className="ml-1 text-sm font-normal opacity-80">
-                ({selectedWritingType === 'summary' ? 'Summary' : 'Synthesis Essay'})
+                ({selectedWritingType === 'summary' ? 'Summary' : 'Synthesis Essay'}){needsSourceText && selectedSourceTextId ? `: ${SUMMARY_SOURCE_TEXTS.find(s => s.id === selectedSourceTextId)?.title.split('—')[0].trim() || ''}` : ''}
               </span>
             )}
             <ChevronRight className="w-4 h-4 ml-2" />
@@ -1387,7 +1447,7 @@ const ReviewScreen = ({ onSubmit, onBack }: { onSubmit: (text: string) => void; 
 
 // Assessment Screen (Processing)
 const AssessmentScreen = ({ onComplete }: { onComplete: (assessment: Assessment) => void }) => {
-  const { selectedCourse, extractedText, geminiApiKey, selectedExamType } = useAppStore();
+  const { selectedCourse, extractedText, geminiApiKey, selectedExamType, selectedWritingType, selectedSourceTextId } = useAppStore();
   const [progress, setProgress] = useState(0);
   const [currentPhase, setCurrentPhase] = useState(0);
   const [error, setError] = useState<string | null>(null);
@@ -1416,6 +1476,8 @@ const AssessmentScreen = ({ onComplete }: { onComplete: (assessment: Assessment)
             topic: null,
             apiKey: geminiApiKey,
             examType: selectedExamType || undefined,
+            writingType: selectedWritingType || undefined,
+            sourceTextId: selectedSourceTextId || undefined,
           }),
         });
 
