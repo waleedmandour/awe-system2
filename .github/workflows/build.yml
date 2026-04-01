@@ -1,0 +1,43 @@
+name: Build Verification
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    name: Build & Type Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Generate Prisma client
+        run: npx prisma generate || echo "Prisma generation skipped"
+
+      - name: Build Next.js
+        run: npm run build
+        env:
+          DATABASE_URL: "file:./db/custom.db"
+
+      - name: Verify build output
+        run: |
+          if [ -d ".next" ]; then
+            echo "Build successful — .next directory created"
+            ls -la .next/
+          else
+            echo "Build failed — no .next directory"
+            exit 1
+          fi
