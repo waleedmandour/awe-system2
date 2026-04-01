@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useAppStore, type Course, type Assessment, type Score, type AssessmentRecord } from '@/lib/store';
+import { useAppStore, type Course, type Assessment, type Score, type AssessmentRecord, type WritingType } from '@/lib/store';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -54,6 +54,7 @@ import {
   Key,
   Cpu,
   Loader2,
+  ClipboardList,
   History,
 } from 'lucide-react';
 
@@ -269,7 +270,7 @@ const WelcomeScreen = ({ onGetStarted }: { onGetStarted: () => void }) => {
             transition={{ delay: 0.6, duration: 0.5 }}
             className="text-center text-muted-foreground max-w-xs mb-12 text-sm md:text-base"
           >
-            Center for Preparatory Studies's AI-powered essay assessment platform for Foundation courses
+            Center for Preparatory Studies's AI-powered essay assessment platform for Foundation and Credit courses
           </motion.p>
         </motion.div>
 
@@ -532,13 +533,22 @@ const SetupScreen = ({ onComplete }: { onComplete: () => void }) => {
 
 // Course Selection Screen
 const CourseSelectionScreen = ({ onSelect, onBack }: { onSelect: () => void; onBack: () => void }) => {
-  const { courses, selectedCourse, setSelectedCourse, selectedExamType, setSelectedExamType } = useAppStore();
+  const { courses, selectedCourse, setSelectedCourse, selectedExamType, setSelectedExamType, selectedWritingType, setSelectedWritingType } = useAppStore();
+  const [activeTab, setActiveTab] = useState<'foundation' | 'credit'>('foundation');
 
   // Whether the currently selected course requires an exam-type choice
   const needsExamType = selectedCourse?.code === '0340';
 
+  // Whether the currently selected course requires a writing-type choice
+  const needsWritingType = selectedCourse?.code === 'LANC2160';
+
   // Whether the Continue button should be enabled
-  const canContinue = selectedCourse && (!needsExamType || selectedExamType);
+  const canContinue = selectedCourse && (!needsExamType || selectedExamType) && (!needsWritingType || selectedWritingType);
+
+  const filteredCourses = courses.filter((course) => {
+    if (activeTab === 'credit') return course.program === 'post-foundation';
+    return course.program === activeTab;
+  });
 
   const handleSelectCourse = (course: Course) => {
     setSelectedCourse(course);
@@ -565,10 +575,34 @@ const CourseSelectionScreen = ({ onSelect, onBack }: { onSelect: () => void; onB
           </div>
         </div>
 
+        {/* Tabs */}
+        <div className="p-4 pb-0">
+          <Tabs value={activeTab} onValueChange={(v) => {
+            setActiveTab(v as 'foundation' | 'credit');
+          }}>
+            <TabsList className="w-full h-12 p-1 bg-muted rounded-xl">
+              <TabsTrigger
+                value="foundation"
+                className="flex-1 h-10 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm"
+              >
+                <GraduationCap className="w-4 h-4 mr-2" />
+                Foundation
+              </TabsTrigger>
+              <TabsTrigger
+                value="credit"
+                className="flex-1 h-10 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm"
+              >
+                <BookOpen className="w-4 h-4 mr-2" />
+                Credit
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </div>
+
         {/* Course Cards */}
         <ScrollArea className="flex-1">
           <div className="p-4 space-y-3">
-            {courses.map((course, index) => (
+            {filteredCourses.map((course, index) => (
               <motion.div
                 key={course.id}
                 initial={{ opacity: 0, y: 20 }}
@@ -587,9 +621,17 @@ const CourseSelectionScreen = ({ onSelect, onBack }: { onSelect: () => void; onB
                     <div className="flex items-start justify-between">
                       <div className="flex items-start gap-3">
                         <div
-                          className="w-12 h-12 rounded-xl flex items-center justify-center bg-gradient-to-br from-[#1a5f2a] to-[#2a7f3a]"
+                          className={`w-12 h-12 rounded-xl flex items-center justify-center ${
+                            activeTab === 'foundation'
+                              ? 'bg-gradient-to-br from-[#1a5f2a] to-[#2a7f3a]'
+                              : 'bg-gradient-to-br from-[#c9a227] to-[#d9b237]'
+                          }`}
                         >
-                          <GraduationCap className="w-6 h-6 text-white" />
+                          {activeTab === 'foundation' ? (
+                            <GraduationCap className="w-6 h-6 text-white" />
+                          ) : (
+                            <BookOpen className="w-6 h-6 text-white" />
+                          )}
                         </div>
                         <div>
                           <div className="flex items-center gap-2">
@@ -657,6 +699,49 @@ const CourseSelectionScreen = ({ onSelect, onBack }: { onSelect: () => void; onB
               </motion.div>
             )}
           </AnimatePresence>
+
+          {/* Writing-Type Selection for LANC2160 */}
+          <AnimatePresence>
+            {needsWritingType && (
+              <motion.div
+                initial={{ opacity: 0, y: 15, height: 0 }}
+                animate={{ opacity: 1, y: 0, height: 'auto' }}
+                exit={{ opacity: 0, y: -10, height: 0 }}
+                transition={{ duration: 0.3 }}
+                className="overflow-hidden"
+              >
+                <div className="px-4 pt-2 pb-4 space-y-2">
+                  <p className="text-sm font-medium text-muted-foreground px-1">
+                    Select writing task:
+                  </p>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => setSelectedWritingType('summary')}
+                      className={`flex-1 flex flex-col items-center justify-center gap-1.5 rounded-xl border-2 px-4 py-4 text-sm font-medium transition-all duration-200 ios-press ${
+                        selectedWritingType === 'summary'
+                          ? 'border-[#c9a227] bg-[#c9a227]/10 text-[#c9a227]'
+                          : 'border-muted-foreground/20 bg-white hover:border-muted-foreground/40 text-muted-foreground'
+                      }`}
+                    >
+                      <FileText className="w-5 h-5" />
+                      <span>Summary Writing</span>
+                    </button>
+                    <button
+                      onClick={() => setSelectedWritingType('synthesis')}
+                      className={`flex-1 flex flex-col items-center justify-center gap-1.5 rounded-xl border-2 px-4 py-4 text-sm font-medium transition-all duration-200 ios-press ${
+                        selectedWritingType === 'synthesis'
+                          ? 'border-[#c9a227] bg-[#c9a227]/10 text-[#c9a227]'
+                          : 'border-muted-foreground/20 bg-white hover:border-muted-foreground/40 text-muted-foreground'
+                      }`}
+                    >
+                      <ClipboardList className="w-5 h-5" />
+                      <span>Synthesis Essay</span>
+                    </button>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </ScrollArea>
 
         {/* Footer */}
@@ -670,6 +755,11 @@ const CourseSelectionScreen = ({ onSelect, onBack }: { onSelect: () => void; onB
             {needsExamType && selectedExamType && (
               <span className="ml-1 text-sm font-normal opacity-80">
                 ({selectedExamType === 'mid-semester' ? 'Mid-semester' : 'Final'})
+              </span>
+            )}
+            {needsWritingType && selectedWritingType && (
+              <span className="ml-1 text-sm font-normal opacity-80">
+                ({selectedWritingType === 'summary' ? 'Summary' : 'Synthesis Essay'})
               </span>
             )}
             <ChevronRight className="w-4 h-4 ml-2" />

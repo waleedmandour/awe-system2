@@ -53,6 +53,7 @@ export interface Essay {
 }
 
 export type ExamType = 'mid-semester' | 'final' | null;
+export type WritingType = 'summary' | 'synthesis' | null;
 export type AppStep = 'welcome' | 'setup' | 'course' | 'upload' | 'processing' | 'review' | 'assessing' | 'results' | 'records';
 
 export interface AssessmentRecord {
@@ -82,6 +83,8 @@ interface AppState {
   setSelectedCourse: (course: Course | null) => void;
   selectedExamType: ExamType;
   setSelectedExamType: (examType: ExamType) => void;
+  selectedWritingType: WritingType;
+  setSelectedWritingType: (writingType: WritingType) => void;
   
   // Essay management
   currentEssay: Essay | null;
@@ -132,6 +135,13 @@ const defaultCourses: Course[] = [
     name: 'English Language Foundation II (FP0340)',
     program: 'foundation',
     description: 'Foundation year English course focusing on basic writing skills.'
+  },
+  {
+    id: 'course-lanc2160',
+    code: 'LANC2160',
+    name: 'Academic English: Summary Writing & Synthesis Essay',
+    program: 'post-foundation',
+    description: 'Post-foundation course focusing on academic summary writing and 2-point synthesis essay writing.'
   }
 ];
 
@@ -153,9 +163,11 @@ export const useAppStore = create<AppState>()(
       // Course selection
       selectedCourse: null,
       courses: defaultCourses,
-      setSelectedCourse: (course) => set({ selectedCourse: course, selectedExamType: null }),
+      setSelectedCourse: (course) => set({ selectedCourse: course, selectedExamType: null, selectedWritingType: null }),
       selectedExamType: null,
       setSelectedExamType: (examType) => set({ selectedExamType: examType }),
+      selectedWritingType: null,
+      setSelectedWritingType: (writingType) => set({ selectedWritingType: writingType }),
       
       // Essay management
       currentEssay: null,
