@@ -269,7 +269,7 @@ const WelcomeScreen = ({ onGetStarted }: { onGetStarted: () => void }) => {
             transition={{ delay: 0.6, duration: 0.5 }}
             className="text-center text-muted-foreground max-w-xs mb-12 text-sm md:text-base"
           >
-            Center for Preparatory Studies's AI-powered essay assessment platform for Foundation and Credit courses
+            Center for Preparatory Studies's AI-powered essay assessment platform for Foundation courses
           </motion.p>
         </motion.div>
 
@@ -533,15 +533,12 @@ const SetupScreen = ({ onComplete }: { onComplete: () => void }) => {
 // Course Selection Screen
 const CourseSelectionScreen = ({ onSelect, onBack }: { onSelect: () => void; onBack: () => void }) => {
   const { courses, selectedCourse, setSelectedCourse, selectedExamType, setSelectedExamType } = useAppStore();
-  const [activeTab, setActiveTab] = useState<'foundation' | 'credit'>('foundation');
 
   // Whether the currently selected course requires an exam-type choice
   const needsExamType = selectedCourse?.code === '0340';
 
   // Whether the Continue button should be enabled
   const canContinue = selectedCourse && (!needsExamType || selectedExamType);
-
-  const filteredCourses = courses.filter((course) => course.program === activeTab);
 
   const handleSelectCourse = (course: Course) => {
     setSelectedCourse(course);
@@ -568,32 +565,10 @@ const CourseSelectionScreen = ({ onSelect, onBack }: { onSelect: () => void; onB
           </div>
         </div>
 
-        {/* Tabs */}
-        <div className="p-4 pb-0">
-          <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'foundation' | 'credit')}>
-            <TabsList className="w-full h-12 p-1 bg-muted rounded-xl">
-              <TabsTrigger
-                value="foundation"
-                className="flex-1 h-10 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm"
-              >
-                <GraduationCap className="w-4 h-4 mr-2" />
-                Foundation
-              </TabsTrigger>
-              <TabsTrigger
-                value="credit"
-                className="flex-1 h-10 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm"
-              >
-                <BookOpen className="w-4 h-4 mr-2" />
-                Credit
-              </TabsTrigger>
-            </TabsList>
-          </Tabs>
-        </div>
-
         {/* Course Cards */}
         <ScrollArea className="flex-1">
           <div className="p-4 space-y-3">
-            {filteredCourses.map((course, index) => (
+            {courses.map((course, index) => (
               <motion.div
                 key={course.id}
                 initial={{ opacity: 0, y: 20 }}
@@ -612,17 +587,9 @@ const CourseSelectionScreen = ({ onSelect, onBack }: { onSelect: () => void; onB
                     <div className="flex items-start justify-between">
                       <div className="flex items-start gap-3">
                         <div
-                          className={`w-12 h-12 rounded-xl flex items-center justify-center ${
-                            activeTab === 'foundation'
-                              ? 'bg-gradient-to-br from-[#1a5f2a] to-[#2a7f3a]'
-                              : 'bg-gradient-to-br from-[#c9a227] to-[#d9b237]'
-                          }`}
+                          className="w-12 h-12 rounded-xl flex items-center justify-center bg-gradient-to-br from-[#1a5f2a] to-[#2a7f3a]"
                         >
-                          {activeTab === 'foundation' ? (
-                            <GraduationCap className="w-6 h-6 text-white" />
-                          ) : (
-                            <BookOpen className="w-6 h-6 text-white" />
-                          )}
+                          <GraduationCap className="w-6 h-6 text-white" />
                         </div>
                         <div>
                           <div className="flex items-center gap-2">

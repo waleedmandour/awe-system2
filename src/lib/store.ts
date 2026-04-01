@@ -132,13 +132,6 @@ const defaultCourses: Course[] = [
     name: 'English Language Foundation II (FP0340)',
     program: 'foundation',
     description: 'Foundation year English course focusing on basic writing skills.'
-  },
-  {
-    id: 'course-lanc2160',
-    code: 'LANC2160',
-    name: 'Academic English: Summary Writing & 2-Point Synthesis Essay',
-    program: 'post-foundation',
-    description: 'Post-foundation course focusing on academic summary writing and 2-point synthesis essay writing.'
   }
 ];
 
