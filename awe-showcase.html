@@ -1177,6 +1177,10 @@
                 transform: rotate(90deg);
                 padding: 4px 0;
             }
+            .try-grid {
+                grid-template-columns: 1fr;
+                max-width: 440px;
+            }
         }
 
         @media (max-width: 768px) {
@@ -1284,238 +1288,8 @@
         }
 
         /* ============================================
-           COMPARISON SECTION
+           FOOTER
            ============================================ */
-        .compare-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 32px;
-            max-width: 900px;
-            margin: 0 auto 48px;
-        }
-
-        .compare-card {
-            background: var(--white);
-            border-radius: var(--radius-lg);
-            overflow: hidden;
-            box-shadow: var(--shadow-md);
-            transition: var(--transition);
-            border: 2px solid transparent;
-            position: relative;
-        }
-
-        .compare-card:hover {
-            transform: translateY(-6px);
-            box-shadow: var(--shadow-xl);
-        }
-
-        .compare-card.featured {
-            border-color: var(--primary);
-        }
-
-        .compare-card.featured::before {
-            content: 'RECOMMENDED';
-            position: absolute;
-            top: 16px;
-            right: -32px;
-            background: var(--primary);
-            color: var(--white);
-            font-size: 0.65rem;
-            font-weight: 700;
-            letter-spacing: 1.5px;
-            padding: 6px 40px;
-            transform: rotate(45deg);
-            z-index: 2;
-        }
-
-        .compare-card-header {
-            padding: 28px 28px 20px;
-            text-align: center;
-        }
-
-        .compare-card-header.green-bg {
-            background: linear-gradient(135deg, var(--primary-dark), var(--primary-light));
-            color: var(--white);
-        }
-
-        .compare-card-header.blue-bg {
-            background: linear-gradient(135deg, #1a3a5f, #2a5a8f);
-            color: var(--white);
-        }
-
-        .compare-card-header i {
-            font-size: 2.2rem;
-            margin-bottom: 12px;
-            display: block;
-        }
-
-        .compare-card-header h3 {
-            font-family: 'Playfair Display', serif;
-            font-size: 1.3rem;
-            font-weight: 700;
-            margin-bottom: 4px;
-        }
-
-        .compare-card-header p {
-            font-size: 0.85rem;
-            opacity: 0.85;
-            font-weight: 400;
-        }
-
-        .compare-card-body {
-            padding: 28px;
-        }
-
-        .compare-feature {
-            display: flex;
-            align-items: flex-start;
-            gap: 12px;
-            padding: 10px 0;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-            font-size: 0.88rem;
-            line-height: 1.5;
-        }
-
-        .compare-feature:last-child {
-            border-bottom: none;
-        }
-
-        .compare-feature i {
-            margin-top: 3px;
-            font-size: 0.8rem;
-            flex-shrink: 0;
-        }
-
-        .compare-feature i.fa-check {
-            color: var(--primary);
-        }
-
-        .compare-feature i.fa-times {
-            color: var(--text-light);
-        }
-
-        .compare-feature i.fa-minus {
-            color: var(--gold-dark);
-        }
-
-        .compare-card-footer {
-            padding: 0 28px 28px;
-            text-align: center;
-        }
-
-        .compare-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 12px 28px;
-            border-radius: 50px;
-            font-family: 'Inter', sans-serif;
-            font-size: 0.9rem;
-            font-weight: 600;
-            text-decoration: none;
-            transition: var(--transition);
-            border: none;
-            cursor: pointer;
-            width: 100%;
-            justify-content: center;
-        }
-
-        .compare-btn.green {
-            background: linear-gradient(135deg, var(--primary), var(--primary-light));
-            color: var(--white);
-            box-shadow: 0 4px 15px rgba(26, 95, 42, 0.3);
-        }
-
-        .compare-btn.green:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(26, 95, 42, 0.4);
-        }
-
-        .compare-btn.blue {
-            background: linear-gradient(135deg, #1a3a5f, #2a5a8f);
-            color: var(--white);
-            box-shadow: 0 4px 15px rgba(26, 58, 95, 0.3);
-        }
-
-        .compare-btn.blue:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(26, 58, 95, 0.4);
-        }
-
-        /* Feature comparison table */
-        .comparison-table-wrap {
-            background: var(--white);
-            border-radius: var(--radius-lg);
-            overflow: hidden;
-            box-shadow: var(--shadow-md);
-            border: 1px solid rgba(0, 0, 0, 0.04);
-            max-width: 900px;
-            margin: 0 auto;
-        }
-
-        .comparison-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 0.88rem;
-        }
-
-        .comparison-table thead {
-            background: var(--light-bg);
-        }
-
-        .comparison-table th {
-            padding: 16px 20px;
-            text-align: left;
-            font-weight: 700;
-            color: var(--dark);
-            font-size: 0.85rem;
-            letter-spacing: 0.5px;
-        }
-
-        .comparison-table th:nth-child(2) {
-            color: var(--primary);
-        }
-
-        .comparison-table th:nth-child(3) {
-            color: #1a3a5f;
-        }
-
-        .comparison-table td {
-            padding: 14px 20px;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-            color: var(--text-dark);
-            vertical-align: top;
-        }
-
-        .comparison-table tr:last-child td {
-            border-bottom: none;
-        }
-
-        .comparison-table tr:hover td {
-            background: rgba(26, 95, 42, 0.02);
-        }
-
-        .comparison-table .feature-label {
-            font-weight: 600;
-            color: var(--dark);
-            min-width: 180px;
-        }
-
-        .comparison-table .check {
-            color: var(--primary);
-            font-weight: 700;
-        }
-
-        .comparison-table .cross {
-            color: var(--text-light);
-        }
-
-        .comparison-table .partial {
-            color: var(--gold-dark);
-            font-weight: 600;
-        }
-
-        /* Try section */
         .try-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -1616,40 +1390,6 @@
         }
 
         /* ============================================
-           RESPONSIVE - COMPARISON
-           ============================================ */
-        @media (max-width: 1024px) {
-            .compare-grid {
-                grid-template-columns: 1fr;
-                max-width: 480px;
-            }
-            .try-grid {
-                grid-template-columns: 1fr;
-                max-width: 440px;
-            }
-            .comparison-table-wrap {
-                overflow-x: auto;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .compare-grid {
-                max-width: 440px;
-                margin-left: auto;
-                margin-right: auto;
-                margin-bottom: 40px;
-            }
-            .comparison-table th,
-            .comparison-table td {
-                padding: 10px 14px;
-                font-size: 0.82rem;
-            }
-            .comparison-table .feature-label {
-                min-width: 140px;
-            }
-        }
-
-        /* ============================================
            ACCESSIBILITY
            ============================================ */
         @media (prefers-reduced-motion: reduce) {
@@ -1682,7 +1422,6 @@
                 <li><a href="#how-it-works" onclick="closeMenu()">How It Works</a></li>
                 <li><a href="#courses" onclick="closeMenu()">Courses</a></li>
                 <li><a href="#features" onclick="closeMenu()">Features</a></li>
-                <li><a href="#compare" onclick="closeMenu()">Compare Systems</a></li>
                 <li><a href="#architecture" onclick="closeMenu()">Architecture</a></li>
                 <li><a href="#try" class="nav-cta" onclick="closeMenu()">Try Now</a></li>
             </ul>
@@ -1981,189 +1720,6 @@
     </section>
 
     <!-- ==========================================
-         COMPARE SYSTEMS SECTION
-         ========================================== -->
-    <section class="section" id="compare">
-        <div class="container">
-            <div class="section-header fade-up">
-                <div class="section-label">Compare</div>
-                <h2 class="section-title">Two Systems, One Goal</h2>
-                <p class="section-desc">Choose the system that best fits your needs. Both deliver the same rigorous AI-powered assessment aligned to CEFR A1&ndash;A2 rubrics.</p>
-            </div>
-
-            <div class="compare-grid">
-                <!-- PWA System Card -->
-                <div class="compare-card featured fade-left stagger-1">
-                    <div class="compare-card-header green-bg">
-                        <i class="fas fa-mobile-screen-button"></i>
-                        <h3>AWE PWA App</h3>
-                        <p>Progressive Web Application</p>
-                    </div>
-                    <div class="compare-card-body">
-                        <div class="compare-feature">
-                            <i class="fas fa-check"></i>
-                            <span>Install on any device &mdash; works like a native app</span>
-                        </div>
-                        <div class="compare-feature">
-                            <i class="fas fa-check"></i>
-                            <span>Direct camera capture for handwritten essays</span>
-                        </div>
-                        <div class="compare-feature">
-                            <i class="fas fa-check"></i>
-                            <span>Instant on-screen results with detailed feedback</span>
-                        </div>
-                        <div class="compare-feature">
-                            <i class="fas fa-check"></i>
-                            <span>Assessment history saved locally on device</span>
-                        </div>
-                        <div class="compare-feature">
-                            <i class="fas fa-check"></i>
-                            <span>Offline-capable interface (requires internet for AI)</span>
-                        </div>
-                        <div class="compare-feature">
-                            <i class="fas fa-check"></i>
-                            <span>Course &amp; exam-type selection (FP0340 mid/final)</span>
-                        </div>
-                        <div class="compare-feature">
-                            <i class="fas fa-check"></i>
-                            <span>0.5 decimal scoring for borderline cases</span>
-                        </div>
-                        <div class="compare-feature">
-                            <i class="fas fa-check"></i>
-                            <span>Powered by Gemini AI</span>
-                        </div>
-                    </div>
-                    <div class="compare-card-footer">
-                        <a href="https://awe-system.vercel.app" target="_blank" rel="noopener noreferrer" class="compare-btn green">
-                            <i class="fas fa-external-link-alt"></i>
-                            Launch PWA App
-                        </a>
-                    </div>
-                </div>
-
-                <!-- Google Forms System Card -->
-                <div class="compare-card fade-right stagger-2">
-                    <div class="compare-card-header blue-bg">
-                        <i class="fab fa-google"></i>
-                        <h3>Google Forms System</h3>
-                        <p>Form-Based Submission Pipeline</p>
-                    </div>
-                    <div class="compare-card-body">
-                        <div class="compare-feature">
-                            <i class="fas fa-check"></i>
-                            <span>No installation &mdash; open in any browser</span>
-                        </div>
-                        <div class="compare-feature">
-                            <i class="fas fa-check"></i>
-                            <span>Upload essay photos through Google Form</span>
-                        </div>
-                        <div class="compare-feature">
-                            <i class="fas fa-minus"></i>
-                            <span>Results via automated email response</span>
-                        </div>
-                        <div class="compare-feature">
-                            <i class="fas fa-times"></i>
-                            <span>No local history &mdash; results in email only</span>
-                        </div>
-                        <div class="compare-feature">
-                            <i class="fas fa-times"></i>
-                            <span>Requires active internet connection</span>
-                        </div>
-                        <div class="compare-feature">
-                            <i class="fas fa-minus"></i>
-                            <span>Course selection via form dropdown</span>
-                        </div>
-                        <div class="compare-feature">
-                            <i class="fas fa-minus"></i>
-                            <span>Standard whole-number scoring</span>
-                        </div>
-                        <div class="compare-feature">
-                            <i class="fas fa-check"></i>
-                            <span>Choose Gemini or OpenAI engine</span>
-                        </div>
-                    </div>
-                    <div class="compare-card-footer">
-                        <a href="https://docs.google.com/forms/d/e/1FAIpQLSdzxyTLFTeixGxX06tcaC6vQrgwhVQimOiHE7z97wxOrNn9qQ/viewform?usp=header" target="_blank" rel="noopener noreferrer" class="compare-btn blue">
-                            <i class="fas fa-external-link-alt"></i>
-                            Open Google Form
-                        </a>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Feature Comparison Table -->
-            <div class="comparison-table-wrap fade-up">
-                <table class="comparison-table">
-                    <thead>
-                        <tr>
-                            <th>Feature</th>
-                            <th><i class="fas fa-mobile-alt" style="margin-right:6px;"></i> PWA App</th>
-                            <th><i class="fab fa-google" style="margin-right:6px;"></i> Google Forms</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td class="feature-label">Installation</td>
-                            <td class="check"><i class="fas fa-check"></i> Installable PWA</td>
-                            <td class="partial"><i class="fas fa-minus"></i> No install needed</td>
-                        </tr>
-                        <tr>
-                            <td class="feature-label">Essay Input</td>
-                            <td class="check"><i class="fas fa-check"></i> Camera + upload (up to 2 pages)</td>
-                            <td class="partial"><i class="fas fa-minus"></i> Upload via form</td>
-                        </tr>
-                        <tr>
-                            <td class="feature-label">OCR Engine</td>
-                            <td class="check"><i class="fas fa-check"></i> Gemini Vision API</td>
-                            <td class="check"><i class="fas fa-check"></i> Google Vision API</td>
-                        </tr>
-                        <tr>
-                            <td class="feature-label">AI Assessment</td>
-                            <td class="check"><i class="fas fa-check"></i> Gemini</td>
-                            <td class="check"><i class="fas fa-check"></i> Gemini / OpenAI</td>
-                        </tr>
-                        <tr>
-                            <td class="feature-label">Scoring Precision</td>
-                            <td class="check"><i class="fas fa-check"></i> 0.5 decimal increments</td>
-                            <td class="cross"><i class="fas fa-times"></i> Whole numbers only</td>
-                        </tr>
-                        <tr>
-                            <td class="feature-label">Results Display</td>
-                            <td class="check"><i class="fas fa-check"></i> Interactive on-screen UI</td>
-                            <td class="partial"><i class="fas fa-minus"></i> Email response</td>
-                        </tr>
-                        <tr>
-                            <td class="feature-label">Assessment History</td>
-                            <td class="check"><i class="fas fa-check"></i> Local storage</td>
-                            <td class="cross"><i class="fas fa-times"></i> Not available</td>
-                        </tr>
-                        <tr>
-                            <td class="feature-label">Offline Support</td>
-                            <td class="check"><i class="fas fa-check"></i> Partial (UI only)</td>
-                            <td class="cross"><i class="fas fa-times"></i> Requires internet</td>
-                        </tr>
-                        <tr>
-                            <td class="feature-label">Exam-Type Selection</td>
-                            <td class="check"><i class="fas fa-check"></i> FP0340 mid/final toggle</td>
-                            <td class="cross"><i class="fas fa-times"></i> Not available</td>
-                        </tr>
-                        <tr>
-                            <td class="feature-label">Share Results</td>
-                            <td class="check"><i class="fas fa-check"></i> Share button built-in</td>
-                            <td class="partial"><i class="fas fa-minus"></i> Forward email</td>
-                        </tr>
-                        <tr>
-                            <td class="feature-label">Best For</td>
-                            <td class="check"><i class="fas fa-star"></i> Students &amp; teachers</td>
-                            <td class="partial"><i class="fas fa-star"></i> Quick trials</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </section>
-
-    <!-- ==========================================
          TRY NOW SECTION
          ========================================== -->
     <section class="section section-alt" id="try">
@@ -2287,7 +1843,10 @@
             <div class="footer-brand">AWE <span>System</span></div>
             <div class="footer-divider"></div>
             <div class="footer-credit">
-                Developed by <strong>AI Co-Marker Project Team</strong><br>
+                <strong>AI Co-Marker Project Team</strong><br>
+                Dr. Jokha Al Hosni<br>
+                Dr. Sanaa Al Huthaifi<br>
+                Dr. Waleed Mandour<br><br>
                 <strong>Sultan Qaboos University</strong> &mdash; Center for Preparatory Studies
             </div>
             <div class="footer-year">2025 &ndash; 2026</div>
