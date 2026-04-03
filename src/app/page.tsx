@@ -58,6 +58,26 @@ import {
   History,
 } from 'lucide-react';
 
+/**
+ * Recalculate totalScore, maxScore, and percentage from individual criterion scores.
+ * This ensures the displayed total always matches the sum of criterion scores,
+ * regardless of what the AI or stored data originally returned.
+ * Uses integer math to avoid floating-point precision issues with 0.5 increments.
+ */
+function recalculateScores(assessment: Assessment): Assessment {
+  if (!assessment?.scores || assessment.scores.length === 0) return assessment;
+  const rawTotal = assessment.scores.reduce((sum, s) => sum + (s.score || 0), 0);
+  const totalScore = Math.round(rawTotal * 2) / 2;
+  const maxScore = assessment.scores.reduce((sum, s) => sum + (s.maxScore || 0), 0);
+  const percentage = maxScore > 0 ? Math.round((totalScore / maxScore) * 100) : 0;
+  return { ...assessment, totalScore, maxScore, percentage };
+}
+
+/** Apply recalculation to an assessment record (for historical data). */
+function recalculateRecord(record: AssessmentRecord): AssessmentRecord {
+  return { ...record, assessment: recalculateScores(record.assessment) };
+}
+
 // Animation variants
 const fadeInUp = {
   initial: { opacity: 0, y: 20 },
@@ -1488,7 +1508,7 @@ const AssessmentScreen = ({ onComplete }: { onComplete: (assessment: Assessment)
         }
 
         // Transform the API response to match Assessment type
-        const assessment: Assessment = {
+        const rawAssessment: Assessment = {
           id: `assess-${Date.now()}`,
           totalScore: result.assessment.totalScore,
           maxScore: result.assessment.maxScore,
@@ -1505,6 +1525,9 @@ const AssessmentScreen = ({ onComplete }: { onComplete: (assessment: Assessment)
           })),
           createdAt: result.assessment.createdAt,
         };
+
+        // Always recalculate total score from individual criterion scores (ignore AI total)
+        const assessment = recalculateScores(rawAssessment);
 
         // Wait for progress to complete before showing results
         setProgress(100);
@@ -1734,13 +1757,15 @@ const parseFeedback = (feedback: string) => {
 
 // Results Screen Component
 const ResultsScreen = ({ assessment, onNewAssessment, onBack }: { assessment: Assessment | null; onNewAssessment: () => void; onBack: () => void }) => {
+  // Always recalculate totals from individual criterion scores
+  const safeAssessment = assessment ? recalculateScores(assessment) : null;
   const { selectedCourse, extractedText } = useAppStore();
   const [activeTab, setActiveTab] = useState('overview');
   const [isDownloading, setIsDownloading] = useState(false);
   const { toast } = useToast();
 
   // Null check - redirect if no assessment
-  if (!assessment) {
+  if (!safeAssessment) {
     return (
       <PageTransition>
         <div className="min-h-screen min-h-[100dvh] flex flex-col items-center justify-center p-6 safe-area-top safe-area-bottom">
@@ -1771,11 +1796,11 @@ const ResultsScreen = ({ assessment, onNewAssessment, onBack }: { assessment: As
       if (navigator.share) {
         await navigator.share({
           title: 'AWE Assessment Results',
-          text: `I scored ${assessment.percentage}% (${assessment.totalScore}/${assessment.maxScore}) on my ${selectedCourse?.name || 'essay'} assessment!`,
+          text: `I scored ${safeAssessment.percentage}% (${safeAssessment.totalScore}/${safeAssessment.maxScore}) on my ${selectedCourse?.name || 'essay'} assessment!`,
         });
       } else {
         await navigator.clipboard.writeText(
-          `AWE Assessment Results\nScore: ${assessment.totalScore}/${assessment.maxScore} (${Math.round(assessment.percentage)}%)`
+          `AWE Assessment Results\nScore: ${safeAssessment.totalScore}/${safeAssessment.maxScore} (${Math.round(safeAssessment.percentage)}%)`
         );
         toast({
           title: 'Copied to Clipboard',
@@ -1905,7 +1930,7 @@ const ResultsScreen = ({ assessment, onNewAssessment, onBack }: { assessment: As
                   strokeLinecap="round"
                   strokeDasharray={352}
                   initial={{ strokeDashoffset: 352 }}
-                  animate={{ strokeDashoffset: 352 - (352 * assessment.percentage) / 100 }}
+                  animate={{ strokeDashoffset: 352 - (352 * safeAssessment.percentage) / 100 }}
                   transition={{ duration: 1.5, delay: 0.3 }}
                 />
               </svg>
@@ -1916,7 +1941,7 @@ const ResultsScreen = ({ assessment, onNewAssessment, onBack }: { assessment: As
                   transition={{ delay: 0.5 }}
                   className="text-4xl font-bold"
                 >
-                  {assessment.percentage}%
+                  {safeAssessment.percentage}%
                 </motion.span>
                 <span className="text-sm opacity-80">Score</span>
               </div>
@@ -1930,11 +1955,11 @@ const ResultsScreen = ({ assessment, onNewAssessment, onBack }: { assessment: As
               className="text-center"
             >
               <div className="w-20 h-20 bg-white/20 rounded-2xl flex items-center justify-center mb-2">
-                <span className="text-2xl font-bold">{assessment.totalScore}/{assessment.maxScore}</span>
+                <span className="text-2xl font-bold">{safeAssessment.totalScore}/{safeAssessment.maxScore}</span>
               </div>
               <p className="text-sm opacity-80">Total Score</p>
               <Badge className="mt-2 bg-[#c9a227] text-white border-0">
-                {assessment.percentage! >= 80 ? 'Excellent' : assessment.percentage! >= 60 ? 'Good' : 'Needs Work'}
+                {safeAssessment.percentage! >= 80 ? 'Excellent' : safeAssessment.percentage! >= 60 ? 'Good' : 'Needs Work'}
               </Badge>
             </motion.div>
           </div>
@@ -1971,14 +1996,14 @@ const ResultsScreen = ({ assessment, onNewAssessment, onBack }: { assessment: As
                   <Card>
                     <CardContent className="p-4 text-center">
                       <Award className="w-8 h-8 mx-auto mb-2 text-[#c9a227]" />
-                      <p className="text-2xl font-bold">{assessment.totalScore}/{assessment.maxScore}</p>
+                      <p className="text-2xl font-bold">{safeAssessment.totalScore}/{safeAssessment.maxScore}</p>
                       <p className="text-xs text-muted-foreground">Total Points</p>
                     </CardContent>
                   </Card>
                   <Card>
                     <CardContent className="p-4 text-center">
                       <TrendingUp className="w-8 h-8 mx-auto mb-2 text-[#1a5f2a]" />
-                      <p className="text-2xl font-bold">{Math.round(assessment.percentage)}%</p>
+                      <p className="text-2xl font-bold">{Math.round(safeAssessment.percentage)}%</p>
                       <p className="text-xs text-muted-foreground">Percentage</p>
                     </CardContent>
                   </Card>
@@ -2205,12 +2230,13 @@ const RecordsScreen = ({ onBack, onNewAssessment }: { onBack: () => void; onNewA
     ).values()
   );
 
-  // Filter records
+  // Recalculate scores for all historical records to fix any old totals
+  const safeRecords = records.map(recalculateRecord);
   const filteredRecords = filterCourse === 'all'
-    ? records
-    : records.filter((r) => r.course?.id === filterCourse);
+    ? safeRecords
+    : safeRecords.filter((r) => r.course?.id === filterCourse);
 
-  // Stats
+  // Stats (based on recalculated scores)
   const totalAssessments = filteredRecords.length;
   const avgScore = totalAssessments > 0
     ? Math.round(filteredRecords.reduce((sum, r) => sum + r.assessment.percentage, 0) / totalAssessments)
