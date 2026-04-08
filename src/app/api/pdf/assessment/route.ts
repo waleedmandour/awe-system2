@@ -55,9 +55,11 @@ export async function POST(request: NextRequest) {
     }
 
     const scores: any[] = assessment.scores || [];
-    const totalScore = assessment.totalScore || 0;
-    const maxScore = assessment.maxScore || 24;
-    const percentage = assessment.percentage || 0;
+
+    // Recalculate total from individual criterion scores to ensure consistency
+    const totalScore = scores.reduce((sum: number, s: any) => sum + (s.score || 0), 0);
+    const maxScore = scores.reduce((sum: number, s: any) => sum + (s.maxScore || 0), 0);
+    const percentage = maxScore > 0 ? Math.round((totalScore / maxScore) * 100) : 0;
     const overallFeedback = assessment.overallFeedback || '';
     const wordCount = assessment.wordCount || 0;
     const courseName = course?.name || 'Unknown Course';
@@ -157,8 +159,8 @@ export async function POST(request: NextRequest) {
       for (let i = 0; i < scores.length; i++) {
         const score = scores[i];
         const cName = score.criterionName || `Criterion ${i + 1}`;
-        const cScore = Math.round(score.score || 0);
-        const cMax = Math.round(score.maxScore || 6);
+        const cScore = score.score || 0;
+        const cMax = score.maxScore || 6;
         const cPct = cMax > 0 ? Math.round((cScore / cMax) * 100) : 0;
         const cColor = getScoreColor(cPct);
 
