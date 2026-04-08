@@ -2015,7 +2015,7 @@ const ResultsScreen = ({ assessment, onNewAssessment, onBack }: { assessment: As
                     <CardTitle className="text-base">Score Breakdown</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-3">
-                    {assessment.scores.map((score, index) => (
+                    {safeAssessment.scores.map((score, index) => (
                       <motion.div
                         key={score.criterionId}
                         initial={{ opacity: 0, x: -20 }}
@@ -2045,7 +2045,7 @@ const ResultsScreen = ({ assessment, onNewAssessment, onBack }: { assessment: As
                 animate={{ opacity: 1, y: 0 }}
                 className="space-y-3"
               >
-                {assessment.scores.map((score, index) => {
+                {safeAssessment.scores.map((score, index) => {
                   const parsedFeedback = parseFeedback(score.feedback || '');
                   return (
                     <motion.div
