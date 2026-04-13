@@ -335,7 +335,7 @@ const CourseSelectionScreen = ({ onSelect, onBack }: { onSelect: () => void; onB
                                   {assignment.title}
                                 </p>
                                 <p className="text-xs text-muted-foreground mt-0.5">
-                                  {assignment.sources.length} sources &middot; {assignment.targetWordCount.min}&ndash;{assignment.targetWordCount.max} words &middot; {assignment.cefrLevel}
+                                  {assignment.sources.length} sources &middot; {assignment.targetWordCount.min}&ndash;{assignment.targetWordCount.max} words
                                 </p>
                                 <p className="text-xs text-muted-foreground mt-0.5">
                                   {assignment.expectedParagraphs} paragraphs expected
@@ -360,18 +360,15 @@ const CourseSelectionScreen = ({ onSelect, onBack }: { onSelect: () => void; onB
             disabled={!canContinue}
             className="w-full h-12 bg-[#1a5f2a] hover:bg-[#1a5f2a]/90 rounded-xl ios-press"
           >
-            Continue with {selectedCourse?.code || 'Course'}
-            {needsExamType && selectedExamType && (
-              <span className="ml-1 text-sm font-normal opacity-80">
-                ({selectedExamType === 'mid-semester' ? 'Mid-semester' : 'Final'})
-              </span>
-            )}
-            {needsWritingType && selectedWritingType && (
-              <span className="ml-1 text-sm font-normal opacity-80">
-                ({selectedWritingType === 'summary' ? 'Summary' : 'Synthesis Essay'}){needsSourceText && selectedSourceTextId ? `: ${SUMMARY_SOURCE_TEXTS.find(s => s.id === selectedSourceTextId)?.title.split('—')[0].trim() || ''}` : ''}{needsSynthesisAssignment && selectedSourceTextId ? `: ${SYNTHESIS_ASSIGNMENTS.find(a => a.id === selectedSourceTextId)?.title || ''}` : ''}
-              </span>
-            )}
-            <ChevronRight className="w-4 h-4 ml-2" />
+            <span className="flex flex-col items-start text-left leading-tight">
+              <span>Continue with {selectedCourse?.code || 'Course'}</span>
+              {(needsExamType && selectedExamType) || (needsWritingType && selectedWritingType) ? (
+                <span className="text-sm font-normal opacity-80">
+                  {needsExamType && selectedExamType ? (selectedExamType === 'mid-semester' ? 'Mid-semester' : 'Final') : ''}{needsWritingType && selectedWritingType ? `${needsExamType && selectedExamType ? ' · ' : ''}${selectedWritingType === 'summary' ? 'Summary' : 'Synthesis Essay'}${needsSourceText && selectedSourceTextId ? `: ${SUMMARY_SOURCE_TEXTS.find(s => s.id === selectedSourceTextId)?.title.split('—')[0].trim() || ''}` : ''}${needsSynthesisAssignment && selectedSourceTextId ? `: ${SYNTHESIS_ASSIGNMENTS.find(a => a.id === selectedSourceTextId)?.title || ''}` : ''}` : ''}
+                </span>
+              ) : null}
+            </span>
+            <ChevronRight className="w-4 h-4 ml-auto flex-shrink-0" />
           </Button>
         </div>
       </div>
