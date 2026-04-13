@@ -8,7 +8,7 @@ on:
 
 jobs:
   build:
-    name: Build & Type Check
+    name: Lint, Type Check & Build
     runs-on: ubuntu-latest
 
     steps:
@@ -26,6 +26,15 @@ jobs:
 
       - name: Generate Prisma client
         run: npx prisma generate || echo "Prisma generation skipped"
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Type check
+        run: npx tsc --noEmit
+
+      - name: Run tests
+        run: npm test
 
       - name: Build Next.js
         run: npm run build
