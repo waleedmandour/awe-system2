@@ -23,7 +23,7 @@ import { PageTransition } from '@/lib/animations';
 
 // Course Selection Screen
 const CourseSelectionScreen = ({ onSelect, onBack }: { onSelect: () => void; onBack: () => void }) => {
-  const { courses, selectedCourse, setSelectedCourse, selectedExamType, setSelectedExamType, selectedWritingType, setSelectedWritingType, selectedPracticeType, setSelectedPracticeType, selectedSourceTextId, setSelectedSourceTextId } = useAppStore();
+  const { courses, selectedCourse, setSelectedCourse, selectedExamType, setSelectedExamType, selectedWritingType, setSelectedWritingType, selectedPracticeType, setSelectedPracticeType, selectedSourceTextId, setSelectedSourceTextId, writingPrompt, setWritingPrompt } = useAppStore();
   const [activeTab, setActiveTab] = useState<'foundation' | 'credit'>('foundation');
 
   // Whether the currently selected course requires an exam-type choice
@@ -42,6 +42,9 @@ const CourseSelectionScreen = ({ onSelect, onBack }: { onSelect: () => void; onB
   const filteredPracticeTests = needsPracticeType && selectedPracticeType
     ? LANC1070_PRACTICE_TESTS.filter(t => t.practiceType === selectedPracticeType)
     : [];
+
+  // Whether FP0340 Final Exam needs a writing prompt input
+  const needsWritingPrompt = selectedCourse?.code === '0340' && selectedExamType === 'final';
 
   // Whether the Continue button should be enabled
   const canContinue = selectedCourse
@@ -229,6 +232,32 @@ const CourseSelectionScreen = ({ onSelect, onBack }: { onSelect: () => void; onB
                       <span>For Final Exam</span>
                     </button>
                   </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Writing Prompt Input for FP0340 Final Exam */}
+          <AnimatePresence>
+            {needsWritingPrompt && (
+              <motion.div
+                initial={{ opacity: 0, y: 15, height: 0 }}
+                animate={{ opacity: 1, y: 0, height: 'auto' }}
+                exit={{ opacity: 0, y: -10, height: 0 }}
+                transition={{ duration: 0.3 }}
+                className="overflow-hidden"
+              >
+                <div className="px-4 pt-1 pb-2 space-y-2">
+                  <p className="text-sm font-medium text-muted-foreground px-1">
+                    Writing Prompt <span className="font-normal">(Optional)</span>
+                  </p>
+                  <textarea
+                    value={writingPrompt}
+                    onChange={(e) => setWritingPrompt(e.target.value)}
+                    placeholder="Enter the essay topic or writing prompt, if provided by your instructor..."
+                    rows={3}
+                    className="w-full rounded-xl border-2 border-muted-foreground/20 bg-white px-4 py-3 text-sm resize-none focus:outline-none focus:border-[#1a5f2a]/50 focus:ring-1 focus:ring-[#1a5f2a]/20 placeholder:text-muted-foreground/60 transition-colors"
+                  />
                 </div>
               </motion.div>
             )}

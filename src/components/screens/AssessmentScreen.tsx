@@ -47,7 +47,7 @@ const PageTransition = ({ children, direction = 'right' }: { children: React.Rea
 
 // Assessment Screen (Processing)
 const AssessmentScreen = ({ onComplete }: { onComplete: (assessment: Assessment) => void }) => {
-  const { selectedCourse, extractedText, geminiApiKey, selectedExamType, selectedWritingType, selectedSourceTextId } = useAppStore();
+  const { selectedCourse, extractedText, geminiApiKey, selectedExamType, selectedWritingType, selectedSourceTextId, writingPrompt } = useAppStore();
   const [progress, setProgress] = useState(0);
   const [currentPhase, setCurrentPhase] = useState(0);
   const [error, setError] = useState<string | null>(null);
@@ -73,7 +73,7 @@ const AssessmentScreen = ({ onComplete }: { onComplete: (assessment: Assessment)
           body: JSON.stringify({
             text: extractedText,
             courseCode: selectedCourse?.code,
-            topic: null,
+            topic: writingPrompt || null,
             apiKey: geminiApiKey,
             examType: selectedExamType || undefined,
             writingType: selectedWritingType || undefined,
@@ -138,7 +138,7 @@ const AssessmentScreen = ({ onComplete }: { onComplete: (assessment: Assessment)
       clearInterval(progressInterval);
       clearInterval(phaseInterval);
     };
-  }, [extractedText, selectedCourse, geminiApiKey, selectedExamType, onComplete, toast]);
+  }, [extractedText, selectedCourse, geminiApiKey, selectedExamType, writingPrompt, onComplete, toast]);
 
   if (error) {
     return (

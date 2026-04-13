@@ -328,6 +328,10 @@ interface AppState {
   processingMessage: string;
   setProcessing: (isProcessing: boolean, message?: string) => void;
   
+  // Writing prompt (optional, for FP0340 Final Exam)
+  writingPrompt: string;
+  setWritingPrompt: (prompt: string) => void;
+
   // OCR result (extracted text before assessment)
   extractedText: string;
   setExtractedText: (text: string) => void;
@@ -400,9 +404,11 @@ export const useAppStore = create<AppState>()(
       // Course selection
       selectedCourse: null,
       courses: defaultCourses,
-      setSelectedCourse: (course) => set({ selectedCourse: course, selectedExamType: null, selectedWritingType: null, selectedPracticeType: null, selectedSourceTextId: null }),
+      setSelectedCourse: (course) => set({ selectedCourse: course, selectedExamType: null, selectedWritingType: null, selectedPracticeType: null, selectedSourceTextId: null, writingPrompt: '' }),
       selectedExamType: null,
-      setSelectedExamType: (examType) => set({ selectedExamType: examType }),
+      setSelectedExamType: (examType) => set({ selectedExamType: examType, writingPrompt: '' }),
+      writingPrompt: '',
+      setWritingPrompt: (prompt) => set({ writingPrompt: prompt }),
       selectedWritingType: null,
       setSelectedWritingType: (writingType) => set({ selectedWritingType: writingType }),
       selectedPracticeType: null as PracticeType,
@@ -470,6 +476,7 @@ export const useAppStore = create<AppState>()(
         selectedCourse: state.selectedCourse,
         selectedWritingType: state.selectedWritingType,
         selectedPracticeType: state.selectedPracticeType,
+        writingPrompt: state.writingPrompt,
         selectedSourceTextId: state.selectedSourceTextId,
         essays: state.essays.slice(0, 10), // Keep last 10 essays
         records: state.records, // Keep all records
