@@ -54,6 +54,7 @@ export interface Essay {
 
 export type ExamType = 'mid-semester' | 'final' | null;
 export type WritingType = 'summary' | 'synthesis' | null;
+export type PracticeType = 'mid-semester' | 'final' | null;
 export type AppStep = 'welcome' | 'setup' | 'course' | 'upload' | 'processing' | 'review' | 'assessing' | 'results' | 'records';
 
 // Summary writing source texts for LANC2160
@@ -197,6 +198,90 @@ Overall costs: higher / 30% lower than conventional`,
   },
 ];
 
+// LANC1070 practice test interface (single source text, 4-paragraph essay)
+export interface PracticeTest {
+  id: string;
+  title: string;
+  description: string;
+  cefrLevel: string;
+  expectedParagraphs: number;
+  sourceText: {
+    id: string;
+    title: string;
+    content: string;
+  };
+  targetWordCount: {
+    min: number;
+    max: number;
+    ideal: number;
+  };
+  practiceType: 'mid-semester' | 'final';
+}
+
+export const LANC1070_PRACTICE_TESTS: PracticeTest[] = [
+  {
+    id: 'lanc1070-p1-job-market',
+    title: 'Opportunities and Challenges in Today\'s Job Market',
+    description: 'Discuss the opportunities and challenges facing today\'s job market in terms of utilization of 21st century skills. Write a 4-paragraph synthesis essay based on the source text.',
+    cefrLevel: 'A2-B1',
+    expectedParagraphs: 4,
+    practiceType: 'mid-semester',
+    targetWordCount: { min: 300, max: 350, ideal: 325 },
+    sourceText: {
+      id: 'lanc1070-p1-source',
+      title: '21st Century Skills in the Modern Job Market',
+      content: `The modern job market is a complex environment shaped by various factors that significantly affect the skills needed for today's employment. Among these are technological advances, globalization, and the ever-changing nature of society, shaping the essential skill sets necessary for success in today's workforce.
+Technology has become an important aspect across different professions in today's world. Proficiency in technology isn't just advantageous; it's a requirement for many jobs across various industries. For example, expertise in coding, data analysis, and using digital tools has become fundamental in fields like healthcare, finance, and information technology. In healthcare, professionals increasingly depend on digital records and diagnostic software, changing patient care approaches. This digital transformation has made patient data management more efficient and enhanced the ability to diagnose illnesses in patients.
+Being able to adapt quickly and learn new skills is crucial in today's job market. Given the rapid pace of change, adaptability and a willingness to learn are key to success. Individuals who excel in continuously acquiring new skills often do well in professions where this adaptability is essential. For instance, imagine a marketing professional moving from traditional advertising methods to effectively using digital marketing strategies in response to changing consumer behaviors and market trends. This change allows for better customer engagement and business success in a rapidly changing environment.
+Alongside technical skills, soft skills such as effective communication, problem-solving, and teamwork are crucial in the contemporary workforce. Employers highly value individuals who demonstrate strong collaborative skills and problem-solving abilities, essential for teamwork and problem-solving situations in today's workplaces. Effective communication ensures a smooth working environment and boosts innovation and productivity.
+However, despite many opportunities, the job market also presents significant challenges. Technological advancements often mean traditional job roles are no longer needed, demanding the acquisition of new skills. Individuals in manufacturing, for instance, might need to learn to operate advanced machinery due to industry transformations. Similarly, the retail sector's shift towards e-commerce demands professionals to learn digital retailing skills to stay relevant.
+Furthermore, accessibility and affordability of quality education and skill development programs present significant challenges. Financial limitations often prevent individuals from gaining new skills necessary for better job prospects. Collaborative efforts among government bodies, educational institutions, and businesses are crucial to ensure equal access to skill-building opportunities.
+Let's consider "GulfTech Innovations," an imaginative technology company in Oman that uses 21st-century skills within its operational framework. Employees at GulfTech are empowered to take part in cross-disciplinary projects where creative thinking and problem-solving abilities are at the forefront. For instance, their software development team does not just focus on coding; they actively participate in design thinking workshops, allowing them to think critically and innovate while developing user-friendly software solutions for local industries. This collaborative approach creates a culture of continuous learning and adaptability, positioning GulfTech as an innovative leader in Oman's tech industry. Their commitment to developing these skills is evident in how they utilize modern technology to address local market demands, while constantly adapting to changing trends and needs.
+In conclusion, today's job market presents diverse opportunities and complex challenges. Succeeding in this environment requires technical proficiency, adaptability, and strong soft skills. Continuous learning and adaptability are essential for success in today's multifaceted job market. Committing to lifelong learning and adapting to changing job requirements are essential for career success.`,
+    },
+  },
+  {
+    id: 'lanc1070-p2-monopoly',
+    title: 'Advantages and Disadvantages of Monopoly',
+    description: 'Discuss the advantages and disadvantages of monopoly. Write a 4-paragraph synthesis essay based on the source text.',
+    cefrLevel: 'A2-B1',
+    expectedParagraphs: 4,
+    practiceType: 'mid-semester',
+    targetWordCount: { min: 300, max: 350, ideal: 325 },
+    sourceText: {
+      id: 'lanc1070-p2-source',
+      title: 'Monopoly: Advantages and Disadvantages',
+      content: `A monopoly is a market structure with only one seller of a particular good or service serving many buyers. One of the characteristics of a monopoly is that there is no competition because there is only one single seller in the market. The seller, for example, companies or businesses that control the prices of that particular product or service and dominate the market, is called a monopolist. Unlike in perfectly competitive markets, monopolists control market supply and prices. The monopolist is either a company with a pure monopoly (100%) or one with a monopolistic power (greater than 25%).
+There are multiple problems with monopolies. Monopolies are pricier. Because there is no competition, prices may rise. For instance, Microsoft commanded a high price for Microsoft Office throughout the 1980s when it controlled the market for PC software. As a result, consumers pay greater prices and have less available spending money. Besides, lack of competition may encourage organizational slackness and other forms of inefficiency. It is possible for a big firm to become inefficient because it is more difficult to coordinate and communicate in a big organization.
+In addition, monopolies frequently possess the authority to pay suppliers less. For instance, farmers have criticized the dominance of big supermarkets, which results in them receiving very little for their goods. A monopoly may also be able to control the wages that its employees get. Companies with monopolies hold power to control the whole market. As a result, they are unable to focus much on the internal welfare of their workforce. They might be persuaded to approach their staff with a low-wage offer.
+The undue political advantage is the next disadvantage of monopolies. Particularly with large IT giants that have such sway over society and people's choices, monopolies can amass political power and the capacity to reshape society in an undemocratic and unaccountable manner. Facebook, Google, and Twitter's influence on how information spreads through society is a rising source of worry. Large monopolists like Standard Oil developed a bad reputation in the late nineteenth century for abusing their power and driving competitors out of business.
+The most common attribute of a monopoly market is customer exploitation. There aren't any alternatives, which means that the consumer is treated unfairly in terms of availability, value, and cost. Since there are no competing products for the already existing market, the company may find it simple to produce inferior or substandard goods if it so chooses. After all, they are confident that the goods will be purchased.
+It's not all bad news, either. The merits of a monopoly are tremendous. Firstly, it is cheap to run. Since there are no near substitutes for the items in question because of their unique nature, the monopolist corporation can differentiate its products without incurring significant marketing and advertising expenses. Furthermore, a single firm can reduce its long-term average expenses in a sector with high fixed costs using economies of scale. For instance, it would be absurd to have numerous small businesses delivering tap water because they would be duplicating infrastructure and financial resources. Having a large-scale infrastructure makes it more effective to have just one firm. Indeed, some services are effectively and efficiently provided by monopolies. It is best to monopolize some services, such as those that are sensitive or security-related, to protect any potentially sensitive information and to preserve its confidentiality.
+Additionally, monopoly-holding companies may be the most effective and dynamic. By outperforming their competitors, businesses might acquire monopoly power. For instance, Google has a monopoly on search engines, yet can we conclude that Google is a wasteful company that doesn't try to innovate? It has made significant investments in emerging technologies.
+While monopolies can potentially provide improved quality and innovative products, as well as lower costs, it all depends on the choices that they make. They may instead exploit customers with higher prices and falling quantity, along with a limited choice of products.`,
+    },
+  },
+  {
+    id: 'lanc1070-p3-marketing',
+    title: 'Traditional and Digital Marketing Strategies',
+    description: 'Discuss traditional and digital marketing strategies. Write a 4-paragraph synthesis essay based on the source text.',
+    cefrLevel: 'A2-B1',
+    expectedParagraphs: 4,
+    practiceType: 'mid-semester',
+    targetWordCount: { min: 300, max: 350, ideal: 325 },
+    sourceText: {
+      id: 'lanc1070-p3-source',
+      title: 'Marketing Strategies: Traditional and Digital',
+      content: `Marketing refers to the activities a company undertakes to promote the buying or selling of its products or services. Marketing includes advertising and allows businesses to sell products and services to consumers, other businesses, and organizations.
+Professionals who work in a corporation's marketing and promotion departments seek to get the attention of key potential audiences through advertising. Promotions are targeted to certain audiences and may involve celebrity endorsements, catchy phrases or slogans, memorable packaging or graphic designs, and overall media exposure. At its most basic level, marketing seeks to match a company's products and services to customers who want access to those products. Matching products to customers ultimately ensures profitability.
+Types of Marketing Strategies
+Marketing is comprised of an incredibly broad and diverse set of strategies. Though traditional marketing is still prevalent, digital marketing now allows companies to engage in newsletter, social media and content marketing strategies.
+Before technology and the Internet revolutionized marketing practices, traditional marketing was the cornerstone of companies' efforts to reach consumers. This encompassed a diverse array of strategies tailored to engage different audiences. Outdoor marketing utilized public displays such as billboards, bench advertisements, vehicle wraps, and transit ads to capture attention in high-traffic areas. Print marketing, characterized by easily replicable materials, was often mass-produced with standardized content, though advancements in printing technology now offer greater flexibility. Direct marketing involved personalized content delivery through mail or distribution of coupons, vouchers, and pamphlets, aiming to establish direct communication with potential customers. Electronic marketing leveraged television and radio to deliver concise digital content, exploiting visual and auditory media to captivate audiences effectively. Event marketing aimed to gather prospective customers in specific locations for product demonstrations or discussions, leveraging conferences, trade shows, seminars, roadshows, and private events as platforms for engagement.
+However, nowadays, the introduction of digital marketing has revolutionized the marketing industry, offering innovative ways for companies to connect with customers. Search Engine Marketing involves increasing search traffic through paid placements on result pages or emphasizing search engine optimization (SEO) techniques for organic visibility. E-mail Marketing relies on distributing messages or newsletters to customer email addresses, offering coupons, discounts, or advance sale notices. Social Media Marketing focuses on building an online presence on platforms through paid advertisements or organic growth strategies like posting content and interacting with followers. Content Marketing involves creating free content such as eBooks, infographics, or videos to share information about products, gather customer data, and foster long-term engagement with the company.`,
+    },
+  },
+];
+
 export interface AssessmentRecord {
   id: string;
   assessment: Assessment;
@@ -226,6 +311,8 @@ interface AppState {
   setSelectedExamType: (examType: ExamType) => void;
   selectedWritingType: WritingType;
   setSelectedWritingType: (writingType: WritingType) => void;
+  selectedPracticeType: PracticeType;
+  setSelectedPracticeType: (practiceType: PracticeType) => void;
   selectedSourceTextId: string | null;
   setSelectedSourceTextId: (sourceTextId: string | null) => void;
   
@@ -280,6 +367,13 @@ const defaultCourses: Course[] = [
     description: 'Foundation year English course focusing on basic writing skills.'
   },
   {
+    id: 'course-lanc1070',
+    code: 'LANC1070',
+    name: 'Academic English: Essay Writing (LANC1070)',
+    program: 'post-foundation',
+    description: 'Post-foundation course focusing on 4-paragraph academic essay writing with integrated skills.'
+  },
+  {
     id: 'course-lanc2160',
     code: 'LANC2160',
     name: 'Academic English: Summary Writing & Synthesis Essay',
@@ -306,11 +400,13 @@ export const useAppStore = create<AppState>()(
       // Course selection
       selectedCourse: null,
       courses: defaultCourses,
-      setSelectedCourse: (course) => set({ selectedCourse: course, selectedExamType: null, selectedWritingType: null, selectedSourceTextId: null }),
+      setSelectedCourse: (course) => set({ selectedCourse: course, selectedExamType: null, selectedWritingType: null, selectedPracticeType: null, selectedSourceTextId: null }),
       selectedExamType: null,
       setSelectedExamType: (examType) => set({ selectedExamType: examType }),
       selectedWritingType: null,
       setSelectedWritingType: (writingType) => set({ selectedWritingType: writingType }),
+      selectedPracticeType: null as PracticeType,
+      setSelectedPracticeType: (practiceType) => set({ selectedPracticeType: practiceType, selectedSourceTextId: null }),
       selectedSourceTextId: null as string | null,
       setSelectedSourceTextId: (sourceTextId: string | null) => set({ selectedSourceTextId: sourceTextId }),
       
@@ -373,6 +469,7 @@ export const useAppStore = create<AppState>()(
         theme: state.theme,
         selectedCourse: state.selectedCourse,
         selectedWritingType: state.selectedWritingType,
+        selectedPracticeType: state.selectedPracticeType,
         selectedSourceTextId: state.selectedSourceTextId,
         essays: state.essays.slice(0, 10), // Keep last 10 essays
         records: state.records, // Keep all records

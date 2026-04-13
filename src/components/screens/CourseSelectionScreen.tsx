@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useAppStore, type Course, SUMMARY_SOURCE_TEXTS, SYNTHESIS_ASSIGNMENTS } from '@/lib/store';
+import { useAppStore, type Course, SUMMARY_SOURCE_TEXTS, SYNTHESIS_ASSIGNMENTS, LANC1070_PRACTICE_TESTS } from '@/lib/store';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
@@ -17,12 +17,13 @@ import {
   FileText,
   Award,
   ClipboardList,
+  PenTool,
 } from 'lucide-react';
 import { PageTransition } from '@/lib/animations';
 
 // Course Selection Screen
 const CourseSelectionScreen = ({ onSelect, onBack }: { onSelect: () => void; onBack: () => void }) => {
-  const { courses, selectedCourse, setSelectedCourse, selectedExamType, setSelectedExamType, selectedWritingType, setSelectedWritingType, selectedSourceTextId, setSelectedSourceTextId } = useAppStore();
+  const { courses, selectedCourse, setSelectedCourse, selectedExamType, setSelectedExamType, selectedWritingType, setSelectedWritingType, selectedPracticeType, setSelectedPracticeType, selectedSourceTextId, setSelectedSourceTextId } = useAppStore();
   const [activeTab, setActiveTab] = useState<'foundation' | 'credit'>('foundation');
 
   // Whether the currently selected course requires an exam-type choice
@@ -33,8 +34,23 @@ const CourseSelectionScreen = ({ onSelect, onBack }: { onSelect: () => void; onB
   const needsSourceText = needsWritingType && selectedWritingType === 'summary';
   const needsSynthesisAssignment = needsWritingType && selectedWritingType === 'synthesis';
 
+  // Whether the currently selected course requires a practice-type choice (LANC1070)
+  const needsPracticeType = selectedCourse?.code === 'LANC1070';
+  const needsPracticeTest = needsPracticeType && !!selectedPracticeType;
+
+  // Filter practice tests by selected practice type
+  const filteredPracticeTests = needsPracticeType && selectedPracticeType
+    ? LANC1070_PRACTICE_TESTS.filter(t => t.practiceType === selectedPracticeType)
+    : [];
+
   // Whether the Continue button should be enabled
-  const canContinue = selectedCourse && (!needsExamType || selectedExamType) && (!needsWritingType || selectedWritingType) && (!needsSourceText || selectedSourceTextId) && (!needsSynthesisAssignment || selectedSourceTextId);
+  const canContinue = selectedCourse
+    && (!needsExamType || selectedExamType)
+    && (!needsWritingType || selectedWritingType)
+    && (!needsSourceText || selectedSourceTextId)
+    && (!needsSynthesisAssignment || selectedSourceTextId)
+    && (!needsPracticeType || selectedPracticeType)
+    && (!needsPracticeTest || selectedSourceTextId);
 
   const filteredCourses = courses.filter((course) => {
     if (activeTab === 'credit') return course.program === 'post-foundation';
@@ -44,6 +60,35 @@ const CourseSelectionScreen = ({ onSelect, onBack }: { onSelect: () => void; onB
   const handleSelectCourse = (course: Course) => {
     setSelectedCourse(course);
   };
+
+  // Build the second line text for the green button
+  const getButtonSubtitle = () => {
+    if (needsExamType && selectedExamType) {
+      return selectedExamType === 'mid-semester' ? 'Mid-semester' : 'Final';
+    }
+    if (needsWritingType && selectedWritingType) {
+      if (selectedWritingType === 'summary' && needsSourceText && selectedSourceTextId) {
+        const src = SUMMARY_SOURCE_TEXTS.find(s => s.id === selectedSourceTextId);
+        return `Summary: ${src?.title.split('—')[0].trim() || ''}`;
+      }
+      if (selectedWritingType === 'synthesis' && needsSynthesisAssignment && selectedSourceTextId) {
+        const asn = SYNTHESIS_ASSIGNMENTS.find(a => a.id === selectedSourceTextId);
+        return `Synthesis: ${asn?.title || ''}`;
+      }
+      return selectedWritingType === 'summary' ? 'Summary Writing' : 'Synthesis Essay';
+    }
+    if (needsPracticeType && selectedPracticeType) {
+      const label = selectedPracticeType === 'mid-semester' ? 'Mid-Semester' : 'Final';
+      if (needsPracticeTest && selectedSourceTextId) {
+        const test = LANC1070_PRACTICE_TESTS.find(t => t.id === selectedSourceTextId);
+        return `${label}: ${test?.title || ''}`;
+      }
+      return `${label} Practice Test`;
+    }
+    return null;
+  };
+
+  const buttonSubtitle = getButtonSubtitle();
 
   return (
     <PageTransition>
@@ -232,6 +277,49 @@ const CourseSelectionScreen = ({ onSelect, onBack }: { onSelect: () => void; onB
             )}
           </AnimatePresence>
 
+          {/* Practice-Type Selection for LANC1070 */}
+          <AnimatePresence>
+            {needsPracticeType && (
+              <motion.div
+                initial={{ opacity: 0, y: 15, height: 0 }}
+                animate={{ opacity: 1, y: 0, height: 'auto' }}
+                exit={{ opacity: 0, y: -10, height: 0 }}
+                transition={{ duration: 0.3 }}
+                className="overflow-hidden"
+              >
+                <div className="px-4 pt-1 pb-2 space-y-2">
+                  <p className="text-sm font-medium text-muted-foreground px-1">
+                    Select practice test type:
+                  </p>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => setSelectedPracticeType('mid-semester')}
+                      className={`flex-1 flex flex-col items-center justify-center gap-1.5 rounded-xl border-2 px-4 py-4 text-sm font-medium transition-all duration-200 ios-press ${
+                        selectedPracticeType === 'mid-semester'
+                          ? 'border-[#c9a227] bg-[#c9a227]/10 text-[#c9a227]'
+                          : 'border-muted-foreground/20 bg-white hover:border-muted-foreground/40 text-muted-foreground'
+                      }`}
+                    >
+                      <FileText className="w-5 h-5" />
+                      <span>Mid-Semester Practice</span>
+                    </button>
+                    <button
+                      onClick={() => setSelectedPracticeType('final')}
+                      className={`flex-1 flex flex-col items-center justify-center gap-1.5 rounded-xl border-2 px-4 py-4 text-sm font-medium transition-all duration-200 ios-press ${
+                        selectedPracticeType === 'final'
+                          ? 'border-[#c9a227] bg-[#c9a227]/10 text-[#c9a227]'
+                          : 'border-muted-foreground/20 bg-white hover:border-muted-foreground/40 text-muted-foreground'
+                      }`}
+                    >
+                      <Award className="w-5 h-5" />
+                      <span>Final Practice</span>
+                    </button>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
           {/* Source Text Selection for Summary Writing */}
           <AnimatePresence>
             {needsSourceText && (
@@ -290,6 +378,7 @@ const CourseSelectionScreen = ({ onSelect, onBack }: { onSelect: () => void; onB
               </motion.div>
             )}
           </AnimatePresence>
+
           {/* Synthesis Assignment Selection for Synthesis Essay */}
           <AnimatePresence>
             {needsSynthesisAssignment && (
@@ -351,6 +440,71 @@ const CourseSelectionScreen = ({ onSelect, onBack }: { onSelect: () => void; onB
               </motion.div>
             )}
           </AnimatePresence>
+
+          {/* Practice Test Selection for LANC1070 */}
+          <AnimatePresence>
+            {needsPracticeTest && (
+              <motion.div
+                initial={{ opacity: 0, y: 15, height: 0 }}
+                animate={{ opacity: 1, y: 0, height: 'auto' }}
+                exit={{ opacity: 0, y: -10, height: 0 }}
+                transition={{ duration: 0.3 }}
+                className="overflow-hidden"
+              >
+                <div className="px-4 pt-1 pb-2 space-y-2">
+                  <p className="text-sm font-medium text-muted-foreground px-1">
+                    Select practice test:
+                  </p>
+                  {filteredPracticeTests.length > 0 ? (
+                    <div className="space-y-2">
+                      {filteredPracticeTests.map((test) => {
+                        const isSelected = selectedSourceTextId === test.id;
+                        return (
+                          <motion.div
+                            key={test.id}
+                            whileTap={{ scale: 0.98 }}
+                          >
+                            <button
+                              onClick={() => setSelectedSourceTextId(test.id)}
+                              className={`w-full text-left p-4 rounded-xl border-2 transition-all duration-200 ${
+                                isSelected
+                                  ? 'border-[#c9a227] bg-[#c9a227]/5'
+                                  : 'border-muted-foreground/20 bg-white hover:border-[#c9a227]/30'
+                              }`}
+                            >
+                              <div className="flex items-start gap-3">
+                                <div className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${
+                                  isSelected
+                                    ? 'bg-[#c9a227] text-white'
+                                    : 'bg-muted text-muted-foreground'
+                                }`}>
+                                  <PenTool className="w-5 h-5" />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <p className={`text-sm font-semibold leading-tight ${
+                                    isSelected ? 'text-[#c9a227]' : 'text-foreground'
+                                  }`}>
+                                    {test.title}
+                                  </p>
+                                  <p className="text-xs text-muted-foreground mt-0.5">
+                                    {test.targetWordCount.min}&ndash;{test.targetWordCount.max} words &middot; {test.expectedParagraphs} paragraphs expected
+                                  </p>
+                                </div>
+                              </div>
+                            </button>
+                          </motion.div>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <div className="text-center py-6 text-muted-foreground text-sm">
+                      No practice tests available yet.
+                    </div>
+                  )}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </ScrollArea>
 
         {/* Footer */}
@@ -360,15 +514,15 @@ const CourseSelectionScreen = ({ onSelect, onBack }: { onSelect: () => void; onB
             disabled={!canContinue}
             className="w-full h-12 bg-[#1a5f2a] hover:bg-[#1a5f2a]/90 rounded-xl ios-press"
           >
-            <span className="flex flex-col items-center text-center leading-tight">
+            <span className="flex flex-col items-center justify-center flex-1 min-w-0 gap-0.5">
               <span>Continue with {selectedCourse?.code || 'Course'}</span>
-              {(needsExamType && selectedExamType) || (needsWritingType && selectedWritingType) ? (
-                <span className="text-sm font-normal opacity-80">
-                  {needsExamType && selectedExamType ? (selectedExamType === 'mid-semester' ? 'Mid-semester' : 'Final') : ''}{needsWritingType && selectedWritingType ? `${needsExamType && selectedExamType ? ' · ' : ''}${selectedWritingType === 'summary' ? 'Summary' : 'Synthesis Essay'}${needsSourceText && selectedSourceTextId ? `: ${SUMMARY_SOURCE_TEXTS.find(s => s.id === selectedSourceTextId)?.title.split('—')[0].trim() || ''}` : ''}${needsSynthesisAssignment && selectedSourceTextId ? `: ${SYNTHESIS_ASSIGNMENTS.find(a => a.id === selectedSourceTextId)?.title || ''}` : ''}` : ''}
+              {buttonSubtitle && (
+                <span className="text-xs font-normal opacity-80 truncate max-w-full">
+                  {buttonSubtitle}
                 </span>
-              ) : null}
+              )}
             </span>
-            <ChevronRight className="w-4 h-4 ml-auto flex-shrink-0" />
+            <ChevronRight className="w-4 h-4 ml-2 flex-shrink-0" />
           </Button>
         </div>
       </div>
