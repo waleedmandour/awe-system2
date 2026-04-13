@@ -225,7 +225,7 @@ export const LANC1070_PRACTICE_TESTS: PracticeTest[] = [
     description: 'Discuss the opportunities and challenges facing today\'s job market in terms of utilization of 21st century skills. Write a 4-paragraph synthesis essay based on the source text.',
     cefrLevel: 'A2-B1',
     expectedParagraphs: 4,
-    practiceType: 'mid-semester',
+    practiceType: 'final',
     targetWordCount: { min: 300, max: 350, ideal: 325 },
     sourceText: {
       id: 'lanc1070-p1-source',
@@ -246,7 +246,7 @@ In conclusion, today's job market presents diverse opportunities and complex cha
     description: 'Discuss the advantages and disadvantages of monopoly. Write a 4-paragraph synthesis essay based on the source text.',
     cefrLevel: 'A2-B1',
     expectedParagraphs: 4,
-    practiceType: 'mid-semester',
+    practiceType: 'final',
     targetWordCount: { min: 300, max: 350, ideal: 325 },
     sourceText: {
       id: 'lanc1070-p2-source',
@@ -267,7 +267,7 @@ While monopolies can potentially provide improved quality and innovative product
     description: 'Discuss traditional and digital marketing strategies. Write a 4-paragraph synthesis essay based on the source text.',
     cefrLevel: 'A2-B1',
     expectedParagraphs: 4,
-    practiceType: 'mid-semester',
+    practiceType: 'final',
     targetWordCount: { min: 300, max: 350, ideal: 325 },
     sourceText: {
       id: 'lanc1070-p3-source',
