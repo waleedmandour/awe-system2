@@ -70,7 +70,9 @@ const BottomNav = ({ currentStep, onNavigate }: { currentStep: string; onNavigat
 
   // Show nav immediately when step changes
   useEffect(() => {
-    setIsVisible(true);
+    // Re-show nav on step change; this intentional setState-in-effect
+    // is acceptable since it's a one-shot UI reset, not cascading state.
+    setIsVisible(true); // eslint-disable-line react-hooks/set-state-in-effect
   }, [currentStep]);
 
   const navItems = [
