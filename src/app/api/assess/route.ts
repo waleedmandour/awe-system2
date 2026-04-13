@@ -174,6 +174,92 @@ const SUMMARY_RUBRICS = {
   ],
 };
 
+// Synthesis Essay criteria for LANC2160 (A2-B1 level, 0-5 per criterion)
+const SYNTHESIS_CRITERIA = [
+  {
+    name: 'Task Achievement',
+    maxScore: 5,
+    description: 'How effectively the synthesis essay fulfils the task requirements, synthesizes information from all source texts, and stays within the word count.',
+  },
+  {
+    name: 'Coherence and Cohesion',
+    maxScore: 5,
+    description: 'How logically the synthesis essay is organized, how well ideas are linked, and how effectively information flows.',
+  },
+  {
+    name: 'Lexical Resource',
+    maxScore: 5,
+    description: 'The range and accuracy of vocabulary, including paraphrasing ability and appropriate word choice.',
+  },
+  {
+    name: 'Grammatical Range and Accuracy',
+    maxScore: 5,
+    description: 'The range and accuracy of grammatical structures, sentence variety, and punctuation.',
+  },
+];
+
+// Detailed rubric band descriptors for Synthesis Essay (A2-B1 level, TWO-POINT ESSAY WRITING MARKING CRITERIA)
+const SYNTHESIS_RUBRICS = {
+  criteria: [
+    {
+      name: 'Task Achievement',
+      maxScore: 5,
+      rubric: {
+        '0-1.5': 'Poor: Text fails to fulfil any task requirements. 10% or more higher or lower than word count.',
+        '2': 'Unsatisfactory: Response does not adequately fulfil task requirements. Most details are unimportant. 10% or more higher or lower than word count.',
+        '2.5': 'Unsatisfactory: Response does not adequately fulfil task requirements. Most details are unimportant. 10% or more higher or lower than word count.',
+        '3': 'Satisfactory: Response adequately fulfils specific task requirements. Most main ideas present. Meaning is generally accurate, and some unimportant details may be included. Up to 10% higher or lower than word count.',
+        '3.5': 'Satisfactory: Response adequately fulfils specific task requirements. Most main ideas present. Meaning is generally accurate, and some unimportant details may be included. Up to 10% higher or lower than word count.',
+        '4': 'Good: Response fulfils all specific task requirements but a little more could be expected. Main ideas present. Meaning is mostly accurate, and most details included are relevant. Stays within word count.',
+        '4.5': 'Good: Response fulfils all specific task requirements but a little more could be expected. Main ideas present. Meaning is mostly accurate, and most details included are relevant. Stays within word count.',
+        '5': 'Excellent: Response fulfils all specific task requirements and exceeds expectations. All main ideas present. Meaning is accurate, and all details included are relevant. Stays within word count.',
+      }
+    },
+    {
+      name: 'Coherence and Cohesion',
+      maxScore: 5,
+      rubric: {
+        '0-1.5': 'Poor: Text lacks organization and coherence. The text is largely confused and incoherent, making it challenging for the reader to process.',
+        '2': 'Unsatisfactory: Organization and coherence are limited. Some re-reading may be necessary. Most cohesive devices are simple and may be used inaccurately and mechanically in most places.',
+        '2.5': 'Unsatisfactory: Organization and coherence are limited. Some re-reading may be necessary. Most cohesive devices are simple and may be used inaccurately and mechanically in most places.',
+        '3': 'Satisfactory: Organization and coherence are often adequate, but supporting ideas may be limited. Text may be stilted in places. Cohesive devices attempted are sometimes inaccurate and repetitive and may be over or under used.',
+        '3.5': 'Satisfactory: Organization and coherence are often adequate, but supporting ideas may be limited. Text may be stilted in places. Cohesive devices attempted are sometimes inaccurate and repetitive and may be over or under used.',
+        '4': 'Good: Organization of information and ideas makes text clear and easy to understand. Cohesive devices attempted are almost always used accurately and appropriately both within and/or between sentences.',
+        '4.5': 'Good: Organization of information and ideas makes text clear and easy to understand. Cohesive devices attempted are almost always used accurately and appropriately both within and/or between sentences.',
+        '5': 'Excellent: Organization of information and ideas is effective and there is a logical flow throughout. A good range of cohesive devices are used accurately and appropriately.',
+      }
+    },
+    {
+      name: 'Lexical Resource',
+      maxScore: 5,
+      rubric: {
+        '0-1.5': 'Poor: Paraphrasing is largely absent. Poor word choice, word form, and spelling prevent communication of ideas.',
+        '2': 'Unsatisfactory: Very little attempt at paraphrasing: more than 15% of the product is directly copied. Inadequate range of vocabulary. Errors in word choice, word form, and spelling predominate and affect communication.',
+        '2.5': 'Unsatisfactory: Very little attempt at paraphrasing: more than 15% of the product is directly copied. Inadequate range of vocabulary. Errors in word choice, word form, and spelling predominate and affect communication.',
+        '3': 'Satisfactory: Generally paraphrased; there may be some copying, but it is less than 15%. Limited but adequate range of vocabulary. Errors in word choice and spelling sometimes affect communication.',
+        '3.5': 'Satisfactory: Generally paraphrased; there may be some copying, but it is less than 15%. Limited but adequate range of vocabulary. Errors in word choice and spelling sometimes affect communication.',
+        '4': 'Good: Well paraphrased with very little copying. Good range of vocabulary. Spelling is mostly correct.',
+        '4.5': 'Good: Well paraphrased with very little copying. Good range of vocabulary. Spelling is mostly correct.',
+        '5': 'Excellent: Completely and accurately paraphrased. Wider range of vocabulary than is expected for the level. Spelling is accurate.',
+      }
+    },
+    {
+      name: 'Grammatical Range and Accuracy',
+      maxScore: 5,
+      rubric: {
+        '0-1.5': 'Poor: Structures are inaccurate and errors predominate, preventing meaningful communication. Punctuation may be inadequate and/or inaccurate.',
+        '2': 'Unsatisfactory: Structures are very limited and inadequate for the level and task. Grammatical errors are noticeable and may often affect communication. Punctuation may be inadequate and/or inaccurate.',
+        '2.5': 'Unsatisfactory: Structures are very limited and inadequate for the level and task. Grammatical errors are noticeable and may often affect communication. Punctuation may be inadequate and/or inaccurate.',
+        '3': 'Satisfactory: Structures are sometimes limited but are adequate for the level and task. Grammatical errors may affect communication in places. Punctuation is generally correct and effective.',
+        '3.5': 'Satisfactory: Structures are sometimes limited but are adequate for the level and task. Grammatical errors may affect communication in places. Punctuation is generally correct and effective.',
+        '4': 'Good: Text has a good range of structures for the level and task. There may be some inaccuracy but communication is not affected. Punctuation is well managed and effective.',
+        '4.5': 'Good: Text has a good range of structures for the level and task. There may be some inaccuracy but communication is not affected. Punctuation is well managed and effective.',
+        '5': 'Excellent: Wider range of structures than is expected for the level is used. Most sentences are error-free. Punctuation is well managed and effective.',
+      }
+    },
+  ],
+};
+
 // Build detailed rubric prompt for Foundation courses
 function buildFoundationPrompt(text: string, topic: string | null, wordCount: number, targetWordCount: { min: number; max: number; ideal: number; label?: string }): string {
   const rubrics = FOUNDATION_RUBRICS;
@@ -489,6 +575,216 @@ JSON OUTPUT FORMAT:
 }`;
 }
 
+// Synthesis assignments data (defined here to avoid import issues with @/lib/store in server-side route)
+interface SynthesisAssignmentData {
+  id: string;
+  title: string;
+  description: string;
+  cefrLevel: string;
+  expectedParagraphs: number;
+  sources: {
+    id: string;
+    title: string;
+    content: string;
+  }[];
+  targetWordCount: {
+    min: number;
+    max: number;
+    ideal: number;
+  };
+}
+
+const SYNTHESIS_ASSIGNMENTS: SynthesisAssignmentData[] = [
+  {
+    id: 'nitrates-poisoning',
+    title: 'Two Common Sources of Poisoning Nitrates',
+    description: 'Write a synthesis essay (4 paragraphs) based on three source texts about nitrates and their effects on human health. Synthesize information from all three sources to explain two common sources of nitrate poisoning: contaminated well water and contaminated vegetables.',
+    cefrLevel: 'A2-B1',
+    expectedParagraphs: 4,
+    targetWordCount: {
+      min: 200,
+      max: 300,
+      ideal: 250,
+    },
+    sources: [
+      {
+        id: 'source-1-nitrates',
+        title: 'What are Nitrates?',
+        content: `Nitrates (NO3) are chemical compounds made from nitrogen (N) and oxygen (O). The primary toxic effects of the inorganic nitrate ion (NO3) result from its reduction to nitrite (NO2) by microorganisms in the upper digestive tract. The gastrointestinal tract of adults can process this chemical and it naturally passes out of the body through urine, but it can cause a dangerous blood condition in children. High levels of nitrate in food or drinking water are known to be dangerous to babies in the first three months of life, and may result in the so-called "blue baby syndrome". The chemical causes the blood to carry less oxygen, and the infant may suffocate. Other symptoms of nitrite toxicity in children and adults can include difficulty in breathing, dizziness, headaches, nausea, and vomiting. In older children and adults, there is also a risk of cancer because nitrites are unstable and can combine readily with other compound to form nitrosamines, which can cause cancer.`,
+      },
+      {
+        id: 'source-2-well-water',
+        title: 'Well Water May Be a Common Source of Nitrate Poisoning',
+        content: `A recent study in the U.S. has said that families using water from wells in agricultural areas should have their water tested regularly to check nitrate levels. The U.S. Safe Drinking Water Act of 1974 established that the maximum safe concentration of nitrates in drinking water is 10 mg/l. Yet some wells tested during the study showed levels that were considerably above that limit. Nitrites can build up in groundwater as a result of the excessive use on farms of nitrogen-based fertilizers such as potassium nitrate and ammonium nitrate. These chemicals often seep into well water and accumulate there. If wells are found to have nitrate levels that are above the safe limit, it is not advisable to use that water for drinking.`,
+      },
+      {
+        id: 'source-3-vegetables',
+        title: 'Increased Nitrate Levels Found in Vegetables',
+        content: `Nitrates are the main form in which the essential plant nutrient, nitrogen, is absorbed naturally by plants from the soil. When fertilizers are added to the soil, the plants can use the nitrates directly and this increases plant growth. Most of the excess nitrates in the environment originate from the chemical fertilizers that are manufactured for agriculture. Unfortunately, in their search for greater profits, farmers often overuse nitrate-based chemical fertilizers to improve crop yields. Vegetables become contaminated with nitrates when crops take up more than they can use for growth. As a consequence, nitrate levels in carrots, lettuce, and spinach, for example, have roughly doubled since the 1970s in the US.`,
+      },
+    ],
+  },
+];
+
+// Build prompt for Synthesis Essay (LANC2160)
+function buildSynthesisPrompt(
+  studentText: string,
+  sources: { title: string; content: string }[],
+  assignmentTitle: string,
+  wordCount: number,
+  targetWordCount: { min: number; max: number; ideal: number }
+): string {
+  const rubrics = SYNTHESIS_RUBRICS;
+  const totalMaxScore = SYNTHESIS_CRITERIA.reduce((sum, c) => sum + c.maxScore, 0); // 20
+
+  const tenPercentBelow = Math.round(targetWordCount.min * 0.9);
+  const tenPercentAbove = Math.round(targetWordCount.max * 1.1);
+
+  const wordCountStatus = wordCount < tenPercentBelow
+    ? `WARNING: Word count (${wordCount}) is MORE THAN 10% BELOW the required minimum of ${targetWordCount.min} words. This MUST lower the Task Achievement score per the rubric.`
+    : wordCount < targetWordCount.min
+    ? `NOTE: Word count (${wordCount}) is below the required range of ${targetWordCount.min}-${targetWordCount.max} words. Up to 10% below is acceptable for the Satisfactory band.`
+    : wordCount > tenPercentAbove
+    ? `WARNING: Word count (${wordCount}) is MORE THAN 10% ABOVE the required maximum of ${targetWordCount.max} words. This MUST lower the Task Achievement score per the rubric.`
+    : wordCount > targetWordCount.max
+    ? `NOTE: Word count (${wordCount}) exceeds the recommended range of ${targetWordCount.min}-${targetWordCount.max} words. Up to 10% above is acceptable for the Satisfactory band.`
+    : `Word count (${wordCount}) is within the acceptable range of ${targetWordCount.min}-${targetWordCount.max} words.`;
+
+  const criteriaDetails = rubrics.criteria.map(c => {
+    const rubricLevels = Object.entries(c.rubric)
+      .map(([score, desc]) => `  Score ${score}: ${desc}`)
+      .join('\n');
+    return `${c.name} (0-${c.maxScore}):\n${rubricLevels}`;
+  }).join('\n\n');
+
+  const sourceTextsBlock = sources.map((s, i) => {
+    const wordCountOfSource = s.content.trim().split(/\s+/).filter(Boolean).length;
+    return `SOURCE TEXT ${i + 1}:
+Title: "${s.title}" (${wordCountOfSource} words)
+"""
+${s.content}
+"""`;
+  }).join('\n\n');
+
+  return `You are an expert writing assessor evaluating a Credit level student's synthesis essay for Sultan Qaboos University's Center for Preparatory Studies, course LANC2160 (Academic English: Summary Writing & Synthesis Essay).
+
+STUDENT LEVEL: CEFR A2-B1 (Elementary to Pre-Intermediate). Feedback must use simple, clear language that A2-B1 learners can understand. Be encouraging while maintaining appropriate academic standards. Avoid overly technical linguistic terminology.
+
+TASK: The student was asked to read ALL THREE source texts below and write a 4-paragraph synthesis essay (200-300 words) that synthesizes information from all three sources to explain two common sources of nitrate poisoning.
+
+ASSIGNMENT: ${assignmentTitle}
+
+${sourceTextsBlock}
+
+STUDENT'S SYNTHESIS ESSAY:
+"""
+${studentText}
+"""
+
+${wordCountStatus}
+Target essay length: ${targetWordCount.min}-${targetWordCount.max} words (ideal: ${targetWordCount.ideal} words).
+
+SYNTHESIS ESSAY ASSESSMENT RUBRICS (LANC2160 — Two-Point Essay Writing Marking Criteria):
+
+${criteriaDetails}
+
+SYNTHESIS-SPECIFIC ASSESSMENT RULES:
+1. A synthesis essay must combine information from ALL THREE source texts — not just one or two. The student should demonstrate the ability to integrate ideas from multiple sources into a coherent whole.
+2. The essay should explain TWO COMMON SOURCES OF NITRATE POISONING: (a) contaminated well water and (b) contaminated vegetables. Both sources must be addressed.
+3. The essay should be exactly 4 paragraphs in structure (typically: introduction, body paragraph 1 on well water, body paragraph 2 on vegetables, and conclusion). If the student has written significantly more or fewer paragraphs, note this in the Coherence and Cohesion assessment.
+4. The student MUST use their OWN WORDS (paraphrasing). Direct copying of phrases or sentences from the source texts without paraphrasing is NOT acceptable and must lower the Task Achievement and Lexical Resource scores. Estimate the percentage of directly copied text.
+5. A synthesis essay should NOT include the student's personal opinions, arguments, or new information not present in the source texts.
+6. If the essay is off-topic (not about nitrates/poisoning), give Task Achievement = 0.
+7. If the student has simply copied large portions of any source text, this is NOT an acceptable synthesis — it should score low on Task Achievement and Lexical Resource regardless of how "accurate" the text is.
+8. Check word count: if the word count is 10% or more above or below the target range, this MUST lower the Task Achievement score according to the rubric bands.
+
+============================================================
+SCORING AND FEEDBACK INSTRUCTIONS (CRITICAL — FOLLOW EXACTLY):
+============================================================
+
+STEP 1 — SCORE each criterion using WHOLE or HALF numbers (0, 0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, or 5). Use 0.5 increments only — never use 0.25 or 0.75. If the essay's quality falls between two adjacent score bands, award a half-point (e.g., 3.5).
+
+STEP 2 — For EACH criterion, write a "Justification" paragraph that:
+  (a) Explicitly names the score band you chose (e.g. "Score 3.5 — between Satisfactory and Good")
+  (b) Quotes at least ONE specific phrase or sentence from the student's essay as evidence
+  (c) Explains why the essay fits that band descriptor — connect the evidence to the rubric
+  (d) If you awarded a half-point, explain which aspects place it in the lower band and which aspects place it in the higher band
+  (e) For Task Achievement: specifically address whether the student synthesized ALL THREE sources, covered BOTH common sources of nitrate poisoning, stayed within word count, and used own words
+  (f) If the score is below 3, clearly state what is missing compared to a higher score
+  (g) If the score is 4 or 5, explain what the student did beyond basic expectations
+
+STEP 3 — For each criterion, list SPECIFIC errors found in the text. Format each as:
+  - "[exact quoted text]" — explanation of the error and how to fix it
+
+STEP 4 — For each criterion, provide 1-2 concrete, achievable suggestions for improvement appropriate for an A2-B1 learner. For example: "Try using linking words like 'Furthermore' or 'In addition' to connect your ideas."
+
+STEP 5 — overallFeedback must be a comprehensive summary (4-6 sentences) that:
+  - Identifies which sources the student used and whether all three were synthesized
+  - Highlights the student's strongest criterion and what they did well
+  - Identifies the weakest area needing the most attention
+  - Comments on the paraphrasing quality (own words vs. copied text) and estimated copying percentage
+  - Gives one prioritized action item to focus on next
+
+STEP 6 — Calculate totalScore = sum of all criterion scores (max ${totalMaxScore}). Scores may include 0.5 increments (e.g., 3.5, 4.5). Calculate percentage = round(totalScore / ${totalMaxScore} * 100).
+
+============================================================
+CRITICAL OUTPUT RULES:
+- Respond with ONLY the raw JSON object. No markdown, no code fences, no commentary.
+- Do NOT wrap the JSON in triple-backtick code blocks.
+- Use straight double quotes, not smart/curly quotes.
+- Do NOT add trailing commas after the last item in arrays or objects.
+- All string values must have properly escaped quotes inside them.
+
+JSON OUTPUT FORMAT:
+============================================================
+{
+  "scores": [
+    {
+      "criterionName": "Task Achievement",
+      "score": 3.5,
+      "maxScore": 5,
+      "justification": "Score 3.5 — between Satisfactory and Good. The essay synthesizes information from all three sources, covering both well water and vegetables. For example, the student writes: \\"[exact quote]\\" which shows [specific rubric alignment]. The student paraphrased in most places. Word count is within the acceptable range.",
+      "strengths": "The student successfully integrates information from all three source texts and addresses both common sources of nitrate poisoning.",
+      "mistakes": [
+        "[exact quoted text]" — Explanation of the error and how to fix it
+      ],
+      "suggestions": "Try to ensure ALL main ideas from each source are represented. Remember to use your own words throughout."
+    },
+    {
+      "criterionName": "Coherence and Cohesion",
+      "score": 3,
+      "maxScore": 5,
+      "justification": "Score 3 — Satisfactory. [explanation with quoted evidence]",
+      "strengths": "[specific strengths]",
+      "mistakes": ["[exact quoted text]" — explanation],
+      "suggestions": "[1-2 improvement suggestions]"
+    },
+    {
+      "criterionName": "Lexical Resource",
+      "score": 3,
+      "maxScore": 5,
+      "justification": "Score 3 — Satisfactory. [explanation with quoted evidence]",
+      "strengths": "[specific strengths]",
+      "mistakes": ["[exact quoted text]" — explanation],
+      "suggestions": "[1-2 improvement suggestions]"
+    },
+    {
+      "criterionName": "Grammatical Range and Accuracy",
+      "score": 3.5,
+      "maxScore": 5,
+      "justification": "Score 3.5 — between Satisfactory and Good. [explanation with quoted evidence]",
+      "strengths": "[specific strengths]",
+      "mistakes": ["[exact quoted text]" — explanation],
+      "suggestions": "[1-2 improvement suggestions]"
+    }
+  ],
+  "totalScore": 13,
+  "maxScore": ${totalMaxScore},
+  "percentage": 65,
+  "overallFeedback": "Your synthesis essay draws on [X of 3] source texts to explain [which sources of nitrate poisoning]. Your strongest area is [criterion] where you [specific strength]. The area that needs the most improvement is [criterion] because [reason]. [Comment on paraphrasing/copied text percentage]. Focus on [one prioritized action] to improve your next essay."
+}`;
+}
+
 /**
  * Robustly extract a JSON object from LLM output that may be:
  *  - Wrapped in markdown code fences (```json ... ```)
@@ -705,6 +1001,7 @@ export async function POST(request: NextRequest) {
     // Determine course type and build appropriate prompt
     const isFoundation = ['0230', '0340'].includes(courseCode);
     const isSummaryWriting = courseCode === 'LANC2160' && writingType === 'summary';
+    const isSynthesisWriting = courseCode === 'LANC2160' && writingType === 'synthesis';
 
     // Resolve target word count based on exam type (for FP0340) or summary target
     let activeTargetWordCount: { min: number; max: number; ideal: number; label?: string } | null = null;
@@ -740,8 +1037,33 @@ export async function POST(request: NextRequest) {
       };
       prompt = buildSummaryPrompt(text, sourceTextData.originalText, sourceTextData.title, wordCount, activeTargetWordCount);
       criteria = SUMMARY_CRITERIA;
+    } else if (isSynthesisWriting) {
+      // Synthesis Essay for LANC2160 — look up assignment by sourceTextId
+      const assignmentData = SYNTHESIS_ASSIGNMENTS.find(a => a.id === sourceTextId);
+      
+      if (!assignmentData) {
+        return NextResponse.json(
+          { error: 'Synthesis assignment not found. Please select a valid assignment for synthesis essay writing.' },
+          { status: 400 }
+        );
+      }
+      
+      activeTargetWordCount = {
+        min: assignmentData.targetWordCount.min,
+        max: assignmentData.targetWordCount.max,
+        ideal: assignmentData.targetWordCount.ideal,
+        label: `Synthesis: "${assignmentData.title}"`
+      };
+      prompt = buildSynthesisPrompt(
+        text,
+        assignmentData.sources.map(s => ({ title: s.title, content: s.content })),
+        assignmentData.title,
+        wordCount,
+        activeTargetWordCount
+      );
+      criteria = SYNTHESIS_CRITERIA;
     } else {
-      // Credit/Post-foundation — Synthesis Essay or general
+      // Credit/Post-foundation — general
       activeTargetWordCount = null;
       prompt = buildCreditPrompt(text, topic, wordCount);
       criteria = CREDIT_CRITERIA;
@@ -753,6 +1075,8 @@ export async function POST(request: NextRequest) {
     // 2. Initialize Model with Strict Instructions
     const systemInstruction = isSummaryWriting
       ? 'You are an expert writing assessment AI for the Credit level course LANC2160 (Academic English: Summary Writing & Synthesis Essay) at Sultan Qaboos University. For summary writing tasks, students are at CEFR A2-B1 level. Your feedback must use simple, clear language appropriate for this proficiency level. CRITICAL: You MUST (1) compare the student summary against the provided source text, (2) quote exact words from the student summary as evidence, (3) explicitly justify why the score matches the rubric band, (4) list specific errors with quoted text, (5) assess paraphrasing quality, and (6) give actionable suggestions. You respond only with valid JSON. No markdown formatting or code blocks.'
+      : isSynthesisWriting
+      ? 'You are an expert writing assessment AI for the Credit level course LANC2160 (Academic English: Summary Writing & Synthesis Essay) at Sultan Qaboos University. For synthesis essay tasks, students are at CEFR A2-B1 level. Your feedback must use simple, clear language appropriate for this proficiency level. CRITICAL: You MUST (1) compare the student essay against ALL THREE provided source texts, (2) check that information from all sources is synthesized, (3) quote exact words from the student essay as evidence, (4) explicitly justify why the score matches the rubric band, (5) list specific errors with quoted text, (6) assess paraphrasing quality and estimate copying percentage, (7) check word count against the target range, and (8) give actionable suggestions. You respond only with valid JSON. No markdown formatting or code blocks.'
       : 'You are an expert writing assessment AI for Foundation and Credit level university courses at Sultan Qaboos University. All students are at CEFR A1-A2 level (Basic User). Your feedback must use simple, clear language appropriate for this proficiency level. Focus on fundamental skills and provide encouraging, constructive guidance. CRITICAL: For each criterion you MUST (1) quote exact words from the student essay as evidence, (2) explicitly justify why the score matches the rubric band, (3) list specific errors with quoted text, and (4) give actionable suggestions. You respond only with valid JSON. No markdown formatting or code blocks.';
 
     const model = genAI.getGenerativeModel({ 
@@ -1013,7 +1337,7 @@ export async function POST(request: NextRequest) {
 
     // Add word count info
     assessment.wordCount = wordCount;
-    assessment.targetWordCount = (isFoundation || isSummaryWriting) ? activeTargetWordCount : null;
+    assessment.targetWordCount = (isFoundation || isSummaryWriting || isSynthesisWriting) ? activeTargetWordCount : null;
 
     return NextResponse.json({
       success: true,

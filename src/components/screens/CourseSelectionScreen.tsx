@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useAppStore, type Course, SUMMARY_SOURCE_TEXTS } from '@/lib/store';
+import { useAppStore, type Course, SUMMARY_SOURCE_TEXTS, SYNTHESIS_ASSIGNMENTS } from '@/lib/store';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
@@ -31,9 +31,10 @@ const CourseSelectionScreen = ({ onSelect, onBack }: { onSelect: () => void; onB
   // Whether the currently selected course requires a writing-type choice
   const needsWritingType = selectedCourse?.code === 'LANC2160';
   const needsSourceText = needsWritingType && selectedWritingType === 'summary';
+  const needsSynthesisAssignment = needsWritingType && selectedWritingType === 'synthesis';
 
   // Whether the Continue button should be enabled
-  const canContinue = selectedCourse && (!needsExamType || selectedExamType) && (!needsWritingType || selectedWritingType) && (!needsSourceText || selectedSourceTextId);
+  const canContinue = selectedCourse && (!needsExamType || selectedExamType) && (!needsWritingType || selectedWritingType) && (!needsSourceText || selectedSourceTextId) && (!needsSynthesisAssignment || selectedSourceTextId);
 
   const filteredCourses = courses.filter((course) => {
     if (activeTab === 'credit') return course.program === 'post-foundation';
@@ -289,6 +290,67 @@ const CourseSelectionScreen = ({ onSelect, onBack }: { onSelect: () => void; onB
               </motion.div>
             )}
           </AnimatePresence>
+          {/* Synthesis Assignment Selection for Synthesis Essay */}
+          <AnimatePresence>
+            {needsSynthesisAssignment && (
+              <motion.div
+                initial={{ opacity: 0, y: 15, height: 0 }}
+                animate={{ opacity: 1, y: 0, height: 'auto' }}
+                exit={{ opacity: 0, y: -10, height: 0 }}
+                transition={{ duration: 0.3 }}
+                className="overflow-hidden"
+              >
+                <div className="px-4 pt-2 pb-4 space-y-2">
+                  <p className="text-sm font-medium text-muted-foreground px-1">
+                    Select synthesis assignment:
+                  </p>
+                  <div className="space-y-2">
+                    {SYNTHESIS_ASSIGNMENTS.map((assignment) => {
+                      const isSelected = selectedSourceTextId === assignment.id;
+                      return (
+                        <motion.div
+                          key={assignment.id}
+                          whileTap={{ scale: 0.98 }}
+                        >
+                          <button
+                            onClick={() => setSelectedSourceTextId(assignment.id)}
+                            className={`w-full text-left p-4 rounded-xl border-2 transition-all duration-200 ${
+                              isSelected
+                                ? 'border-[#c9a227] bg-[#c9a227]/5'
+                                : 'border-muted-foreground/20 bg-white hover:border-[#c9a227]/30'
+                            }`}
+                          >
+                            <div className="flex items-start gap-3">
+                              <div className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${
+                                isSelected
+                                  ? 'bg-[#c9a227] text-white'
+                                  : 'bg-muted text-muted-foreground'
+                              }`}>
+                                <ClipboardList className="w-5 h-5" />
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className={`text-sm font-semibold leading-tight ${
+                                  isSelected ? 'text-[#c9a227]' : 'text-foreground'
+                                }`}>
+                                  {assignment.title}
+                                </p>
+                                <p className="text-xs text-muted-foreground mt-0.5">
+                                  {assignment.sources.length} sources &middot; {assignment.targetWordCount.min}&ndash;{assignment.targetWordCount.max} words &middot; {assignment.cefrLevel}
+                                </p>
+                                <p className="text-xs text-muted-foreground mt-0.5">
+                                  {assignment.expectedParagraphs} paragraphs expected
+                                </p>
+                              </div>
+                            </div>
+                          </button>
+                        </motion.div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </ScrollArea>
 
         {/* Footer */}
@@ -306,7 +368,7 @@ const CourseSelectionScreen = ({ onSelect, onBack }: { onSelect: () => void; onB
             )}
             {needsWritingType && selectedWritingType && (
               <span className="ml-1 text-sm font-normal opacity-80">
-                ({selectedWritingType === 'summary' ? 'Summary' : 'Synthesis Essay'}){needsSourceText && selectedSourceTextId ? `: ${SUMMARY_SOURCE_TEXTS.find(s => s.id === selectedSourceTextId)?.title.split('—')[0].trim() || ''}` : ''}
+                ({selectedWritingType === 'summary' ? 'Summary' : 'Synthesis Essay'}){needsSourceText && selectedSourceTextId ? `: ${SUMMARY_SOURCE_TEXTS.find(s => s.id === selectedSourceTextId)?.title.split('—')[0].trim() || ''}` : ''}{needsSynthesisAssignment && selectedSourceTextId ? `: ${SYNTHESIS_ASSIGNMENTS.find(a => a.id === selectedSourceTextId)?.title || ''}` : ''}
               </span>
             )}
             <ChevronRight className="w-4 h-4 ml-2" />

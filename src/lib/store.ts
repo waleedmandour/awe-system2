@@ -92,6 +92,57 @@ The tube doesn't appear to increase short-term stress on the fish, according to 
   },
 ];
 
+// Synthesis essay assignment interface (multiple source texts)
+export interface SynthesisAssignment {
+  id: string;
+  title: string;
+  description: string;
+  cefrLevel: string;
+  expectedParagraphs: number;
+  sources: {
+    id: string;
+    title: string;
+    content: string;
+  }[];
+  targetWordCount: {
+    min: number;
+    max: number;
+    ideal: number;
+  };
+}
+
+export const SYNTHESIS_ASSIGNMENTS: SynthesisAssignment[] = [
+  {
+    id: 'nitrates-poisoning',
+    title: 'Two Common Sources of Poisoning Nitrates',
+    description: 'Write a synthesis essay (4 paragraphs) based on three source texts about nitrates and their effects on human health. Synthesize information from all three sources to explain two common sources of nitrate poisoning: contaminated well water and contaminated vegetables.',
+    cefrLevel: 'A2-B1',
+    expectedParagraphs: 4,
+    targetWordCount: {
+      min: 200,
+      max: 300,
+      ideal: 250,
+    },
+    sources: [
+      {
+        id: 'source-1-nitrates',
+        title: 'What are Nitrates?',
+        content: `Nitrates (NO3) are chemical compounds made from nitrogen (N) and oxygen (O). The primary toxic effects of the inorganic nitrate ion (NO3) result from its reduction to nitrite (NO2) by microorganisms in the upper digestive tract. The gastrointestinal tract of adults can process this chemical and it naturally passes out of the body through urine, but it can cause a dangerous blood condition in children. High levels of nitrate in food or drinking water are known to be dangerous to babies in the first three months of life, and may result in the so-called "blue baby syndrome". The chemical causes the blood to carry less oxygen, and the infant may suffocate. Other symptoms of nitrite toxicity in children and adults can include difficulty in breathing, dizziness, headaches, nausea, and vomiting. In older children and adults, there is also a risk of cancer because nitrites are unstable and can combine readily with other compound to form nitrosamines, which can cause cancer.`,
+      },
+      {
+        id: 'source-2-well-water',
+        title: 'Well Water May Be a Common Source of Nitrate Poisoning',
+        content: `A recent study in the U.S. has said that families using water from wells in agricultural areas should have their water tested regularly to check nitrate levels. The U.S. Safe Drinking Water Act of 1974 established that the maximum safe concentration of nitrates in drinking water is 10 mg/l. Yet some wells tested during the study showed levels that were considerably above that limit. Nitrites can build up in groundwater as a result of the excessive use on farms of nitrogen-based fertilizers such as potassium nitrate and ammonium nitrate. These chemicals often seep into well water and accumulate there. If wells are found to have nitrate levels that are above the safe limit, it is not advisable to use that water for drinking.`,
+      },
+      {
+        id: 'source-3-vegetables',
+        title: 'Increased Nitrate Levels Found in Vegetables',
+        content: `Nitrates are the main form in which the essential plant nutrient, nitrogen, is absorbed naturally by plants from the soil. When fertilizers are added to the soil, the plants can use the nitrates directly and this increases plant growth. Most of the excess nitrates in the environment originate from the chemical fertilizers that are manufactured for agriculture. Unfortunately, in their search for greater profits, farmers often overuse nitrate-based chemical fertilizers to improve crop yields. Vegetables become contaminated with nitrates when crops take up more than they can use for growth. As a consequence, nitrate levels in carrots, lettuce, and spinach, for example, have roughly doubled since the 1970s in the US.`,
+      },
+    ],
+  },
+];
+
 export interface AssessmentRecord {
   id: string;
   assessment: Assessment;
