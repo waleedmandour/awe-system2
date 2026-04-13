@@ -92,7 +92,7 @@ const CourseSelectionScreen = ({ onSelect, onBack }: { onSelect: () => void; onB
 
         {/* Course Cards */}
         <ScrollArea className="flex-1">
-          <div className="p-4 space-y-3">
+          <div className="p-4 pb-2 space-y-3">
             {filteredCourses.map((course, index) => (
               <motion.div
                 key={course.id}
@@ -156,7 +156,7 @@ const CourseSelectionScreen = ({ onSelect, onBack }: { onSelect: () => void; onB
                 transition={{ duration: 0.3 }}
                 className="overflow-hidden"
               >
-                <div className="px-4 pt-2 pb-4 space-y-2">
+                <div className="px-4 pt-1 pb-2 space-y-2">
                   <p className="text-sm font-medium text-muted-foreground px-1">
                     Select exam type:
                   </p>
@@ -199,7 +199,7 @@ const CourseSelectionScreen = ({ onSelect, onBack }: { onSelect: () => void; onB
                 transition={{ duration: 0.3 }}
                 className="overflow-hidden"
               >
-                <div className="px-4 pt-2 pb-4 space-y-2">
+                <div className="px-4 pt-1 pb-2 space-y-2">
                   <p className="text-sm font-medium text-muted-foreground px-1">
                     Select writing task:
                   </p>
@@ -242,7 +242,7 @@ const CourseSelectionScreen = ({ onSelect, onBack }: { onSelect: () => void; onB
                 transition={{ duration: 0.3 }}
                 className="overflow-hidden"
               >
-                <div className="px-4 pt-2 pb-4 space-y-2">
+                <div className="px-4 pt-1 pb-2 space-y-2">
                   <p className="text-sm font-medium text-muted-foreground px-1">
                     Select source text to summarize:
                   </p>
@@ -300,7 +300,7 @@ const CourseSelectionScreen = ({ onSelect, onBack }: { onSelect: () => void; onB
                 transition={{ duration: 0.3 }}
                 className="overflow-hidden"
               >
-                <div className="px-4 pt-2 pb-4 space-y-2">
+                <div className="px-4 pt-1 pb-2 space-y-2">
                   <p className="text-sm font-medium text-muted-foreground px-1">
                     Select synthesis assignment:
                   </p>
@@ -360,7 +360,7 @@ const CourseSelectionScreen = ({ onSelect, onBack }: { onSelect: () => void; onB
             disabled={!canContinue}
             className="w-full h-12 bg-[#1a5f2a] hover:bg-[#1a5f2a]/90 rounded-xl ios-press"
           >
-            <span className="flex flex-col items-start text-left leading-tight">
+            <span className="flex flex-col items-center text-center leading-tight">
               <span>Continue with {selectedCourse?.code || 'Course'}</span>
               {(needsExamType && selectedExamType) || (needsWritingType && selectedWritingType) ? (
                 <span className="text-sm font-normal opacity-80">
