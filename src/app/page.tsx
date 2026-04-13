@@ -2127,7 +2127,7 @@ const ResultsScreen = ({ assessment, onNewAssessment, onBack }: { assessment: As
               </motion.div>
             )}
 
-            {activeTab === 'feedback' && (
+            {activeTab === 'feedback' && assessment && (
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
