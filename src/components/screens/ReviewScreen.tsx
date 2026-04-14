@@ -154,6 +154,12 @@ const ReviewScreen = ({ onSubmit, onBack }: { onSubmit: (text: string) => void; 
               </AlertDescription>
             </Alert>
           )}
+          <Alert className="bg-red-50 border-red-300 dark:bg-red-950 dark:border-red-800">
+            <AlertCircle className="w-4 h-4 text-red-600 dark:text-red-400 shrink-0" />
+            <AlertDescription className="text-sm text-red-700 dark:text-red-300">
+              <strong>Please wait 1–2 minutes</strong> before clicking &quot;Submit for Assessment.&quot; Gemini&apos;s free tier has usage limits — submitting too quickly after your last request may cause the assessment to fail.
+            </AlertDescription>
+          </Alert>
           <Button
             onClick={handleSubmit}
             disabled={editedText.trim().length < 50}

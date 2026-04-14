@@ -60,10 +60,6 @@ const CourseSelectionScreen = ({ onSelect, onBack }: { onSelect: () => void; onB
     return course.program === activeTab;
   });
 
-  const handleSelectCourse = (course: Course) => {
-    setSelectedCourse(course);
-  };
-
   // Build the second line text for the green button
   const getButtonSubtitle = () => {
     if (needsExamType && selectedExamType) {
@@ -138,402 +134,361 @@ const CourseSelectionScreen = ({ onSelect, onBack }: { onSelect: () => void; onB
           </Tabs>
         </div>
 
-        {/* Course Cards */}
+        {/* Course Cards with nested children */}
         <ScrollArea className="flex-1">
           <div className="p-4 pb-2 space-y-3">
-            {filteredCourses.map((course, index) => (
-              <motion.div
-                key={course.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1 }}
-              >
-                <Card
-                  className={`cursor-pointer transition-all duration-200 border-2 ${
-                    selectedCourse?.id === course.id
-                      ? 'border-[#1a5f2a] bg-[#1a5f2a]/5'
-                      : 'border-transparent hover:border-muted-foreground/20'
-                  }`}
-                  onClick={() => setSelectedCourse(course)}
+            {filteredCourses.map((course, index) => {
+              const isSelected = selectedCourse?.id === course.id;
+              const showChildren = isSelected;
+              const accentColor = activeTab === 'foundation' ? '#1a5f2a' : '#c9a227';
+
+              // Check which children to show for this specific course
+              const showExamType = showChildren && course.code === '0340';
+              const showWritingType = showChildren && course.code === 'LANC2160';
+              const showPracticeType = showChildren && course.code === 'LANC1070';
+              const showSourceText = showWritingType && selectedWritingType === 'summary';
+              const showSynthesisAssignment = showWritingType && selectedWritingType === 'synthesis';
+              const showWritingPrompt = showChildren && course.code === '0340' && selectedExamType === 'final';
+              const showPracticeTest = showPracticeType && !!selectedPracticeType;
+              const coursePracticeTests = showPracticeType && selectedPracticeType
+                ? LANC1070_PRACTICE_TESTS.filter(t => t.practiceType === selectedPracticeType)
+                : [];
+
+              return (
+                <motion.div
+                  key={course.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                  className="space-y-0"
                 >
-                  <CardContent className="p-4">
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-start gap-3">
-                        <div
-                          className={`w-12 h-12 rounded-xl flex items-center justify-center ${
-                            activeTab === 'foundation'
-                              ? 'bg-gradient-to-br from-[#1a5f2a] to-[#2a7f3a]'
-                              : 'bg-gradient-to-br from-[#c9a227] to-[#d9b237]'
-                          }`}
-                        >
-                          {activeTab === 'foundation' ? (
-                            <GraduationCap className="w-6 h-6 text-white" />
-                          ) : (
-                            <BookOpen className="w-6 h-6 text-white" />
-                          )}
-                        </div>
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <Badge variant="secondary" className="text-xs">
-                              {course.code}
-                            </Badge>
+                  {/* Course Card */}
+                  <Card
+                    className={`cursor-pointer transition-all duration-200 border-2 ${
+                      isSelected
+                        ? 'border-[#1a5f2a] bg-[#1a5f2a]/5'
+                        : 'border-transparent hover:border-muted-foreground/20'
+                    }`}
+                    onClick={() => setSelectedCourse(course)}
+                  >
+                    <CardContent className="p-4">
+                      <div className="flex items-start justify-between">
+                        <div className="flex items-start gap-3">
+                          <div
+                            className={`w-12 h-12 rounded-xl flex items-center justify-center ${
+                              activeTab === 'foundation'
+                                ? 'bg-gradient-to-br from-[#1a5f2a] to-[#2a7f3a]'
+                                : 'bg-gradient-to-br from-[#c9a227] to-[#d9b237]'
+                            }`}
+                          >
+                            {activeTab === 'foundation' ? (
+                              <GraduationCap className="w-6 h-6 text-white" />
+                            ) : (
+                              <BookOpen className="w-6 h-6 text-white" />
+                            )}
                           </div>
-                          <h3 className="font-semibold mt-1">{course.name}</h3>
-                          {course.description && (
-                            <p className="text-sm text-muted-foreground mt-1">{course.description}</p>
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <Badge variant="secondary" className="text-xs">
+                                {course.code}
+                              </Badge>
+                            </div>
+                            <h3 className="font-semibold mt-1">{course.name}</h3>
+                            {course.description && (
+                              <p className="text-sm text-muted-foreground mt-1">{course.description}</p>
+                            )}
+                          </div>
+                        </div>
+                        {isSelected && (
+                          <CheckCircle className="w-6 h-6 text-[#1a5f2a]" />
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Nested children container — visually indented under the course card */}
+                  <AnimatePresence>
+                    {showChildren && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        transition={{ duration: 0.3 }}
+                        className="overflow-hidden"
+                      >
+                        <div
+                          className="ml-4 pl-4 border-l-2 py-2 space-y-2"
+                          style={{ borderColor: accentColor }}
+                        >
+                          {/* Exam-Type Selection for FP0340 */}
+                          {showExamType && (
+                            <div className="space-y-2">
+                              <p className="text-sm font-medium text-muted-foreground px-1">
+                                Select exam type:
+                              </p>
+                              <div className="flex gap-2">
+                                <button
+                                  onClick={(e) => { e.stopPropagation(); setSelectedExamType('mid-semester'); }}
+                                  className={`flex-1 flex items-center justify-center gap-2 rounded-xl border-2 px-4 py-3 text-sm font-medium transition-all duration-200 ios-press ${
+                                    selectedExamType === 'mid-semester'
+                                      ? 'border-[#1a5f2a] bg-[#1a5f2a]/10 text-[#1a5f2a]'
+                                      : 'border-muted-foreground/20 bg-white hover:border-muted-foreground/40 text-muted-foreground'
+                                  }`}
+                                >
+                                  <FileText className="w-4 h-4" />
+                                  <span>For Mid-semester Exam</span>
+                                </button>
+                                <button
+                                  onClick={(e) => { e.stopPropagation(); setSelectedExamType('final'); }}
+                                  className={`flex-1 flex items-center justify-center gap-2 rounded-xl border-2 px-4 py-3 text-sm font-medium transition-all duration-200 ios-press ${
+                                    selectedExamType === 'final'
+                                      ? 'border-[#1a5f2a] bg-[#1a5f2a]/10 text-[#1a5f2a]'
+                                      : 'border-muted-foreground/20 bg-white hover:border-muted-foreground/40 text-muted-foreground'
+                                  }`}
+                                >
+                                  <Award className="w-4 h-4" />
+                                  <span>For Final Exam</span>
+                                </button>
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Writing Prompt Input for FP0340 Final Exam */}
+                          {showWritingPrompt && (
+                            <div className="space-y-2">
+                              <p className="text-sm font-medium text-muted-foreground px-1">
+                                Writing Prompt <span className="font-normal">(Optional)</span>
+                              </p>
+                              <textarea
+                                value={writingPrompt}
+                                onChange={(e) => setWritingPrompt(e.target.value)}
+                                placeholder="Enter the essay topic or writing prompt, if provided by your instructor..."
+                                rows={3}
+                                className="w-full rounded-xl border-2 border-muted-foreground/20 bg-white px-4 py-3 text-sm resize-none focus:outline-none focus:border-[#1a5f2a]/50 focus:ring-1 focus:ring-[#1a5f2a]/20 placeholder:text-muted-foreground/60 transition-colors"
+                              />
+                            </div>
+                          )}
+
+                          {/* Writing-Type Selection for LANC2160 */}
+                          {showWritingType && (
+                            <div className="space-y-2">
+                              <p className="text-sm font-medium text-muted-foreground px-1">
+                                Select writing task:
+                              </p>
+                              <div className="flex gap-2">
+                                <button
+                                  onClick={(e) => { e.stopPropagation(); setSelectedWritingType('summary'); }}
+                                  className={`flex-1 flex flex-col items-center justify-center gap-1.5 rounded-xl border-2 px-4 py-4 text-sm font-medium transition-all duration-200 ios-press ${
+                                    selectedWritingType === 'summary'
+                                      ? 'border-[#c9a227] bg-[#c9a227]/10 text-[#c9a227]'
+                                      : 'border-muted-foreground/20 bg-white hover:border-muted-foreground/40 text-muted-foreground'
+                                  }`}
+                                >
+                                  <FileText className="w-5 h-5" />
+                                  <span>Summary Writing</span>
+                                </button>
+                                <button
+                                  onClick={(e) => { e.stopPropagation(); setSelectedWritingType('synthesis'); }}
+                                  className={`flex-1 flex flex-col items-center justify-center gap-1.5 rounded-xl border-2 px-4 py-4 text-sm font-medium transition-all duration-200 ios-press ${
+                                    selectedWritingType === 'synthesis'
+                                      ? 'border-[#c9a227] bg-[#c9a227]/10 text-[#c9a227]'
+                                      : 'border-muted-foreground/20 bg-white hover:border-muted-foreground/40 text-muted-foreground'
+                                  }`}
+                                >
+                                  <ClipboardList className="w-5 h-5" />
+                                  <span>Synthesis Essay</span>
+                                </button>
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Practice-Type Selection for LANC1070 */}
+                          {showPracticeType && (
+                            <div className="space-y-2">
+                              <p className="text-sm font-medium text-muted-foreground px-1">
+                                Select practice test type:
+                              </p>
+                              <div className="flex gap-2">
+                                <button
+                                  onClick={(e) => { e.stopPropagation(); setSelectedPracticeType('mid-semester'); }}
+                                  className={`flex-1 flex flex-col items-center justify-center gap-1.5 rounded-xl border-2 px-4 py-4 text-sm font-medium transition-all duration-200 ios-press ${
+                                    selectedPracticeType === 'mid-semester'
+                                      ? 'border-[#c9a227] bg-[#c9a227]/10 text-[#c9a227]'
+                                      : 'border-muted-foreground/20 bg-white hover:border-muted-foreground/40 text-muted-foreground'
+                                  }`}
+                                >
+                                  <FileText className="w-5 h-5" />
+                                  <span>Mid-Semester Practice</span>
+                                </button>
+                                <button
+                                  onClick={(e) => { e.stopPropagation(); setSelectedPracticeType('final'); }}
+                                  className={`flex-1 flex flex-col items-center justify-center gap-1.5 rounded-xl border-2 px-4 py-4 text-sm font-medium transition-all duration-200 ios-press ${
+                                    selectedPracticeType === 'final'
+                                      ? 'border-[#c9a227] bg-[#c9a227]/10 text-[#c9a227]'
+                                      : 'border-muted-foreground/20 bg-white hover:border-muted-foreground/40 text-muted-foreground'
+                                  }`}
+                                >
+                                  <Award className="w-5 h-5" />
+                                  <span>Final Practice</span>
+                                </button>
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Source Text Selection for Summary Writing */}
+                          {showSourceText && (
+                            <div className="space-y-2">
+                              <p className="text-sm font-medium text-muted-foreground px-1">
+                                Select source text to summarize:
+                              </p>
+                              <div className="space-y-2">
+                                {SUMMARY_SOURCE_TEXTS.map((source) => {
+                                  const isSelected = selectedSourceTextId === source.id;
+                                  return (
+                                    <motion.div key={source.id} whileTap={{ scale: 0.98 }}>
+                                      <button
+                                        onClick={(e) => { e.stopPropagation(); setSelectedSourceTextId(source.id); }}
+                                        className={`w-full text-left p-4 rounded-xl border-2 transition-all duration-200 ${
+                                          isSelected
+                                            ? 'border-[#c9a227] bg-[#c9a227]/5'
+                                            : 'border-muted-foreground/20 bg-white hover:border-[#c9a227]/30'
+                                        }`}
+                                      >
+                                        <div className="flex items-start gap-3">
+                                          <div className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${
+                                            isSelected
+                                              ? 'bg-[#c9a227] text-white'
+                                              : 'bg-muted text-muted-foreground'
+                                          }`}>
+                                            <FileText className="w-5 h-5" />
+                                          </div>
+                                          <div className="flex-1 min-w-0">
+                                            <p className={`text-sm font-semibold leading-tight ${
+                                              isSelected ? 'text-[#c9a227]' : 'text-foreground'
+                                            }`}>
+                                              {source.title}
+                                            </p>
+                                            <p className="text-xs text-muted-foreground mt-0.5">
+                                              {source.wordCount} words &middot; Target summary: {source.targetMin}&ndash;{source.targetMax} words
+                                            </p>
+                                          </div>
+                                        </div>
+                                      </button>
+                                    </motion.div>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Synthesis Assignment Selection */}
+                          {showSynthesisAssignment && (
+                            <div className="space-y-2">
+                              <p className="text-sm font-medium text-muted-foreground px-1">
+                                Select synthesis assignment:
+                              </p>
+                              <div className="space-y-2">
+                                {SYNTHESIS_ASSIGNMENTS.map((assignment) => {
+                                  const isSelected = selectedSourceTextId === assignment.id;
+                                  return (
+                                    <motion.div key={assignment.id} whileTap={{ scale: 0.98 }}>
+                                      <button
+                                        onClick={(e) => { e.stopPropagation(); setSelectedSourceTextId(assignment.id); }}
+                                        className={`w-full text-left p-4 rounded-xl border-2 transition-all duration-200 ${
+                                          isSelected
+                                            ? 'border-[#c9a227] bg-[#c9a227]/5'
+                                            : 'border-muted-foreground/20 bg-white hover:border-[#c9a227]/30'
+                                        }`}
+                                      >
+                                        <div className="flex items-start gap-3">
+                                          <div className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${
+                                            isSelected
+                                              ? 'bg-[#c9a227] text-white'
+                                              : 'bg-muted text-muted-foreground'
+                                          }`}>
+                                            <ClipboardList className="w-5 h-5" />
+                                          </div>
+                                          <div className="flex-1 min-w-0">
+                                            <p className={`text-sm font-semibold leading-tight ${
+                                              isSelected ? 'text-[#c9a227]' : 'text-foreground'
+                                            }`}>
+                                              {assignment.title}
+                                            </p>
+                                            <p className="text-xs text-muted-foreground mt-0.5">
+                                              {assignment.sources.length} sources &middot; {assignment.targetWordCount.min}&ndash;{assignment.targetWordCount.max} words
+                                            </p>
+                                            <p className="text-xs text-muted-foreground mt-0.5">
+                                              {assignment.expectedParagraphs} paragraphs expected
+                                            </p>
+                                          </div>
+                                        </div>
+                                      </button>
+                                    </motion.div>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Practice Test Selection for LANC1070 */}
+                          {showPracticeTest && (
+                            <div className="space-y-2">
+                              <p className="text-sm font-medium text-muted-foreground px-1">
+                                Select practice test:
+                              </p>
+                              {coursePracticeTests.length > 0 ? (
+                                <div className="space-y-2">
+                                  {coursePracticeTests.map((test) => {
+                                    const isSelected = selectedSourceTextId === test.id;
+                                    return (
+                                      <motion.div key={test.id} whileTap={{ scale: 0.98 }}>
+                                        <button
+                                          onClick={(e) => { e.stopPropagation(); setSelectedSourceTextId(test.id); }}
+                                          className={`w-full text-left p-4 rounded-xl border-2 transition-all duration-200 ${
+                                            isSelected
+                                              ? 'border-[#c9a227] bg-[#c9a227]/5'
+                                              : 'border-muted-foreground/20 bg-white hover:border-[#c9a227]/30'
+                                          }`}
+                                        >
+                                          <div className="flex items-start gap-3">
+                                            <div className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${
+                                              isSelected
+                                                ? 'bg-[#c9a227] text-white'
+                                                : 'bg-muted text-muted-foreground'
+                                            }`}>
+                                              <PenTool className="w-5 h-5" />
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                              <p className={`text-sm font-semibold leading-tight ${
+                                                isSelected ? 'text-[#c9a227]' : 'text-foreground'
+                                              }`}>
+                                                {test.title}
+                                              </p>
+                                              <p className="text-xs text-muted-foreground mt-0.5">
+                                                {test.targetWordCount.min}&ndash;{test.targetWordCount.max} words &middot; {test.expectedParagraphs} paragraphs expected
+                                              </p>
+                                            </div>
+                                          </div>
+                                        </button>
+                                      </motion.div>
+                                    );
+                                  })}
+                                </div>
+                              ) : (
+                                <div className="text-center py-6 text-muted-foreground text-sm">
+                                  No practice tests available yet.
+                                </div>
+                              )}
+                            </div>
                           )}
                         </div>
-                      </div>
-                      {selectedCourse?.id === course.id && (
-                        <CheckCircle className="w-6 h-6 text-[#1a5f2a]" />
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ))}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </motion.div>
+              );
+            })}
           </div>
-
-          {/* Exam-Type Selection for FP0340 */}
-          <AnimatePresence>
-            {needsExamType && (
-              <motion.div
-                initial={{ opacity: 0, y: 15, height: 0 }}
-                animate={{ opacity: 1, y: 0, height: 'auto' }}
-                exit={{ opacity: 0, y: -10, height: 0 }}
-                transition={{ duration: 0.3 }}
-                className="overflow-hidden"
-              >
-                <div className="px-4 pt-1 pb-2 space-y-2">
-                  <p className="text-sm font-medium text-muted-foreground px-1">
-                    Select exam type:
-                  </p>
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => setSelectedExamType('mid-semester')}
-                      className={`flex-1 flex items-center justify-center gap-2 rounded-xl border-2 px-4 py-3 text-sm font-medium transition-all duration-200 ios-press ${
-                        selectedExamType === 'mid-semester'
-                          ? 'border-[#1a5f2a] bg-[#1a5f2a]/10 text-[#1a5f2a]'
-                          : 'border-muted-foreground/20 bg-white hover:border-muted-foreground/40 text-muted-foreground'
-                      }`}
-                    >
-                      <FileText className="w-4 h-4" />
-                      <span>For Mid-semester Exam</span>
-                    </button>
-                    <button
-                      onClick={() => setSelectedExamType('final')}
-                      className={`flex-1 flex items-center justify-center gap-2 rounded-xl border-2 px-4 py-3 text-sm font-medium transition-all duration-200 ios-press ${
-                        selectedExamType === 'final'
-                          ? 'border-[#1a5f2a] bg-[#1a5f2a]/10 text-[#1a5f2a]'
-                          : 'border-muted-foreground/20 bg-white hover:border-muted-foreground/40 text-muted-foreground'
-                      }`}
-                    >
-                      <Award className="w-4 h-4" />
-                      <span>For Final Exam</span>
-                    </button>
-                  </div>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          {/* Writing Prompt Input for FP0340 Final Exam */}
-          <AnimatePresence>
-            {needsWritingPrompt && (
-              <motion.div
-                initial={{ opacity: 0, y: 15, height: 0 }}
-                animate={{ opacity: 1, y: 0, height: 'auto' }}
-                exit={{ opacity: 0, y: -10, height: 0 }}
-                transition={{ duration: 0.3 }}
-                className="overflow-hidden"
-              >
-                <div className="px-4 pt-1 pb-2 space-y-2">
-                  <p className="text-sm font-medium text-muted-foreground px-1">
-                    Writing Prompt <span className="font-normal">(Optional)</span>
-                  </p>
-                  <textarea
-                    value={writingPrompt}
-                    onChange={(e) => setWritingPrompt(e.target.value)}
-                    placeholder="Enter the essay topic or writing prompt, if provided by your instructor..."
-                    rows={3}
-                    className="w-full rounded-xl border-2 border-muted-foreground/20 bg-white px-4 py-3 text-sm resize-none focus:outline-none focus:border-[#1a5f2a]/50 focus:ring-1 focus:ring-[#1a5f2a]/20 placeholder:text-muted-foreground/60 transition-colors"
-                  />
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          {/* Writing-Type Selection for LANC2160 */}
-          <AnimatePresence>
-            {needsWritingType && (
-              <motion.div
-                initial={{ opacity: 0, y: 15, height: 0 }}
-                animate={{ opacity: 1, y: 0, height: 'auto' }}
-                exit={{ opacity: 0, y: -10, height: 0 }}
-                transition={{ duration: 0.3 }}
-                className="overflow-hidden"
-              >
-                <div className="px-4 pt-1 pb-2 space-y-2">
-                  <p className="text-sm font-medium text-muted-foreground px-1">
-                    Select writing task:
-                  </p>
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => setSelectedWritingType('summary')}
-                      className={`flex-1 flex flex-col items-center justify-center gap-1.5 rounded-xl border-2 px-4 py-4 text-sm font-medium transition-all duration-200 ios-press ${
-                        selectedWritingType === 'summary'
-                          ? 'border-[#c9a227] bg-[#c9a227]/10 text-[#c9a227]'
-                          : 'border-muted-foreground/20 bg-white hover:border-muted-foreground/40 text-muted-foreground'
-                      }`}
-                    >
-                      <FileText className="w-5 h-5" />
-                      <span>Summary Writing</span>
-                    </button>
-                    <button
-                      onClick={() => setSelectedWritingType('synthesis')}
-                      className={`flex-1 flex flex-col items-center justify-center gap-1.5 rounded-xl border-2 px-4 py-4 text-sm font-medium transition-all duration-200 ios-press ${
-                        selectedWritingType === 'synthesis'
-                          ? 'border-[#c9a227] bg-[#c9a227]/10 text-[#c9a227]'
-                          : 'border-muted-foreground/20 bg-white hover:border-muted-foreground/40 text-muted-foreground'
-                      }`}
-                    >
-                      <ClipboardList className="w-5 h-5" />
-                      <span>Synthesis Essay</span>
-                    </button>
-                  </div>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          {/* Practice-Type Selection for LANC1070 */}
-          <AnimatePresence>
-            {needsPracticeType && (
-              <motion.div
-                initial={{ opacity: 0, y: 15, height: 0 }}
-                animate={{ opacity: 1, y: 0, height: 'auto' }}
-                exit={{ opacity: 0, y: -10, height: 0 }}
-                transition={{ duration: 0.3 }}
-                className="overflow-hidden"
-              >
-                <div className="px-4 pt-1 pb-2 space-y-2">
-                  <p className="text-sm font-medium text-muted-foreground px-1">
-                    Select practice test type:
-                  </p>
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => setSelectedPracticeType('mid-semester')}
-                      className={`flex-1 flex flex-col items-center justify-center gap-1.5 rounded-xl border-2 px-4 py-4 text-sm font-medium transition-all duration-200 ios-press ${
-                        selectedPracticeType === 'mid-semester'
-                          ? 'border-[#c9a227] bg-[#c9a227]/10 text-[#c9a227]'
-                          : 'border-muted-foreground/20 bg-white hover:border-muted-foreground/40 text-muted-foreground'
-                      }`}
-                    >
-                      <FileText className="w-5 h-5" />
-                      <span>Mid-Semester Practice</span>
-                    </button>
-                    <button
-                      onClick={() => setSelectedPracticeType('final')}
-                      className={`flex-1 flex flex-col items-center justify-center gap-1.5 rounded-xl border-2 px-4 py-4 text-sm font-medium transition-all duration-200 ios-press ${
-                        selectedPracticeType === 'final'
-                          ? 'border-[#c9a227] bg-[#c9a227]/10 text-[#c9a227]'
-                          : 'border-muted-foreground/20 bg-white hover:border-muted-foreground/40 text-muted-foreground'
-                      }`}
-                    >
-                      <Award className="w-5 h-5" />
-                      <span>Final Practice</span>
-                    </button>
-                  </div>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          {/* Source Text Selection for Summary Writing */}
-          <AnimatePresence>
-            {needsSourceText && (
-              <motion.div
-                initial={{ opacity: 0, y: 15, height: 0 }}
-                animate={{ opacity: 1, y: 0, height: 'auto' }}
-                exit={{ opacity: 0, y: -10, height: 0 }}
-                transition={{ duration: 0.3 }}
-                className="overflow-hidden"
-              >
-                <div className="px-4 pt-1 pb-2 space-y-2">
-                  <p className="text-sm font-medium text-muted-foreground px-1">
-                    Select source text to summarize:
-                  </p>
-                  <div className="space-y-2">
-                    {SUMMARY_SOURCE_TEXTS.map((source) => {
-                      const isSelected = selectedSourceTextId === source.id;
-                      return (
-                        <motion.div
-                          key={source.id}
-                          whileTap={{ scale: 0.98 }}
-                        >
-                          <button
-                            onClick={() => setSelectedSourceTextId(source.id)}
-                            className={`w-full text-left p-4 rounded-xl border-2 transition-all duration-200 ${
-                              isSelected
-                                ? 'border-[#c9a227] bg-[#c9a227]/5'
-                                : 'border-muted-foreground/20 bg-white hover:border-[#c9a227]/30'
-                            }`}
-                          >
-                            <div className="flex items-start gap-3">
-                              <div className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${
-                                isSelected
-                                  ? 'bg-[#c9a227] text-white'
-                                  : 'bg-muted text-muted-foreground'
-                              }`}>
-                                <FileText className="w-5 h-5" />
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <p className={`text-sm font-semibold leading-tight ${
-                                  isSelected ? 'text-[#c9a227]' : 'text-foreground'
-                                }`}>
-                                  {source.title}
-                                </p>
-                                <p className="text-xs text-muted-foreground mt-0.5">
-                                  {source.wordCount} words &middot; Target summary: {source.targetMin}&ndash;{source.targetMax} words
-                                </p>
-                              </div>
-                            </div>
-                          </button>
-                        </motion.div>
-                      );
-                    })}
-                  </div>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          {/* Synthesis Assignment Selection for Synthesis Essay */}
-          <AnimatePresence>
-            {needsSynthesisAssignment && (
-              <motion.div
-                initial={{ opacity: 0, y: 15, height: 0 }}
-                animate={{ opacity: 1, y: 0, height: 'auto' }}
-                exit={{ opacity: 0, y: -10, height: 0 }}
-                transition={{ duration: 0.3 }}
-                className="overflow-hidden"
-              >
-                <div className="px-4 pt-1 pb-2 space-y-2">
-                  <p className="text-sm font-medium text-muted-foreground px-1">
-                    Select synthesis assignment:
-                  </p>
-                  <div className="space-y-2">
-                    {SYNTHESIS_ASSIGNMENTS.map((assignment) => {
-                      const isSelected = selectedSourceTextId === assignment.id;
-                      return (
-                        <motion.div
-                          key={assignment.id}
-                          whileTap={{ scale: 0.98 }}
-                        >
-                          <button
-                            onClick={() => setSelectedSourceTextId(assignment.id)}
-                            className={`w-full text-left p-4 rounded-xl border-2 transition-all duration-200 ${
-                              isSelected
-                                ? 'border-[#c9a227] bg-[#c9a227]/5'
-                                : 'border-muted-foreground/20 bg-white hover:border-[#c9a227]/30'
-                            }`}
-                          >
-                            <div className="flex items-start gap-3">
-                              <div className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${
-                                isSelected
-                                  ? 'bg-[#c9a227] text-white'
-                                  : 'bg-muted text-muted-foreground'
-                              }`}>
-                                <ClipboardList className="w-5 h-5" />
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <p className={`text-sm font-semibold leading-tight ${
-                                  isSelected ? 'text-[#c9a227]' : 'text-foreground'
-                                }`}>
-                                  {assignment.title}
-                                </p>
-                                <p className="text-xs text-muted-foreground mt-0.5">
-                                  {assignment.sources.length} sources &middot; {assignment.targetWordCount.min}&ndash;{assignment.targetWordCount.max} words
-                                </p>
-                                <p className="text-xs text-muted-foreground mt-0.5">
-                                  {assignment.expectedParagraphs} paragraphs expected
-                                </p>
-                              </div>
-                            </div>
-                          </button>
-                        </motion.div>
-                      );
-                    })}
-                  </div>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          {/* Practice Test Selection for LANC1070 */}
-          <AnimatePresence>
-            {needsPracticeTest && (
-              <motion.div
-                initial={{ opacity: 0, y: 15, height: 0 }}
-                animate={{ opacity: 1, y: 0, height: 'auto' }}
-                exit={{ opacity: 0, y: -10, height: 0 }}
-                transition={{ duration: 0.3 }}
-                className="overflow-hidden"
-              >
-                <div className="px-4 pt-1 pb-2 space-y-2">
-                  <p className="text-sm font-medium text-muted-foreground px-1">
-                    Select practice test:
-                  </p>
-                  {filteredPracticeTests.length > 0 ? (
-                    <div className="space-y-2">
-                      {filteredPracticeTests.map((test) => {
-                        const isSelected = selectedSourceTextId === test.id;
-                        return (
-                          <motion.div
-                            key={test.id}
-                            whileTap={{ scale: 0.98 }}
-                          >
-                            <button
-                              onClick={() => setSelectedSourceTextId(test.id)}
-                              className={`w-full text-left p-4 rounded-xl border-2 transition-all duration-200 ${
-                                isSelected
-                                  ? 'border-[#c9a227] bg-[#c9a227]/5'
-                                  : 'border-muted-foreground/20 bg-white hover:border-[#c9a227]/30'
-                              }`}
-                            >
-                              <div className="flex items-start gap-3">
-                                <div className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${
-                                  isSelected
-                                    ? 'bg-[#c9a227] text-white'
-                                    : 'bg-muted text-muted-foreground'
-                                }`}>
-                                  <PenTool className="w-5 h-5" />
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                  <p className={`text-sm font-semibold leading-tight ${
-                                    isSelected ? 'text-[#c9a227]' : 'text-foreground'
-                                  }`}>
-                                    {test.title}
-                                  </p>
-                                  <p className="text-xs text-muted-foreground mt-0.5">
-                                    {test.targetWordCount.min}&ndash;{test.targetWordCount.max} words &middot; {test.expectedParagraphs} paragraphs expected
-                                  </p>
-                                </div>
-                              </div>
-                            </button>
-                          </motion.div>
-                        );
-                      })}
-                    </div>
-                  ) : (
-                    <div className="text-center py-6 text-muted-foreground text-sm">
-                      No practice tests available yet.
-                    </div>
-                  )}
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
         </ScrollArea>
 
         {/* Footer */}
