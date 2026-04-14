@@ -27,7 +27,7 @@ const CourseSelectionScreen = ({ onSelect, onBack }: { onSelect: () => void; onB
   const [activeTab, setActiveTab] = useState<'foundation' | 'credit'>('foundation');
 
   // Whether the currently selected course requires an exam-type choice
-  const needsExamType = selectedCourse?.code === '0340';
+  const needsExamType = selectedCourse?.code === '0230' || selectedCourse?.code === '0340';
 
   // Whether the currently selected course requires a writing-type choice
   const needsWritingType = selectedCourse?.code === 'LANC2160';
@@ -43,8 +43,8 @@ const CourseSelectionScreen = ({ onSelect, onBack }: { onSelect: () => void; onB
     ? LANC1070_PRACTICE_TESTS.filter(t => t.practiceType === selectedPracticeType)
     : [];
 
-  // Whether FP0340 Final Exam needs a writing prompt input
-  const needsWritingPrompt = selectedCourse?.code === '0340' && selectedExamType === 'final';
+  // Whether Foundation Final Exam needs a writing prompt input
+  const needsWritingPrompt = (selectedCourse?.code === '0230' || selectedCourse?.code === '0340') && selectedExamType === 'final';
 
   // Whether the Continue button should be enabled
   const canContinue = selectedCourse
@@ -143,12 +143,12 @@ const CourseSelectionScreen = ({ onSelect, onBack }: { onSelect: () => void; onB
               const accentColor = activeTab === 'foundation' ? '#1a5f2a' : '#c9a227';
 
               // Check which children to show for this specific course
-              const showExamType = showChildren && course.code === '0340';
+              const showExamType = showChildren && (course.code === '0230' || course.code === '0340');
               const showWritingType = showChildren && course.code === 'LANC2160';
               const showPracticeType = showChildren && course.code === 'LANC1070';
               const showSourceText = showWritingType && selectedWritingType === 'summary';
               const showSynthesisAssignment = showWritingType && selectedWritingType === 'synthesis';
-              const showWritingPrompt = showChildren && course.code === '0340' && selectedExamType === 'final';
+              const showWritingPrompt = showChildren && (course.code === '0230' || course.code === '0340') && selectedExamType === 'final';
               const showPracticeTest = showPracticeType && !!selectedPracticeType;
               const coursePracticeTests = showPracticeType && selectedPracticeType
                 ? LANC1070_PRACTICE_TESTS.filter(t => t.practiceType === selectedPracticeType)

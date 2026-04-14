@@ -16,8 +16,8 @@ This Progressive Web App (PWA) enables students to upload photos of handwritten 
 - Extract text using Google Gemini OCR or Google Cloud Vision API
 - Receive AI-powered assessment based on course-specific rubrics aligned with CEFR levels
 - Get detailed feedback with justifications, error identification, and improvement suggestions
-- Select exam type (Mid-semester or Final) for FP0340 with appropriate word count targets
-- Enter an optional writing prompt for FP0340 Final Exam to guide assessment
+- Select exam type (Mid-semester or Final) for FP0230 and FP0340 with appropriate word count targets
+- Enter an optional writing prompt for Foundation Final Exam to guide assessment
 - Practice summary writing and synthesis essay writing for LANC2160 with source texts
 - Practice 4-paragraph essay writing for LANC1070 with mid-semester and final tests
 - Download assessment reports as PDF
@@ -31,10 +31,10 @@ This Progressive Web App (PWA) enables students to upload photos of handwritten 
 
 | Course Code | Course Name | Rubric Scale | Exam Types |
 |-------------|-------------|:------------:|------------|
-| FP0230 | English Language Foundation I | 0-6 per criterion | Standard (120 words) |
+| FP0230 | English Language Foundation I | 0-6 per criterion | Mid-semester (120 words) / Final (200 words) |
 | FP0340 | English Language Foundation II | 0-6 per criterion | Mid-semester (120 words) / Final (200 words) |
 
-**FP0340 Special Features:**
+**FP0230 & FP0340 Special Features:**
 - Exam-type selection (Mid-semester or Final) with dynamic word count targets
 - Optional writing prompt input for Final Exam — if provided by the instructor, it is appended to the assessment criteria sent to Gemini, enabling more focused and context-aware feedback
 

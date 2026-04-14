@@ -474,6 +474,7 @@ export const useAppStore = create<AppState>()(
         visionApiKey: state.visionApiKey,
         theme: state.theme,
         selectedCourse: state.selectedCourse,
+        selectedExamType: state.selectedExamType,
         selectedWritingType: state.selectedWritingType,
         selectedPracticeType: state.selectedPracticeType,
         writingPrompt: state.writingPrompt,
