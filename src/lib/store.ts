@@ -55,7 +55,7 @@ export interface Essay {
 export type ExamType = 'mid-semester' | 'final' | null;
 export type WritingType = 'summary' | 'synthesis' | null;
 export type PracticeType = 'mid-semester' | 'final' | null;
-export type AppStep = 'welcome' | 'setup' | 'course' | 'upload' | 'processing' | 'review' | 'assessing' | 'results' | 'records';
+export type AppStep = 'login' | 'welcome' | 'setup' | 'course' | 'upload' | 'processing' | 'review' | 'assessing' | 'results' | 'records' | 'auth-error' | 'about';
 
 // Summary writing source texts for LANC2160
 export interface SummarySourceText {
@@ -290,11 +290,22 @@ export interface AssessmentRecord {
   createdAt: string;
 }
 
+export interface UserSession {
+  name: string;
+  email: string;
+  image?: string;
+}
+
 interface AppState {
   // Navigation
   currentStep: AppStep;
   setStep: (step: AppStep) => void;
   
+  // User session
+  user: UserSession | null;
+  setUser: (user: UserSession | null) => void;
+  clearUser: () => void;
+
   // Settings
   geminiApiKey: string;
   visionApiKey: string;
@@ -390,9 +401,14 @@ export const useAppStore = create<AppState>()(
   persist(
     (set, get) => ({
       // Navigation
-      currentStep: 'welcome',
+      currentStep: 'login' as AppStep,
       setStep: (step) => set({ currentStep: step }),
       
+      // User session
+      user: null as UserSession | null,
+      setUser: (user) => set({ user }),
+      clearUser: () => set({ user: null, currentStep: 'login' }),
+
       // Settings
       geminiApiKey: '',
       visionApiKey: '',
@@ -470,6 +486,7 @@ export const useAppStore = create<AppState>()(
       name: 'awe-storage',
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({
+        user: state.user,
         geminiApiKey: state.geminiApiKey,
         visionApiKey: state.visionApiKey,
         theme: state.theme,

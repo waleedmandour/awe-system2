@@ -202,7 +202,7 @@ awe-system/
 
 ```bash
 # Clone the repository
-git clone https://github.com/waleedmandour/awe-system.git
+git clone https://github.com/waleedmandour/awe-system22.git
 cd awe-system
 
 # Install dependencies
@@ -234,13 +234,13 @@ The AWE System is configured for one-click deployment on [Vercel](https://vercel
 
 ### One-Click Deploy
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/waleedmandour/awe-system)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/waleedmandour/awe-system22)
 
 ### Manual Deploy
 
 1. Go to [vercel.com/new](https://vercel.com/new)
 2. Click "Import Git Repository"
-3. Select `waleedmandour/awe-system`
+3. Select `waleedmandour/awe-system2`
 4. Leave all defaults — Vercel auto-detects Next.js
 5. Click "Deploy"
 
@@ -324,7 +324,7 @@ If you use **awe-system** in your research, teaching, or publications, please ci
 
 ### APA
 
-> Mandour, W. (2025). *awe-system: A Multimodal, LLM-based Automated Writing Evaluation System for Formative Assessment* (Version 1.0.0) [Computer software]. Sultan Qaboos University — Center for Preparatory Studies. https://github.com/waleedmandour/awe-system
+> Mandour, W. (2025). *awe-system: A Multimodal, LLM-based Automated Writing Evaluation System for Formative Assessment* (Version 1.0.0) [Computer software]. Sultan Qaboos University — Center for Preparatory Studies. https://github.com/waleedmandour/awe-system2
 
 ### BibTeX
 
@@ -335,13 +335,13 @@ If you use **awe-system** in your research, teaching, or publications, please ci
   year      = {2025},
   version   = {1.0.0},
   publisher = {Sultan Qaboos University -- Center for Preparatory Studies},
-  url       = {https://github.com/waleedmandour/awe-system}
+  url       = {https://github.com/waleedmandour/awe-system22}
 }
 ```
 
 ### MLA
 
-> Mandour, Waleed. *awe-system: A Multimodal, LLM-based Automated Writing Evaluation System for Formative Assessment*. Version 1.0.0, Sultan Qaboos University — Center for Preparatory Studies, 2025, https://github.com/waleedmandour/awe-system.
+> Mandour, Waleed. *awe-system: A Multimodal, LLM-based Automated Writing Evaluation System for Formative Assessment*. Version 1.0.0, Sultan Qaboos University — Center for Preparatory Studies, 2025, https://github.com/waleedmandour/awe-system2.
 
 > A machine-readable citation file ([`CITATION.cff`](CITATION.cff)) is also available in the repository root.
 

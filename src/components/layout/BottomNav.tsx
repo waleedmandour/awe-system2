@@ -8,6 +8,7 @@ import {
   Camera,
   BarChart3,
   History,
+  Info,
 } from 'lucide-react';
 
 // Bottom Navigation Component with autohide on scroll
@@ -81,6 +82,7 @@ const BottomNav = ({ currentStep, onNavigate }: { currentStep: string; onNavigat
     { id: 'upload', step: 'upload', icon: Camera, label: 'Upload' },
     { id: 'results', step: 'results', icon: BarChart3, label: 'Results' },
     { id: 'records', step: 'records', icon: History, label: 'Records' },
+    { id: 'about', step: 'about', icon: Info, label: 'About' },
   ];
 
   return (

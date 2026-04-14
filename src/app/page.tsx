@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { AnimatePresence } from 'framer-motion';
+import { useSession, getSession } from 'next-auth/react';
 import { useAppStore, type Assessment } from '@/lib/store';
 import { useToast } from '@/hooks/use-toast';
 
@@ -11,6 +12,8 @@ import OfflineIndicator from '@/components/layout/OfflineIndicator';
 import BottomNav from '@/components/layout/BottomNav';
 
 // Screen components
+import LoginScreen from '@/components/screens/LoginScreen';
+import AuthErrorScreen from '@/components/screens/AuthErrorScreen';
 import WelcomeScreen from '@/components/screens/WelcomeScreen';
 import SetupScreen from '@/components/screens/SetupScreen';
 import CourseSelectionScreen from '@/components/screens/CourseSelectionScreen';
@@ -20,6 +23,7 @@ import ReviewScreen from '@/components/screens/ReviewScreen';
 import AssessmentScreen from '@/components/screens/AssessmentScreen';
 import ResultsScreen from '@/components/screens/ResultsScreen';
 import RecordsScreen from '@/components/screens/RecordsScreen';
+import AboutScreen from '@/components/screens/AboutScreen';
 
 // ─── Main App Component (Orchestrator) ─────────────────────────────────────────
 
@@ -28,6 +32,8 @@ export default function AWEApp() {
     currentStep,
     setStep,
     geminiApiKey,
+    user,
+    setUser,
     selectedCourse,
     extractedText,
     setExtractedText,
@@ -37,16 +43,37 @@ export default function AWEApp() {
     setProcessing,
   } = useAppStore();
 
+  const { data: session, status } = useSession();
   const { toast } = useToast();
 
   const [direction, setDirection] = useState<'left' | 'right'>('right');
 
-  // Determine initial step based on state
+  // Sync session to store
   useEffect(() => {
-    if (!geminiApiKey && currentStep === 'welcome') {
-      // Show setup after welcome if no API key — handled in navigateTo
+    if (status === 'authenticated' && session?.user) {
+      setUser({
+        name: session.user.name || '',
+        email: session.user.email || '',
+        image: session.user.image || undefined,
+      });
     }
-  }, [geminiApiKey, currentStep]);
+  }, [status, session, setUser]);
+
+  // Determine initial step based on auth state and API key
+  useEffect(() => {
+    if (status === 'loading') return; // Wait for session to load
+
+    if (!user && currentStep !== 'auth-error') {
+      // Not logged in — go to login
+      setStep('login');
+      return;
+    }
+
+    if (user && currentStep === 'login') {
+      // Just logged in, navigate to appropriate screen
+      setStep(geminiApiKey ? 'welcome' : 'setup');
+    }
+  }, [status, user, currentStep, geminiApiKey, setStep]);
 
   const navigateTo = (step: string) => {
     setDirection('right');
@@ -55,7 +82,7 @@ export default function AWEApp() {
 
   const goBack = () => {
     setDirection('left');
-    const stepOrder = ['welcome', 'setup', 'course', 'upload', 'processing', 'review', 'assessing', 'results', 'records'];
+    const stepOrder = ['login', 'welcome', 'setup', 'course', 'upload', 'processing', 'review', 'assessing', 'results', 'records', 'about'];
     const currentIndex = stepOrder.indexOf(currentStep);
     if (currentIndex > 0) {
       setStep(stepOrder[currentIndex - 1] as any);
@@ -157,10 +184,40 @@ export default function AWEApp() {
     setStep('welcome');
   };
 
+  // Show loading while session is being fetched
+  if (status === 'loading') {
+    return (
+      <div className="mobile-container bg-background flex items-center justify-center min-h-screen min-h-[100dvh]">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-16 h-16 rounded-2xl overflow-hidden bg-white p-2 border border-[#1a5f2a]/10">
+            <img
+              src="/squ_logo.png"
+              alt="Sultan Qaboos University"
+              className="w-full h-full object-contain"
+            />
+          </div>
+          <div className="w-6 h-6 border-2 border-[#1a5f2a]/30 border-t-[#1a5f2a] rounded-full animate-spin" />
+        </div>
+      </div>
+    );
+  }
+
   // ─── Step-based routing ────────────────────────────────────────────────────
 
   const renderScreen = () => {
     switch (currentStep) {
+      case 'login':
+        return (
+          <LoginScreen
+            onLogin={() => navigateTo(geminiApiKey ? 'welcome' : 'setup')}
+          />
+        );
+      case 'auth-error':
+        return (
+          <AuthErrorScreen
+            onRetry={() => navigateTo('login')}
+          />
+        );
       case 'welcome':
         return (
           <WelcomeScreen
@@ -219,27 +276,34 @@ export default function AWEApp() {
             onNewAssessment={handleNewAssessment}
           />
         );
+      case 'about':
+        return (
+          <AboutScreen
+            onBack={goBack}
+          />
+        );
       default:
-        return <WelcomeScreen onGetStarted={() => navigateTo('setup')} />;
+        return <LoginScreen onLogin={() => navigateTo(geminiApiKey ? 'welcome' : 'setup')} />;
     }
   };
 
   // ─── BottomNav visibility ───────────────────────────────────────────────────
 
-  const shouldShowBottomNav = !['processing', 'assessing'].includes(currentStep);
+  const hiddenNavSteps = ['processing', 'assessing', 'login', 'auth-error'];
+  const shouldShowBottomNav = !hiddenNavSteps.includes(currentStep);
 
   // ─── Render ────────────────────────────────────────────────────────────────
 
   return (
     <div className="mobile-container bg-background">
       <OfflineIndicator />
-      <InstallBanner />
+      {!user && currentStep !== 'auth-error' && <InstallBanner />}
 
       <AnimatePresence mode="wait" custom={direction}>
         {renderScreen()}
       </AnimatePresence>
 
-      {shouldShowBottomNav && currentStep !== 'welcome' && currentStep !== 'setup' && (
+      {shouldShowBottomNav && (
         <BottomNav currentStep={currentStep} onNavigate={navigateTo} />
       )}
 
