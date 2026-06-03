@@ -1,0 +1,416 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { GoogleGenAI, HarmCategory, HarmBlockThreshold } from '@google/genai';
+
+// IMPORTANT: This prevents Vercel from timing out the OCR process
+export const maxDuration = 60;
+
+// Maximum image size in bytes (20MB) — Gemini API limit
+const MAX_IMAGE_SIZE = 20 * 1024 * 1024;
+
+// MIME types that Gemini supports
+const SUPPORTED_MIME_TYPES = [
+  'image/jpeg',
+  'image/png',
+  'image/webp',
+  'image/gif',
+  'image/bmp',
+  'image/tiff',
+];
+
+// POST Endpoint for routing OCR requests
+// Accepts both legacy `image` (single string) and new `images` (string array)
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json();
+    const { image, images } = body;
+
+    // Normalize to array: support both `image` (legacy) and `images` (new multi-page)
+    const imageArray: string[] = [];
+    if (Array.isArray(images) && images.length > 0) {
+      imageArray.push(...images);
+    } else if (image) {
+      imageArray.push(image);
+    }
+
+    if (imageArray.length === 0) {
+      return NextResponse.json(
+        { error: 'No image(s) provided' },
+        { status: 400 }
+      );
+    }
+
+    // Pre-process and validate all images upfront — fail fast before calling any API
+    const processedImages: { base64: string; mimeType: string }[] = [];
+
+    for (let i = 0; i < imageArray.length; i++) {
+      try {
+        const processed = processImageForAPI(imageArray[i]);
+        processedImages.push(processed);
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : 'Unknown error';
+        console.error(`Image processing error (page ${i + 1}):`, msg);
+        return NextResponse.json(
+          { error: `Failed to process page ${i + 1}: ${msg}` },
+          { status: 400 }
+        );
+      }
+    }
+
+    // Check total payload size for multi-page uploads
+    // Gemini API has a ~20MB total limit, but Vercel's body limit is ~4.5MB
+    // If the combined base64 is too large, we reject early with a helpful message
+    if (processedImages.length > 1) {
+      const totalBase64Size = processedImages.reduce((sum, img) => sum + img.base64.length, 0);
+      const MAX_TOTAL_BASE64 = 3.5 * 1024 * 1024; // ~3.5MB base64 limit (Vercel body ~4.5MB with JSON overhead)
+      if (totalBase64Size > MAX_TOTAL_BASE64) {
+        return NextResponse.json(
+          {
+            error: `The combined image size is too large (${Math.round(totalBase64Size / 1024 / 1024)}MB). ` +
+              `For two-page uploads, please use lower-resolution photos (under 1600px) or upload one page at a time.`,
+          },
+          { status: 413 }
+        );
+      }
+    }
+
+    // ── Initialize Gemini API (Vertex AI or AI Studio) ──────────────────
+    const vertexProject = process.env.GOOGLE_CLOUD_PROJECT;
+    const vertexLocation = process.env.GOOGLE_CLOUD_LOCATION || 'me-central1';
+    const vertexApiKey = process.env.VERTEX_API_KEY;
+    const legacyApiKey = process.env.GEMINI_API_KEY;
+
+    const useVertexAI = !!vertexProject && !vertexApiKey;
+    const useVertexExpress = !!vertexProject && !!vertexApiKey;
+    const useAIStudio = !vertexProject && !!legacyApiKey;
+
+    if (!useVertexAI && !useVertexExpress && !useAIStudio) {
+      return NextResponse.json(
+        { error: 'Server configuration error: Set GOOGLE_CLOUD_PROJECT for Vertex AI (with ADC or VERTEX_API_KEY), or GEMINI_API_KEY for AI Studio.', details: 'No API credentials configured.' },
+        { status: 500 }
+      );
+    }
+
+    // For Vercel: if GOOGLE_APPLICATION_CREDENTIALS_JSON is set, write to temp file for ADC
+    if (useVertexAI && process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON && !process.env.GOOGLE_APPLICATION_CREDENTIALS) {
+      const fs = await import('fs');
+      const path = await import('path');
+      const os = await import('os');
+      const tmpPath = path.join(os.tmpdir(), `gcp-sa-${vertexProject}.json`);
+      fs.writeFileSync(tmpPath, process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON, 'utf-8');
+      process.env.GOOGLE_APPLICATION_CREDENTIALS = tmpPath;
+    }
+
+    let ai: any;
+    if (useVertexAI) {
+      ai = new GoogleGenAI({ vertexai: true, project: vertexProject, location: vertexLocation });
+    } else if (useVertexExpress) {
+      ai = new GoogleGenAI({ vertexai: true, project: vertexProject, location: vertexLocation, apiKey: vertexApiKey });
+    } else {
+      ai = new GoogleGenAI({ apiKey: legacyApiKey });
+    }
+
+    return await performGeminiOCR(processedImages, ai);
+  } catch (error) {
+    console.error('OCR processing error:', error);
+    return NextResponse.json(
+      { error: 'Failed to process image', details: error instanceof Error ? error.message : 'Unknown error' },
+      { status: 500 }
+    );
+  }
+}
+
+/**
+ * Process and validate an image string for API consumption.
+ * Handles data URIs, base64 sanitization, MIME type validation,
+ * HEIC/HEIF detection, and size limits.
+ */
+function processImageForAPI(imageString: string): { base64: string; mimeType: string } {
+  if (!imageString || typeof imageString !== 'string') {
+    throw new Error('No image data provided');
+  }
+
+  let rawBase64: string;
+  let mimeType: string;
+
+  if (imageString.startsWith('data:')) {
+    // Parse data URI: data:[<mimeType>][;base64],<data>
+    const commaIndex = imageString.indexOf(',');
+    if (commaIndex === -1) {
+      throw new Error('Invalid data URI format — missing comma separator');
+    }
+
+    const headerPart = imageString.substring(0, commaIndex);
+    rawBase64 = imageString.substring(commaIndex + 1);
+
+    // Extract MIME type from header
+    const mimeMatch = headerPart.match(/data:([^;]+)/);
+    mimeType = mimeMatch ? mimeMatch[1].toLowerCase().trim() : 'image/jpeg';
+
+    // Verify the data is actually base64 encoded (check for base64 marker)
+    const isBase64 = headerPart.includes(';base64');
+    if (!isBase64) {
+      // Data URI without ;base64 means the data is URL-encoded, not base64
+      throw new Error(
+        `Image is not base64-encoded (found "${mimeType}" without ;base64). ` +
+        `Please use a standard image format (JPEG, PNG, WEBP).`
+      );
+    }
+  } else {
+    // Raw base64 string without data URI prefix
+    rawBase64 = imageString;
+    mimeType = 'image/jpeg';
+  }
+
+  // Sanitize base64: remove ALL whitespace, newlines, and control characters
+  // Mobile platforms (especially iOS) can embed newlines in FileReader output
+  const sanitizedBase64 = rawBase64
+    .replace(/[\s\r\n\t\f\v\u00A0\u2028\u2029]/g, '');
+
+  if (sanitizedBase64.length === 0) {
+    throw new Error('Image data is empty after processing');
+  }
+
+  // Validate that the sanitized string is valid base64
+  // Base64 alphabet: A-Z, a-z, 0-9, +, /, and = for padding
+  if (!/^[A-Za-z0-9+/]*={0,2}$/.test(sanitizedBase64)) {
+    throw new Error(
+      'Image data contains invalid base64 characters. ' +
+      'This can happen with HEIC/HEIF images from iOS devices. ' +
+      'Please convert the image to JPEG or PNG before uploading.'
+    );
+  }
+
+  // Check for HEIC/HEIF format — NOT supported by Gemini or Vision API
+  if (mimeType === 'image/heic' || mimeType === 'image/heif') {
+    throw new Error(
+      'HEIC/HEIF format is not supported. ' +
+      'On iPhone: go to Settings → Camera → Formats → select "Most Compatible" ' +
+      'to take photos in JPEG format, or use a different image.'
+    );
+  }
+
+  // Warn for unsupported but potentially valid MIME types
+  if (!SUPPORTED_MIME_TYPES.includes(mimeType)) {
+    // Don't throw — try anyway with a fallback to JPEG
+    console.warn(`Unsupported MIME type "${mimeType}", falling back to image/jpeg`);
+    mimeType = 'image/jpeg';
+  }
+
+  // Check decoded size limit (~4/3 ratio for base64 to binary)
+  const estimatedByteSize = Math.floor(sanitizedBase64.length * 0.75);
+  if (estimatedByteSize > MAX_IMAGE_SIZE) {
+    throw new Error(
+      `Image is too large (~${Math.round(estimatedByteSize / 1024 / 1024)}MB). ` +
+      `Maximum allowed size is ${Math.round(MAX_IMAGE_SIZE / 1024 / 1024)}MB. ` +
+      `Please resize the image or take a photo with lower resolution.`
+    );
+  }
+
+  return { base64: sanitizedBase64, mimeType };
+}
+
+// Clean OCR output into proper running lines for editing and assessment
+function cleanExtractedText(raw: string): string {
+  let text = raw.trim();
+  // Replace multiple spaces with single space (but keep newlines)
+  text = text.replace(/[ \t]+/g, ' ');
+  // Fix hyphenated line breaks
+  text = text.replace(/-\n(\w)/g, '$1');
+  // Remove single newlines (line-break artifacts, not real paragraphs)
+  text = text.replace(/([^\n])\n([^\n])/g, '$1 $2');
+  // Collapse multiple blank lines into exactly one
+  text = text.replace(/\n{3,}/g, '\n\n');
+  // Trim each line
+  text = text
+    .split('\n')
+    .map(line => line.trim())
+    .join('\n');
+  return text.trim();
+}
+
+// Perform OCR using Google Vision API — processes multiple images in order
+async function performVisionOCR(images: { base64: string; mimeType: string }[], apiKey: string) {
+  try {
+    const allTexts: string[] = [];
+
+    for (let i = 0; i < images.length; i++) {
+      const { base64, mimeType } = images[i];
+
+      const visionResponse = await fetch(
+        `https://vision.googleapis.com/v1/images:annotate?key=${apiKey}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            requests: [{
+              image: { content: base64 },
+              features: [{ type: 'DOCUMENT_TEXT_DETECTION' }],
+              imageContext: { languageHints: ['en'] },
+            }],
+          }),
+        }
+      );
+
+      if (!visionResponse.ok) {
+        const error = await visionResponse.json();
+        console.error(`Vision API error (page ${i + 1}):`, error);
+        // If first page fails, bubble up; if subsequent pages fail, skip
+        if (i === 0) {
+          return NextResponse.json(
+            { error: 'Failed to process image with Vision API', details: error },
+            { status: visionResponse.status }
+          );
+        }
+        continue;
+      }
+
+      const result = await visionResponse.json();
+      const textAnnotations = result.responses?.[0]?.textAnnotations;
+      const rawText = textAnnotations?.[0]?.description || '';
+      const cleanedText = cleanExtractedText(rawText);
+      if (cleanedText) allTexts.push(cleanedText);
+    }
+
+    // Combine all pages with a paragraph break between them
+    const combinedText = allTexts.join('\n\n');
+    const wordCount = combinedText.split(/\s+/).filter(Boolean).length;
+
+    return NextResponse.json({
+      success: true,
+      text: combinedText,
+      wordCount,
+      confidence: 0.9,
+      method: 'vision',
+      pageCount: images.length,
+    });
+  } catch (error) {
+    console.error('Vision OCR error:', error);
+    return NextResponse.json(
+      { error: 'Failed to process image with Vision API', details: error instanceof Error ? error.message : 'Unknown error' },
+      { status: 500 }
+    );
+  }
+}
+
+// Perform OCR using Google Gemini — processes multiple images in a single call
+// This is the optimal approach: Gemini receives ALL images at once with a
+// clear ordering instruction, so it naturally concatenates the text in the
+// correct page order without duplication or reordering issues.
+async function performGeminiOCR(images: { base64: string; mimeType: string }[], ai: any) {
+  try {
+    // Build parts array: all images first, then the OCR prompt
+    const imageParts = images.map((img) => ({
+      inlineData: { data: img.base64, mimeType: img.mimeType }
+    }));
+
+    const prompt = images.length === 1
+      ? 'Extract ALL text from this image exactly as written. Preserve the original formatting, line breaks, and structure. This may be handwritten text — transcribe it carefully, preserving every word. Output ONLY the extracted text with no additional commentary or explanations.'
+      : `These ${images.length} images are pages of the same essay, in order (page 1 first, page 2 second). Extract ALL text from ALL images and combine them into one continuous text in exact page order. Where text continues from one page to the next, merge seamlessly — do NOT repeat the overlapping content. Preserve paragraph breaks and formatting. Output ONLY the combined extracted text.`;
+
+    const safetySettings = [
+      { category: HarmCategory.HARM_CATEGORY_HATE_SPEECH, threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH },
+      { category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH },
+      { category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH },
+      { category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH },
+    ];
+
+    const contents: any[] = [...imageParts, { text: prompt }];
+
+    const result = await ai.models.generateContent({
+      model: 'gemini-2.5-flash',
+      contents,
+      config: {
+        systemInstruction: 'You are an expert OCR system specialized in reading handwritten and printed text. Extract ALL text from images with the highest accuracy. When multiple images are provided, they are pages of the SAME document in order (page 1, page 2, etc.). You MUST combine the text from all pages in exact page order, preserving the logical flow — do NOT duplicate the overlapping text at page boundaries. Output ONLY the full combined extracted text with no additional commentary, no page markers, and no explanations.',
+        temperature: 0.1,
+        maxOutputTokens: 8192,
+        thinkingConfig: { thinkingBudget: 0 },
+        safetySettings,
+      },
+    });
+
+    // ── Check for blocking / truncation ──
+    const promptFeedback = (result as any)?.promptFeedback;
+    if (promptFeedback?.blockReason) {
+      return NextResponse.json(
+        { error: 'AI content filter blocked the image. Please try a different image or rephrase the content.', details: `Prompt blocked: ${promptFeedback.blockReason}` },
+        { status: 422 }
+      );
+    }
+
+    const candidate = (result as any)?.candidates?.[0];
+    const finishReason = candidate?.finishReason;
+
+    if (finishReason === 'SAFETY' || finishReason === 'RECITATION' || finishReason === 'LANGUAGE') {
+      return NextResponse.json(
+        { error: 'AI content filter blocked the OCR response. The essay may contain sensitive topics. Please try again or use the Vision API instead.', details: `Response blocked: ${finishReason}` },
+        { status: 422 }
+      );
+    }
+
+    // Extract text — filter out "thought" parts from thinking models
+    let rawText = '';
+    if (candidate?.content?.parts) {
+      for (const part of candidate.content.parts) {
+        if (part.text && !part.thought) {
+          rawText += part.text;
+        }
+      }
+    }
+    if (!rawText) {
+      rawText = result.text || '';
+    }
+    if (!rawText || rawText.trim().length === 0) {
+      return NextResponse.json(
+        { error: 'AI returned an empty response for the image. Please try again or use the Vision API instead.', details: `Empty response, finishReason: ${finishReason || 'unknown'}` },
+        { status: 500 }
+      );
+    }
+
+    if (finishReason === 'MAX_TOKENS') {
+      console.warn('Gemini OCR response was truncated (MAX_TOKENS). The extracted text may be incomplete.');
+    }
+
+    const extractedText = cleanExtractedText(rawText);
+    const wordCount = extractedText.split(/\s+/).filter(Boolean).length;
+
+    return NextResponse.json({
+      success: true,
+      text: extractedText,
+      wordCount,
+      confidence: 0.85,
+      method: 'gemini',
+      pageCount: images.length,
+    });
+  } catch (error) {
+    console.error('Gemini OCR error:', error);
+    // Provide a user-friendly error message for common platform issues
+    const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+    let userMessage = 'Failed to process image with Gemini.';
+
+    if (errorMsg.includes('string') && errorMsg.includes('match') && errorMsg.includes('pattern')) {
+      // "The string did not match the expected pattern" — Gemini SDK rejects malformed base64
+      // This commonly happens when the payload was truncated by Vercel's body size limit,
+      // or when the base64 data contains invalid characters from a corrupt data URI.
+      userMessage =
+        'The image data was too large or corrupt. ' +
+        'When uploading 2 pages, the combined image size may exceed the server limit. ' +
+        'Try using lower-resolution photos, or upload one page at a time. ' +
+        'iPhone users: ensure camera is set to JPEG (Settings → Camera → Formats → Most Compatible).';
+    } else if (errorMsg.includes('string') && (errorMsg.includes('platform') || errorMsg.includes('invalid'))) {
+      userMessage =
+        'The image format is not supported. ' +
+        'This commonly occurs with HEIC/HEIF photos from iPhones. ' +
+        'Solution: Go to Settings → Camera → Formats → select "Most Compatible" to use JPEG. ' +
+        'Alternatively, take a screenshot of the image and upload that instead.';
+    } else if (errorMsg.includes('quota') || errorMsg.includes('RESOURCE_EXHAUSTED') || errorMsg.includes('429')) {
+      userMessage = 'API quota exceeded. Please wait a moment and try again.';
+    } else if (errorMsg.includes('API key') || errorMsg.includes('401') || errorMsg.includes('403')) {
+      userMessage = 'Invalid API key. Please check your Gemini API key in settings.';
+    }
+
+    return NextResponse.json(
+      { error: userMessage, details: errorMsg },
+      { status: 500 }
+    );
+  }
+}
