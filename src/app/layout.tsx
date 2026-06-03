@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://awe-system1.vercel.app"),
+  metadataBase: new URL("https://awe-system2.vercel.app"),
   title: "iAWE System - Sultan Qaboos University",
   description: "Intelligent Automated Writing Evaluation System for Sultan Qaboos University. AI-powered essay assessment and feedback.",
   keywords: ["iAWE", "AWE", "Sultan Qaboos University", "SQU", "Writing Evaluation", "Essay Assessment", "Academic Writing"],
@@ -38,7 +38,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "iAWE System - Sultan Qaboos University",
     description: "Intelligent AI-powered essay assessment and feedback for SQU students",
-    url: "https://awe-system1.vercel.app",
+    url: "https://awe-system2.vercel.app",
     siteName: "iAWE System",
     type: "website",
     images: [{ url: "/icon-512x512.png", width: 512, height: 512, type: "image/png" }],
