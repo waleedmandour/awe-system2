@@ -285,6 +285,7 @@ export default function AWEApp() {
         <p>Developed by: <span className="font-medium text-[#1e40af]">Dr. Waleed Mandour</span></p>
         <p>AI Co-Marker Assistance Project, 2026</p>
         <p className="mt-1 text-[10px] text-amber-600">AI may make mistakes. Verify results with a qualified instructor.</p>
+        <p className="mt-1 text-[10px] text-muted-foreground/70">Powered with Vertex AI and Google&apos;s Agent Platform, 2026</p>
       </footer>
     </div>
   );
