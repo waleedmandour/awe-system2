@@ -73,24 +73,24 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // ── Initialize Gemini API (Vertex AI or AI Studio) ──────────────────
-    const vertexProject = process.env.GOOGLE_CLOUD_PROJECT;
-    const vertexLocation = process.env.GOOGLE_CLOUD_LOCATION || 'me-central1';
+    // ── Initialize Gemini API (Agent Platform / Vertex AI / AI Studio) ──────
     const vertexApiKey = process.env.VERTEX_API_KEY;
     const legacyApiKey = process.env.GEMINI_API_KEY;
+    const vertexProject = process.env.GOOGLE_CLOUD_PROJECT;
+    const vertexLocation = process.env.GOOGLE_CLOUD_LOCATION || 'me-central1';
 
-    const useVertexAI = !!vertexProject && !vertexApiKey;
-    const useVertexExpress = !!vertexProject && !!vertexApiKey;
-    const useAIStudio = !vertexProject && !!legacyApiKey;
+    const useVertexExpress = !!vertexApiKey;
+    const useVertexAI = !useVertexExpress && !!vertexProject;
+    const useAIStudio = !useVertexExpress && !useVertexAI && !!legacyApiKey;
 
     if (!useVertexAI && !useVertexExpress && !useAIStudio) {
       return NextResponse.json(
-        { error: 'Server configuration error: Set GOOGLE_CLOUD_PROJECT for Vertex AI (with ADC or VERTEX_API_KEY), or GEMINI_API_KEY for AI Studio.', details: 'No API credentials configured.' },
+        { error: 'Server configuration error: Set VERTEX_API_KEY for Vertex AI Express, or GOOGLE_CLOUD_PROJECT for Vertex AI with ADC, or GEMINI_API_KEY for AI Studio.', details: 'No API credentials configured.' },
         { status: 500 }
       );
     }
 
-    // For Vercel: if GOOGLE_APPLICATION_CREDENTIALS_JSON is set, write to temp file for ADC
+    // For Vercel: write service account JSON to temp file for ADC
     if (useVertexAI && process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON && !process.env.GOOGLE_APPLICATION_CREDENTIALS) {
       const fs = await import('fs');
       const path = await import('path');
@@ -101,10 +101,10 @@ export async function POST(request: NextRequest) {
     }
 
     let ai: any;
-    if (useVertexAI) {
+    if (useVertexExpress) {
+      ai = new GoogleGenAI({ vertexai: true, apiKey: vertexApiKey });
+    } else if (useVertexAI) {
       ai = new GoogleGenAI({ vertexai: true, project: vertexProject, location: vertexLocation });
-    } else if (useVertexExpress) {
-      ai = new GoogleGenAI({ vertexai: true, project: vertexProject, location: vertexLocation, apiKey: vertexApiKey });
     } else {
       ai = new GoogleGenAI({ apiKey: legacyApiKey });
     }

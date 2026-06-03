@@ -950,43 +950,45 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // ── Initialize Gemini API (Vertex AI or AI Studio) ────────────────────────
-    // Three authentication modes, checked in priority order:
+    // ── Initialize Gemini API (Agent Platform / Vertex AI / AI Studio) ────────
+    // Authentication modes, checked in priority order:
     //
-    // 1. VERTEX AI (full): GOOGLE_CLOUD_PROJECT + GOOGLE_CLOUD_LOCATION
-    //    Uses Application Default Credentials (ADC). On Vercel, set
-    //    GOOGLE_APPLICATION_CREDENTIALS_JSON to the service account JSON.
+    // 1. VERTEX AI (ADC): VERTEX_API_KEY not set, but GOOGLE_CLOUD_PROJECT is.
+    //    SDK uses ADC automatically. On Vercel, set GOOGLE_APPLICATION_CREDENTIALS_JSON.
     //    Provides: region selection, seed/topK/topP determinism, Section 18 privacy.
     //
-    // 2. VERTEX AI EXPRESS: GOOGLE_CLOUD_PROJECT + VERTEX_API_KEY
-    //    Uses a Google Cloud API key with Vertex AI Express Mode.
-    //    Provides: Section 18 privacy, but no region selection or seed determinism.
+    // 2. VERTEX AI EXPRESS: VERTEX_API_KEY is set (with or without project).
+    //    SDK uses the API key against the Vertex AI global endpoint.
+    //    Provides: Section 18 privacy. No region selection, limited determinism.
+    //    NOTE: The @google/genai SDK treats project/location and apiKey as MUTUALLY
+    //    EXCLUSIVE for Vertex AI. When apiKey is set, project/location are cleared.
     //
-    // 3. AI STUDIO (legacy): GEMINI_API_KEY only
+    // 3. AI STUDIO (legacy): Only GEMINI_API_KEY is set.
     //    Free Gemini API — no privacy guarantee, no determinism controls.
     //
-    const vertexProject = process.env.GOOGLE_CLOUD_PROJECT;
-    const vertexLocation = process.env.GOOGLE_CLOUD_LOCATION || 'me-central1';
+    // The SDK also reads GOOGLE_GENAI_USE_ENTERPRISE / GOOGLE_GENAI_USE_VERTEXAI
+    // env vars to auto-enable enterprise mode, but explicit constructor params
+    // always take precedence.
+    //
     const vertexApiKey = process.env.VERTEX_API_KEY;
     const legacyApiKey = process.env.GEMINI_API_KEY;
+    const vertexProject = process.env.GOOGLE_CLOUD_PROJECT;
+    const vertexLocation = process.env.GOOGLE_CLOUD_LOCATION || 'me-central1';
 
-    // Mode 1: Full Vertex AI with ADC (service account)
-    const useVertexAI = !!vertexProject && !vertexApiKey;
-    // Mode 2: Vertex AI Express Mode (API key + project)
-    const useVertexExpress = !!vertexProject && !!vertexApiKey;
-    // Mode 3: AI Studio free API
-    const useAIStudio = !vertexProject && !!legacyApiKey;
+    // Mode detection: API key for Vertex Express takes priority if set
+    const useVertexExpress = !!vertexApiKey;
+    const useVertexAI = !useVertexExpress && !!vertexProject;
+    const useAIStudio = !useVertexExpress && !useVertexAI && !!legacyApiKey;
 
     if (!useVertexAI && !useVertexExpress && !useAIStudio) {
       return NextResponse.json(
-        { error: 'Server configuration error: Set GOOGLE_CLOUD_PROJECT for Vertex AI (with ADC or VERTEX_API_KEY), or GEMINI_API_KEY for AI Studio.', details: 'No API credentials configured.' },
+        { error: 'Server configuration error: Set VERTEX_API_KEY for Vertex AI Express, or GOOGLE_CLOUD_PROJECT for Vertex AI with ADC, or GEMINI_API_KEY for AI Studio.', details: 'No API credentials configured.' },
         { status: 500 }
       );
     }
 
     // For Vercel: if GOOGLE_APPLICATION_CREDENTIALS_JSON is set, write it to a
     // temp file and point GOOGLE_APPLICATION_CREDENTIALS to it so ADC picks it up.
-    // This avoids requiring a physical JSON key file in the deployment.
     if (useVertexAI && process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON && !process.env.GOOGLE_APPLICATION_CREDENTIALS) {
       const fs = await import('fs');
       const path = await import('path');
@@ -998,22 +1000,25 @@ export async function POST(request: NextRequest) {
     }
 
     let ai: any;
-    if (useVertexAI) {
+    if (useVertexExpress) {
+      // Vertex AI Express Mode: apiKey ONLY — project/location are NOT passed
+      // because the SDK treats them as mutually exclusive for Vertex AI.
+      // The SDK routes to the global Vertex AI endpoint automatically.
+      ai = new GoogleGenAI({
+        vertexai: true,
+        apiKey: vertexApiKey,
+      });
+      console.log('Vertex AI (Express) initialized: using API key, global endpoint');
+    } else if (useVertexAI) {
+      // Full Vertex AI with ADC: project + location, NO apiKey
       ai = new GoogleGenAI({
         vertexai: true,
         project: vertexProject,
         location: vertexLocation,
       });
       console.log(`Vertex AI (ADC) initialized: project=${vertexProject}, location=${vertexLocation}`);
-    } else if (useVertexExpress) {
-      ai = new GoogleGenAI({
-        vertexai: true,
-        project: vertexProject,
-        location: vertexLocation,
-        apiKey: vertexApiKey,
-      });
-      console.log(`Vertex AI (Express) initialized: project=${vertexProject}, location=${vertexLocation}`);
     } else {
+      // AI Studio (legacy): apiKey only, no vertexai flag
       ai = new GoogleGenAI({ apiKey: legacyApiKey });
       console.log('AI Studio mode (legacy): using GEMINI_API_KEY');
     }
