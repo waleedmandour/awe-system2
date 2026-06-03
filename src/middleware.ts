@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 /**
- * Proxy for AWE System1
+ * AWE System2 — Next.js Middleware
  *
- * Protects API routes (/api/ocr, /api/assess) by verifying the
+ * Protects paid API routes (/api/ocr, /api/assess) by verifying the
  * authentication token cookie. Unauthenticated requests receive 401.
  *
  * The /api/auth route is excluded from protection so users can authenticate.
@@ -14,7 +14,7 @@ export const config = {
   matcher: ['/api/ocr/:path*', '/api/assess/:path*'],
 };
 
-export async function proxy(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const token = request.cookies.get('awe-auth-token')?.value;
   const email = request.cookies.get('awe-auth-email')?.value;
 

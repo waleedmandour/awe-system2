@@ -796,6 +796,68 @@ SCORING INSTRUCTIONS:
 6. Do NOT calculate totalScore or percentage — those are computed automatically.`;
 }
 
+function buildLanc2070Prompt(
+  studentText: string,
+  mainArticle: { title: string; author: string; year: number; content: string },
+  excerpts: { author: string; year: number; title: string; content: string }[],
+  assignmentTitle: string,
+  writingPrompt: string,
+  wordCount: number,
+  targetWordCount: { min: number; max: number; ideal: number }
+): string {
+  const rubrics = CREDIT_RUBRICS; // Article review uses credit-level criteria
+  const tenPercentBelow = Math.round(targetWordCount.min * 0.9);
+  const tenPercentAbove = Math.round(targetWordCount.max * 1.1);
+
+  const wordCountStatus = wordCount < tenPercentBelow
+    ? `WARNING: Word count is MORE THAN 10% BELOW ${targetWordCount.min}. This MUST lower the Task Achievement score.`
+    : wordCount < targetWordCount.min
+    ? `NOTE: Word count is below ${targetWordCount.min}-${targetWordCount.max}. Up to 10% below is acceptable.`
+    : wordCount > tenPercentAbove
+    ? `NOTE: Word count is MORE THAN 10% ABOVE ${targetWordCount.max}. Do NOT deduct marks. Mention in feedback.`
+    : wordCount > targetWordCount.max
+    ? `NOTE: Word count exceeds ${targetWordCount.min}-${targetWordCount.max}. Do NOT deduct marks.`
+    : `Word count is within ${targetWordCount.min}-${targetWordCount.max}.`;
+
+  const excerptsText = excerpts.map((e, i) =>
+    `Excerpt ${i + 1}: "${e.title}" by ${e.author} (${e.year})\n"""\n${e.content}\n"""`
+  ).join('\n\n');
+
+  return `You are an expert writing assessor for LANC2070 (Article Review) at Sultan Qaboos University. CEFR A2-B1 level.
+
+ASSIGNMENT: ${assignmentTitle}
+WRITING TASK: ${writingPrompt}
+TARGET WORD COUNT: ${targetWordCount.min}-${targetWordCount.max} (ideal: ${targetWordCount.ideal}). Tolerance: +/-10%.
+${wordCountStatus}
+
+MAIN ARTICLE:
+Title: "${mainArticle.title}" by ${mainArticle.author} (${mainArticle.year})
+"""
+${mainArticle.content}
+"""
+
+SUPPORTING EXCERPTS:
+${excerptsText}
+
+STUDENT'S ARTICLE REVIEW:
+"""
+${studentText}
+"""
+
+ARTICLE REVIEW RUBRICS:
+${buildCriteriaText(rubrics)}
+
+${CREDIT_HUMANIZATION}
+SCORING INSTRUCTIONS:
+1. Score each criterion 0-5 (0.5 increments). Use the FULL range — do NOT default to middle scores.
+2. For Task Achievement: Evaluate whether the student critically analyses the article (not just summarizes), reviews at least 2 points from the author, uses at least 2 excerpts with proper in-text APA citations, and paraphrases effectively (no chunks of 3+ copied words).
+3. For each criterion: quote at least ONE exact phrase from the student's review as evidence.
+4. List up to 3 specific errors per criterion as { "quote": "[exact text]", "explanation": "[why wrong]" }. Do NOT provide corrections.
+5. Write 1-2 specific strengths and 1-2 actionable suggestions per criterion.
+6. overallFeedback (3-4 sentences): strongest/weakest criterion, quality of critical analysis vs summary, paraphrasing quality, one prioritized action item.
+7. Do NOT calculate totalScore or percentage — those are computed automatically.`;
+}
+
 function buildSynthesisPrompt(
   studentText: string,
   sources: { title: string; content: string }[],
@@ -1030,6 +1092,7 @@ export async function POST(request: NextRequest) {
     const isSynthesisWriting = courseCode === 'LANC2160' && writingType === 'synthesis';
     const isLanc1070 = courseCode === 'LANC1070';
     const isLanc2146 = courseCode === 'LANC2146';
+    const isLanc2070 = courseCode === 'LANC2070';
 
     if (courseCode === 'LANC2160' && !writingType) {
       return NextResponse.json(
@@ -1038,7 +1101,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if ((isLanc1070 || isLanc2146 || isSummaryWriting || isSynthesisWriting) && !sourceTextId) {
+    if ((isLanc1070 || isLanc2146 || isLanc2070 || isSummaryWriting || isSynthesisWriting) && !sourceTextId) {
       return NextResponse.json(
         { error: 'A source text or assignment must be selected before assessment. Please go back and select one.', details: `Missing sourceTextId for course ${courseCode}` },
         { status: 400 }
@@ -1097,6 +1160,18 @@ export async function POST(request: NextRequest) {
       activeTargetWordCount = { min: practiceData.targetWordCount.min, max: practiceData.targetWordCount.max, ideal: practiceData.targetWordCount.ideal, label: `Report: "${practiceData.title}"` };
       prompt = buildLanc2146Prompt(text, practiceData.reportSections.map(s => ({ title: s.title, content: s.content })), practiceData.resultsFigure?.caption || null, practiceData.resultsFigure?.graphDescription || null, practiceData.title, wordCount, activeTargetWordCount);
       criteria = LANC2146_CRITERIA;
+    } else if (isLanc2070) {
+      const { LANC2070_PRACTICE_TESTS } = await import('@/lib/store');
+      const practiceData = LANC2070_PRACTICE_TESTS.find(t => t.id === sourceTextId);
+      if (!practiceData) {
+        return NextResponse.json(
+          { error: 'Article review assignment not found. Please select a valid practice test.', details: `No LANC2070 practice test found for sourceTextId: ${sourceTextId}` },
+          { status: 400 }
+        );
+      }
+      activeTargetWordCount = { min: practiceData.targetWordCount.min, max: practiceData.targetWordCount.max, ideal: practiceData.targetWordCount.ideal, label: `Article Review: "${practiceData.title}"` };
+      prompt = buildLanc2070Prompt(text, practiceData.mainArticle, practiceData.excerpts, practiceData.title, practiceData.writingPrompt, wordCount, activeTargetWordCount);
+      criteria = CREDIT_CRITERIA;
     } else if (isLanc1070) {
       const { LANC1070_PRACTICE_TESTS } = await import('@/lib/store');
       const practiceData = LANC1070_PRACTICE_TESTS.find(t => t.id === sourceTextId);
@@ -1125,6 +1200,8 @@ export async function POST(request: NextRequest) {
       ? 'You are an expert writing assessment AI for LANC2160 (Synthesis Essay) at Sultan Qaboos University. CEFR A2-B1 level. Compare the essay against ALL THREE source texts. Quote exact words as evidence. Justify every score against the rubric. List specific errors with quoted text.'
       : isLanc1070
       ? 'You are an expert writing assessment AI for LANC1070 (Synthesis Essay) at Sultan Qaboos University. CEFR A2-B1 level. Compare the essay against the provided source text. Quote exact words as evidence. Justify every score against the rubric. List specific errors with quoted text.'
+      : isLanc2070
+      ? 'You are an expert writing assessment AI for LANC2070 (Article Review) at Sultan Qaboos University. CEFR A2-B1 level. Evaluate critical analysis vs summary, paraphrasing quality, and APA citation usage. Quote exact words as evidence. Justify every score against the rubric. List specific errors with quoted text.'
       : isLanc2146
       ? 'You are an expert writing assessment AI for LANC2146 (Report Writing) at Sultan Qaboos University. CEFR A2-B1 level. Evaluate Discussion (analysis/interpretation) and Conclusion (summary, recommendations). Quote exact words as evidence. Justify every score against the rubric. List specific errors with quoted text.'
       : isFoundation
