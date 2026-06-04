@@ -102,6 +102,68 @@ The assessment engine applies 9 humanization rules for fair, encouraging, and co
 8. **Feedback Tone Guardrails** — Asset-based language, no judgmental phrasing
 9. **Holistic Consistency Check** — Score spread across criteria must not exceed 2 points
 
+### Boundary Accuracy System (v3.1)
+
+The most persistent problem in AI-based writing assessment is the **Satisfactory/Good boundary confusion** — the AI's inability to reliably distinguish between adjacent grade levels that share semantically similar descriptors. iAWE v3.1 implements three complementary approaches to solve this:
+
+#### Approach 1: Enhanced Rubric Descriptors with Boundary Conditions
+
+Every rubric level at the Satisfactory/Good boundary now includes **exclusionary boundary conditions** — defining each level not just by what it IS, but by what it is NOT. Each boundary includes a **KEY TEST**: a specific yes/no question the model must answer before upgrading from Satisfactory to Good.
+
+Example (Foundation Task Response):
+> **Satisfactory (3.5):** "BOUNDARY — NOT Good (4): The essay fulfills MOST but NOT ALL task requirements. At least one required element is missing, underdeveloped, or partially off-topic. KEY TEST: Can you point to a missing, underdeveloped, or off-topic element? If YES → remains 3.5."
+>
+> **Good (4):** "BOUNDARY — NOT Satisfactory (3.5): ALL task requirements are met — no missing elements, no underdeveloped points, no irrelevant tangents. KEY TEST from 3.5: Is there ANY missing, underdeveloped, or off-topic element? If NO → 4 is justified."
+
+Boundary conditions are applied to all 5 rubric types: Foundation (0–6), Credit (0–5), Summary (0–5), Synthesis (0–5), and Report Writing (0–5).
+
+#### Approach 2: Evidence-First Scoring Protocol
+
+The scoring process has been restructured into an **8-step Evidence-First Protocol** that forces the model to cite textual evidence and perform boundary verification BEFORE assigning a score:
+
+| Step | Action | Purpose |
+|:----:|--------|---------|
+| 1 | **Evidence Gathering** — Quote 2+ relevant phrases (one supporting higher, one supporting lower band) | Prevents pattern-matching without evidence |
+| 2 | **Band Range Identification** — State the narrowest possible band range | Narrows the decision space |
+| 3 | **Boundary Verification** — Mandatory binary check when range spans Satisfactory/Good | Forces explicit boundary decision |
+| 4 | **Exclusion Check** — Check if boundary exclusion statements rule out the higher band | Uses negative definitions |
+| 5 | **Score Assignment** — Only NOW assign a score consistent with Steps 1–4 | Prevents premature scoring |
+| 6 | **Justification with Evidence** — Cite quoted evidence and reference boundary checks | Ensures accountability |
+| 7 | **Error Classification** — List errors as expected/non-impeding/impeding | Consistent error handling |
+| 8 | **Holistic Consistency Check** — Verify spread ≤ 2 points, no contradictions | Cross-criterion consistency |
+
+Each rubric type has its own **Boundary Verification Check table** — a set of binary checkboxes (□ ALL requirements met, □ No missing elements, etc.) that the model must complete before assigning a Good score. If ANY checkbox fails, the score remains at Satisfactory.
+
+#### Approach 3: Scored Exemplars as Calibration Anchors
+
+Each rubric type includes **paired Satisfactory/Good exemplars** — short, realistic student excerpts at the exact boundary between the two levels. Each exemplar includes:
+
+- The student excerpt (realistic A1-A2 or A2-B1 writing with typical Arabic L1 transfer errors)
+- The assigned score
+- An **annotation** explaining WHY the score is not the adjacent level, referencing the KEY TEST from the boundary conditions
+
+Exemplar design principle: Each Satisfactory exemplar is a "high Satisfactory" (just barely below Good), and each Good exemplar is a "low Good" (just barely above Satisfactory). This maximizes the model's sensitivity at the decision boundary.
+
+| Rubric Type | Criteria with Exemplars | Total Pairs |
+|-------------|:-----------------------:|:-----------:|
+| Foundation | Task Response, Coherence, Lexical, Grammar | 4 |
+| Credit | Task Achievement, Lexical Resource | 2 |
+| Summary | Task Achievement | 1 |
+| Synthesis | Task Achievement | 1 |
+| Report Writing | Task Response | 1 |
+
+#### Synthesis-Specific Boundary Check
+
+For synthesis writing (LANC2160, LANC1070), an additional binary check is enforced at the Task Achievement boundary: **Are ALL source texts referenced and integrated?** If the student only references some sources, Task Achievement cannot exceed Satisfactory regardless of other qualities. This is the single strongest differentiator between Satisfactory and Good for synthesis writing.
+
+#### Report Writing-Specific Boundary Check
+
+For report writing (LANC2146), the Task Response boundary checks include: **Are specific statistics cited?** and **Does the conclusion include ALL four required elements?** (most obvious result, reference to previous research, restatement of aim, solutions/recommendations). Missing any element prevents a Good score.
+
+#### Token Budget Impact
+
+The three approaches add approximately 800–1800 tokens per prompt (depending on rubric type), which translates to approximately $0.0004–0.0008 additional cost per assessment at current Gemini 2.5 Flash pricing — negligible for the accuracy improvement gained.
+
 ---
 
 ## Tech Stack
@@ -322,7 +384,7 @@ If you use the **iAWE System** in your research, teaching, or publications, plea
 
 ### APA
 
-> Mandour, W. (2026). *iAWE System: A Multimodal, LLM-based Automated Writing Evaluation System for Formative Assessment* (Version 3.0.0) [Computer software]. Sultan Qaboos University — Center for Preparatory Studies. https://github.com/waleedmandour/awe-system2
+> Mandour, W. (2026). *iAWE System: A Multimodal, LLM-based Automated Writing Evaluation System for Formative Assessment* (Version 3.1.0) [Computer software]. Sultan Qaboos University — Center for Preparatory Studies. https://github.com/waleedmandour/awe-system2
 
 ### BibTeX
 
@@ -331,7 +393,7 @@ If you use the **iAWE System** in your research, teaching, or publications, plea
   author    = {Mandour, Waleed},
   title     = {{iAWE System: A Multimodal, LLM-based Automated Writing Evaluation System for Formative Assessment}},
   year      = {2026},
-  version   = {3.0.0},
+  version   = {3.1.0},
   publisher = {Sultan Qaboos University -- Center for Preparatory Studies},
   url       = {https://github.com/waleedmandour/awe-system2}
 }
