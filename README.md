@@ -345,4 +345,4 @@ This project is licensed under the [MIT License](LICENSE).
 
 ---
 
-*Powered with Vertex AI and Google's Agent Platform, 2026*
+*Built with ♥️ to the Language Teaching Community, 2026*
