@@ -36,8 +36,8 @@ const FOUNDATION_RUBRICS = {
         '0-1.5': 'Very Poor: Text fails to fulfill any task requirements and shows no understanding of audience, purpose or genre. Length of text may be inappropriate.',
         '2-2.5': 'Weak: Response shows minimal awareness of the task, audience, purpose or genre. Very limited topic development. Length of text is likely inappropriate.',
         '3': 'Unsatisfactory: Response does not adequately fulfill task requirements and shows little awareness of audience, purpose and genre. Little or no attempt at topic development. Length of text may be inappropriate.',
-        '3.5': 'Satisfactory: Response fulfills most task requirements and shows adequate awareness of audience, purpose and genre. Topic development is attempted but may be limited, predictable, and/or irrelevant in places. Length of text may be inappropriate.',
-        '4': 'Good: Response fulfills specific task requirements. Little more could reasonably be expected for the level. Response shows a good level of awareness of audience, purpose and genre. Topic is developed and explored well.',
+        '3.5': 'Satisfactory: Response fulfills most task requirements and shows adequate awareness of audience, purpose and genre. Topic development is attempted but may be limited, predictable, and/or irrelevant in places. Length of text may be inappropriate. BOUNDARY — NOT Good (4): The essay fulfills MOST but NOT ALL task requirements. At least one required element is missing, underdeveloped, or partially off-topic. Topic development includes at least ONE of: superficial analysis, predictable examples, or irrelevant tangents. KEY TEST: Can you point to a missing, underdeveloped, or off-topic element? If YES → remains 3.5.',
+        '4': 'Good: Response fulfills specific task requirements. Little more could reasonably be expected for the level. Response shows a good level of awareness of audience, purpose and genre. Topic is developed and explored well. BOUNDARY — NOT Satisfactory (3.5): ALL task requirements are met — no missing elements, no underdeveloped points, no irrelevant tangents. KEY TEST from 3.5: Is there ANY missing, underdeveloped, or off-topic element? If NO → 4 is justified.',
         '4.5': 'Very Good: Response fulfills all specific task requirements. Response shows a very good level of awareness of audience, purpose and genre. Topic is well developed and explored with some depth.',
         '5-6': 'Excellent: Response fulfills all specific task requirements and exceeds expectations for this level. Response shows a high level of awareness of audience, purpose and genre. Topic is fully developed and explored.'
       }
@@ -50,8 +50,8 @@ const FOUNDATION_RUBRICS = {
         '0-1.5': 'Very Poor: Very little control of organizational features. The text is largely confused and incoherent, making it challenging for the reader to process.',
         '2-2.5': 'Weak: Minimal organization. Ideas are disconnected and difficult to follow. No paragraphs or very poor paragraphing. Cohesive devices are absent or misused.',
         '3': 'Unsatisfactory: Organization is limited, compromising coherence. Some re-reading may be necessary. Ideas lack progression and may be repeated. There may be no paragraphs. Some simple cohesive devices are used but usually inaccurately and repetitively.',
-        '3.5': 'Satisfactory: Organization provides an underlying coherence although progression may be inconsistent. Text may be stilted in places. Paragraphing is generally appropriate although ideas may not always be supported. Cohesive devices may be over or under used, or used mechanically in places. Text may be repetitive due to lack of referencing.',
-        '4': 'Good: Organization of information and ideas makes text clear and easy to understand. Each paragraph has a main topic supported by some relevant details. Cohesive devices are frequently used accurately both within and/or between sentences.',
+        '3.5': 'Satisfactory: Organization provides an underlying coherence although progression may be inconsistent. Text may be stilted in places. Paragraphing is generally appropriate although ideas may not always be supported. Cohesive devices may be over or under used, or used mechanically in places. Text may be repetitive due to lack of referencing. BOUNDARY — NOT Good (4): The text is basically followable BUT shows at least ONE of: inconsistent progression between ideas, stilted/awkward transitions, mechanical/repetitive cohesive devices, or unsupported ideas within paragraphs. KEY TEST: Can the reader follow every idea without re-reading or pausing? If NO → remains 3.5.',
+        '4': 'Good: Organization of information and ideas makes text clear and easy to understand. Each paragraph has a main topic supported by some relevant details. Cohesive devices are frequently used accurately both within and/or between sentences. BOUNDARY — NOT Satisfactory (3.5): The text flows clearly WITHOUT requiring re-reading. EVERY paragraph has an identifiable main topic. Cohesive devices are used accurately (not mechanically). KEY TEST from 3.5: Is there ANY paragraph with an unclear main topic, or ANY mechanical/repetitive cohesive device pattern? If NO → 4 is justified.',
         '4.5': 'Very Good: Information and ideas are clearly and logically organized. Each paragraph has a clear main topic supported by relevant details. Cohesive devices are consistently used accurately within and between sentences.',
         '5-6': 'Excellent: Information and ideas are organized so effectively that text has a fluent progression throughout. Opening and closing sections are appropriate and fully developed. Each paragraph has a clear main topic supported by well-organised, relevant details. Cohesive devices are consistently used accurately both within and/or between sentences.'
       }
@@ -64,8 +64,8 @@ const FOUNDATION_RUBRICS = {
         '0-1.5': 'Very Poor: Vocabulary is very limited and may be unrelated to the task or consists largely of inappropriate memorized chunks. Poor word choice and spelling prevent the communication of ideas.',
         '2-2.5': 'Weak: Vocabulary is extremely limited and frequently inappropriate. Word choice and spelling errors are pervasive and severely impede communication. Only isolated words or phrases are comprehensible.',
         '3': 'Unsatisfactory: Vocabulary is inadequate or inappropriate for the level and task and may be used repetitively. Errors in word choice and spelling frequently affect communication.',
-        '3.5': 'Satisfactory: Text has a limited but adequate range of vocabulary for the level and task. Core vocabulary is usually used accurately and appropriately. If there are attempts to extend beyond this range, there may be some inaccuracy or inappropriacy which affects communication in places.',
-        '4': 'Good: Text has a good range of vocabulary for the level and task. Core vocabulary is frequently used accurately and appropriately. If there are attempts to extend beyond this range, there may be some inaccuracy or inappropriacy, although communication is not affected.',
+        '3.5': 'Satisfactory: Text has a limited but adequate range of vocabulary for the level and task. Core vocabulary is usually used accurately and appropriately. If there are attempts to extend beyond this range, there may be some inaccuracy or inappropriacy which affects communication in places. BOUNDARY — NOT Good (4): Vocabulary is ADEQUATE for basic communication BUT does NOT show the range or precision of Good. At least ONE of: noticeable repetition of key words, lack of topic-specific vocabulary, or attempts at less common vocabulary that result in errors affecting communication. KEY TEST: Does the student use a NOTICEABLY varied range of vocabulary WITHOUT errors that affect communication? If NO → remains 3.5.',
+        '4': 'Good: Text has a good range of vocabulary for the level and task. Core vocabulary is frequently used accurately and appropriately. If there are attempts to extend beyond this range, there may be some inaccuracy or inappropriacy, although communication is not affected. BOUNDARY — NOT Satisfactory (3.5): The vocabulary range is NOTICEABLY varied — not just core words repeated. Communication is NOT affected by vocabulary errors. KEY TEST from 3.5: Is vocabulary NOTICEABLY repetitive, or are there vocabulary errors that affect communication? If NEITHER → 4 is justified.',
         '4.5': 'Very Good: Text has a very good range of vocabulary for the level and task. Vocabulary is used accurately and appropriately with only rare minor errors. Communication is clear and effective.',
         '5-6': 'Excellent: Text has a significantly wider range of vocabulary than is expected for the level and task. Core vocabulary is consistently used accurately and appropriately. There may be occasional errors in word choice and spelling where more complex/creative lexis is attempted but communication is not affected.'
       }
@@ -78,8 +78,8 @@ const FOUNDATION_RUBRICS = {
         '0-1.5': 'Very Poor: Structures are inaccurate and errors predominate, preventing meaningful communication. Punctuation may be inadequate and/or inaccurate.',
         '2-2.5': 'Weak: Very limited grammatical structures with frequent serious errors. Most sentences contain errors that impede understanding. Punctuation is largely absent or inaccurate.',
         '3': 'Unsatisfactory: Structures are very limited and inadequate for the level and task. Errors are noticeable and may often affect communication. Punctuation may be inadequate and/or inaccurate.',
-        '3.5': 'Satisfactory: Text has a limited but adequate range of structures for the level and task. Core structures for the level are usually used accurately and appropriately although they may sometimes be used mechanically. Grammatical errors may affect communication in places. Punctuation is generally effective.',
-        '4': 'Good: Text has a good range of structures for the level and task. Core structures for the level are frequently used accurately and appropriately. If there are attempts to extend beyond this range, there may be some inaccuracy or inappropriacy, without affecting communication. Punctuation is well managed and effective.',
+        '3.5': 'Satisfactory: Text has a limited but adequate range of structures for the level and task. Core structures for the level are usually used accurately and appropriately although they may sometimes be used mechanically. Grammatical errors may affect communication in places. Punctuation is generally effective. BOUNDARY — NOT Good (4): Grammar is ADEQUATE but NOT varied. The student relies on a narrow set of sentence structures (mostly simple sentences, few complex ones). Grammatical errors may affect communication in at least one place. KEY TEST: Does the student use a GOOD RANGE of structures (simple + compound + complex) with communication NOT affected by grammar errors? If NO → remains 3.5.',
+        '4': 'Good: Text has a good range of structures for the level and task. Core structures for the level are frequently used accurately and appropriately. If there are attempts to extend beyond this range, there may be some inaccuracy or inappropriacy, without affecting communication. Punctuation is well managed and effective. BOUNDARY — NOT Satisfactory (3.5): The student uses a GOOD RANGE of structures (not just simple sentences). Grammar errors, if present, do NOT affect communication. KEY TEST from 3.5: Is sentence structure noticeably varied, AND are there NO grammar errors that affect communication? If BOTH → 4 is justified.',
         '4.5': 'Very Good: Text has a very good range of structures for the level. Most structures are used accurately and appropriately. Minor errors do not impede communication. Punctuation is well managed and effective.',
         '5-6': 'Excellent: Text has a significantly wider range of structures than is expected for the level and task. Core structures are consistently used accurately and appropriately. There may be occasional errors where more complex structures are attempted but communication is not affected. Punctuation is well managed and effective.'
       }
@@ -107,8 +107,8 @@ const CREDIT_RUBRICS = {
       rubric: {
         '0-1.5': 'Poor: Fails to fulfil any task requirements. 10% or more outside word count.',
         '2-2.5': 'Unsatisfactory: Does not adequately fulfil task requirements. Most details are unimportant. 10% or more outside word count.',
-        '3-3.5': 'Satisfactory: Adequately fulfils task requirements. Most main ideas present. Meaning generally accurate; some unimportant details may be included. Up to 10% outside word count.',
-        '4-4.5': 'Good: Fulfils all task requirements but a little more could be expected. Main ideas present. Meaning mostly accurate, most details relevant. Stays within word count.',
+        '3-3.5': 'Satisfactory: Adequately fulfils task requirements. Most main ideas present. Meaning generally accurate; some unimportant details may be included. Up to 10% outside word count. BOUNDARY — NOT Good (4-4.5): At least ONE of: a main idea is missing, an unimportant detail takes the place of a key point, meaning is "generally" accurate but has some inaccuracies, or word count is outside the target range. KEY TEST: Are ALL main ideas present with accurate meaning AND relevant details AND within word count? If ANY fails → remains 3-3.5.',
+        '4-4.5': 'Good: Fulfils all task requirements but a little more could be expected. Main ideas present. Meaning mostly accurate, most details relevant. Stays within word count. BOUNDARY — NOT Satisfactory (3-3.5): ALL main ideas are present (no missing points). Meaning is MOSTLY accurate (not just "generally"). MOST details are relevant. Word count is within range. KEY TEST from 3-3.5: Is there ANY missing main idea, ANY significant meaning inaccuracy, ANY irrelevant detail, or ANY word count violation? If ALL NO → 4-4.5 is justified.',
         '5': 'Excellent: Fulfils all task requirements and exceeds expectations. All main ideas present. Meaning accurate, all details relevant. Stays within word count.',
       }
     },
@@ -117,8 +117,8 @@ const CREDIT_RUBRICS = {
       rubric: {
         '0-1.5': 'Poor: Lacks organization and coherence. Text largely confused and incoherent, challenging for reader to process.',
         '2-2.5': 'Unsatisfactory: Organization and coherence limited. Some re-reading necessary. Most cohesive devices are simple, used inaccurately and mechanically.',
-        '3-3.5': 'Satisfactory: Organization and coherence often adequate, but supporting ideas may be limited. Text may be stilted. Cohesive devices sometimes inaccurate, repetitive, or over/under used.',
-        '4-4.5': 'Good: Organization makes text clear and easy to understand. Cohesive devices almost always used accurately and appropriately within and between sentences.',
+        '3-3.5': 'Satisfactory: Organization and coherence often adequate, but supporting ideas may be limited. Text may be stilted. Cohesive devices sometimes inaccurate, repetitive, or over/under used. BOUNDARY — NOT Good (4-4.5): At least ONE of: supporting ideas are limited, text feels stilted/awkward in places, cohesive devices are sometimes inaccurate or repetitive. KEY TEST: Is the text clear and easy to understand throughout, with accurate cohesive devices? If NO → remains 3-3.5.',
+        '4-4.5': 'Good: Organization makes text clear and easy to understand. Cohesive devices almost always used accurately and appropriately within and between sentences. BOUNDARY — NOT Satisfactory (3-3.5): The text is clear and easy to understand (not just "adequate"). Cohesive devices are ALMOST ALWAYS accurate (not "sometimes inaccurate"). KEY TEST from 3-3.5: Is there ANY section that is stilted or hard to follow, OR ANY inaccurate/repetitive cohesive device? If ALL NO → 4-4.5 is justified.',
         '5': 'Excellent: Effective organization with logical flow throughout. Good range of cohesive devices used accurately and appropriately.',
       }
     },
@@ -127,8 +127,8 @@ const CREDIT_RUBRICS = {
       rubric: {
         '0-1.5': 'Poor: Paraphrasing largely absent. Poor word choice, word form, and spelling prevent communication.',
         '2-2.5': 'Unsatisfactory: Very little paraphrasing; more than 15% directly copied. Inadequate vocabulary range. Errors in word choice, word form, and spelling predominate and affect communication.',
-        '3-3.5': 'Satisfactory: Generally paraphrased; some copying but less than 15%. Limited but adequate vocabulary. Errors in word choice and spelling sometimes affect communication.',
-        '4-4.5': 'Good: Well paraphrased with very little copying. Good vocabulary range. Spelling mostly correct.',
+        '3-3.5': 'Satisfactory: Generally paraphrased; some copying but less than 15%. Limited but adequate vocabulary. Errors in word choice and spelling sometimes affect communication. BOUNDARY — NOT Good (4-4.5): There IS some direct copying (even if under 15%). Vocabulary is "limited but adequate" — NOT yet showing good range. Errors in word choice or spelling sometimes affect communication. KEY TEST: Is the text well paraphrased with VERY LITTLE copying, good vocabulary range, AND no communication-affecting errors? If ANY fails → remains 3-3.5.',
+        '4-4.5': 'Good: Well paraphrased with very little copying. Good vocabulary range. Spelling mostly correct. BOUNDARY — NOT Satisfactory (3-3.5): Paraphrasing is effective with VERY LITTLE copying (not "some copying"). Vocabulary range is GOOD (not "limited but adequate"). KEY TEST from 3-3.5: Is there ANY noticeable copying, ANY limited/repetitive vocabulary, OR ANY word choice errors that affect communication? If ALL NO → 4-4.5 is justified.',
         '5': 'Excellent: Completely and accurately paraphrased. Wider vocabulary range than expected for the level. Spelling accurate.',
       }
     },
@@ -137,8 +137,8 @@ const CREDIT_RUBRICS = {
       rubric: {
         '0-1.5': 'Poor: Inaccurate structures, errors predominate, preventing communication. Punctuation inadequate and/or inaccurate.',
         '2-2.5': 'Unsatisfactory: Very limited structures inadequate for the level. Grammatical errors noticeable and often affect communication. Punctuation may be inadequate/inaccurate.',
-        '3-3.5': 'Satisfactory: Structures sometimes limited but adequate for the task. Grammatical errors may affect communication in places. Punctuation generally correct and effective.',
-        '4-4.5': 'Good: Good range of structures. Some inaccuracy but communication not affected. Punctuation well managed and effective.',
+        '3-3.5': 'Satisfactory: Structures sometimes limited but adequate for the task. Grammatical errors may affect communication in places. Punctuation generally correct and effective. BOUNDARY — NOT Good (4-4.5): Grammar is "sometimes limited" — the student does NOT yet show a good range of structures. Errors "may affect communication in places" — communication is NOT consistently smooth. KEY TEST: Is there a GOOD RANGE of structures (not "sometimes limited") AND do grammar errors NOT affect communication? If EITHER fails → remains 3-3.5.',
+        '4-4.5': 'Good: Good range of structures. Some inaccuracy but communication not affected. Punctuation well managed and effective. BOUNDARY — NOT Satisfactory (3-3.5): The student shows a GOOD RANGE of structures (not "sometimes limited"). Communication is NOT affected by grammar errors (not "may affect in places"). KEY TEST from 3-3.5: Are structures "sometimes limited" OR do grammar errors affect communication? If BOTH NO → 4-4.5 is justified.',
         '5': 'Excellent: Wider range of structures than expected for the level. Most sentences error-free. Punctuation well managed and effective.',
       }
     },
@@ -159,9 +159,9 @@ const SUMMARY_RUBRICS = {
       rubric: {
         '0-1': 'No summary, irrelevant, or isolated words. No main ideas captured. Largely copied.',
         '2': 'Captures at most one main idea. Misses most key points. Minimal paraphrasing, heavy copying.',
-        '2.5-3': 'Captures main ideas adequately but may miss 1-2 points. Some paraphrasing with noticeable copying.',
-        '3.5': 'Captures all main ideas effectively. Consistent paraphrasing with minor copied phrases.',
-        '4-4.5': 'All main ideas captured clearly. Effective paraphrasing throughout. Focused, cohesive.',
+        '2.5-3': 'Captures main ideas adequately but may miss 1-2 points. Some paraphrasing with noticeable copying. BOUNDARY — NOT 3.5: Misses 1–2 main ideas from the source. Paraphrasing is inconsistent — some sentences are clearly copied rather than reworded. KEY TEST for 3.5: Are ALL main ideas captured with CONSISTENT paraphrasing? If NO → remains 2.5-3.',
+        '3.5': 'Captures all main ideas effectively. Consistent paraphrasing with minor copied phrases. BOUNDARY — NOT 2.5-3: ALL main ideas are captured (no missing points). Paraphrasing is CONSISTENT (not just "some"). NOT 4-4.5: Still has minor copied phrases. KEY TEST for 4-4.5: Does the summary read as an INDEPENDENT text with EFFECTIVE paraphrasing throughout? If NO → remains 3.5.',
+        '4-4.5': 'All main ideas captured clearly. Effective paraphrasing throughout. Focused, cohesive. BOUNDARY — NOT 3.5: Paraphrasing is EFFECTIVE throughout (not "consistent with minor copied phrases"). The summary is FOCUSED and COHESIVE (no unnecessary details, no tangents). KEY TEST from 3.5: Are there ANY noticeable copied phrases OR is the summary unfocused? If ALL NO → 4-4.5 is justified.',
         '5': 'Comprehensive, accurate reflection of source. Natural paraphrasing. Reads as independent text.',
       }
     },
@@ -170,9 +170,9 @@ const SUMMARY_RUBRICS = {
       rubric: {
         '0-1': 'No coherence. Random fragments. No linking words. Ideas cannot be followed.',
         '2': 'Minimal organisation. Ideas listed, not connected. Very few linking words. Disjointed.',
-        '2.5-3': 'Basic organisation. Simple linking words used appropriately. Generally easy to follow.',
-        '3.5': 'Well-organised with clear logical progression. Good range of cohesive devices. Smooth flow.',
-        '4-4.5': 'Clearly organised with strong progression. Cohesive devices used effectively and naturally.',
+        '2.5-3': 'Basic organisation. Simple linking words used appropriately. Generally easy to follow. BOUNDARY — NOT 3.5: Organization is basic with simple linking only. KEY TEST for 3.5: Is there clear logical progression with a good range of cohesive devices? If NO → remains 2.5-3.',
+        '3.5': 'Well-organised with clear logical progression. Good range of cohesive devices. Smooth flow. BOUNDARY — NOT 2.5-3: Clear logical progression present with good range of cohesive devices. NOT 4-4.5: Flow is smooth but not yet "strong" or "natural" throughout. KEY TEST for 4-4.5: Are cohesive devices used effectively and NATURALLY throughout? If NO → remains 3.5.',
+        '4-4.5': 'Clearly organised with strong progression. Cohesive devices used effectively and naturally. BOUNDARY — NOT 3.5: Cohesive devices used effectively and NATURALLY (not just "good range"). Strong progression throughout. KEY TEST from 3.5: Are cohesive devices used naturally throughout? If YES → 4-4.5 is justified.',
         '5': 'Exceptional organisation with flawless logical flow. Cohesive devices used with mastery.',
       }
     },
@@ -181,9 +181,9 @@ const SUMMARY_RUBRICS = {
       rubric: {
         '0-1': 'Extremely limited vocabulary. Inaccurate word choice. Pervasive spelling errors.',
         '2': 'Limited vocabulary, frequent repetition. Awkward word choice. Frequent spelling errors.',
-        '2.5-3': 'Adequate vocabulary range. Basic paraphrasing usually effective. Some spelling errors.',
-        '3.5': 'Good vocabulary range. Paraphrasing effective. Some less common vocabulary attempted.',
-        '4-4.5': 'Varied vocabulary. Natural paraphrasing. Strong word choice and collocation.',
+        '2.5-3': 'Adequate vocabulary range. Basic paraphrasing usually effective. Some spelling errors. BOUNDARY — NOT 3.5: Vocabulary is adequate but basic, with some spelling errors. KEY TEST for 3.5: Is vocabulary range GOOD with effective paraphrasing and attempts at less common vocabulary? If NO → remains 2.5-3.',
+        '3.5': 'Good vocabulary range. Paraphrasing effective. Some less common vocabulary attempted. BOUNDARY — NOT 2.5-3: Good vocabulary range with effective paraphrasing. NOT 4-4.5: Vocabulary is good but not yet "varied" or "natural" throughout. KEY TEST for 4-4.5: Is vocabulary VARIED with NATURAL paraphrasing and strong word choice? If NO → remains 3.5.',
+        '4-4.5': 'Varied vocabulary. Natural paraphrasing. Strong word choice and collocation. BOUNDARY — NOT 3.5: Vocabulary is VARIED with NATURAL paraphrasing and strong word choice/collocation. KEY TEST from 3.5: Is vocabulary noticeably varied AND is paraphrasing natural throughout? If BOTH → 4-4.5 is justified.',
         '5': 'Sophisticated, precise vocabulary. Consistently natural paraphrasing. Flawless spelling.',
       }
     },
@@ -192,9 +192,9 @@ const SUMMARY_RUBRICS = {
       rubric: {
         '0-1': 'No grammatical control. Random fragments. Errors prevent communication.',
         '2': 'Simple structures with frequent errors. Limited variety. Common errors (articles, tenses).',
-        '2.5-3': 'Simple sentences accurate, some complex attempted. Errors occur but do not significantly affect meaning.',
-        '3.5': 'Good range of structures with reasonable accuracy. Minor errors. Good sentence variety.',
-        '4-4.5': 'Strong control including complex sentences. Errors infrequent/rare. Sentence variety enhances quality.',
+        '2.5-3': 'Simple sentences accurate, some complex attempted. Errors occur but do not significantly affect meaning. BOUNDARY — NOT 3.5: Simple sentences accurate but complex structures have errors. KEY TEST for 3.5: Is there a good range of structures with reasonable accuracy and good sentence variety? If NO → remains 2.5-3.',
+        '3.5': 'Good range of structures with reasonable accuracy. Minor errors. Good sentence variety. BOUNDARY — NOT 2.5-3: Good range of structures with reasonable accuracy. NOT 4-4.5: Errors are minor but present; sentence variety is good but not yet "enhancing quality." KEY TEST for 4-4.5: Is there strong control including complex sentences with infrequent errors? If NO → remains 3.5.',
+        '4-4.5': 'Strong control including complex sentences. Errors infrequent/rare. Sentence variety enhances quality. BOUNDARY — NOT 3.5: Strong control including complex sentences. Errors are infrequent/rare. Sentence variety enhances quality. KEY TEST from 3.5: Is control strong AND are errors infrequent? If BOTH → 4-4.5 is justified.',
         '5': 'Near-native control. Wide variety of structures used naturally and accurately. Flawless punctuation.',
       }
     },
@@ -215,8 +215,8 @@ const SYNTHESIS_RUBRICS = {
       rubric: {
         '0-1.5': 'Poor: Fails to fulfil any task requirements. 10% or more outside word count.',
         '2-2.5': 'Unsatisfactory: Does not adequately fulfil task requirements. Most details are unimportant. 10% or more outside word count.',
-        '3-3.5': 'Satisfactory: Adequately fulfils task requirements. Most main ideas present. Meaning generally accurate; some unimportant details may be included. Up to 10% outside word count.',
-        '4-4.5': 'Good: Fulfils all task requirements but a little more could be expected. Main ideas present. Meaning mostly accurate, most details relevant. Stays within word count.',
+        '3-3.5': 'Satisfactory: Adequately fulfils task requirements. Most main ideas present. Meaning generally accurate; some unimportant details may be included. Up to 10% outside word count. BOUNDARY — NOT Good (4-4.5): At least ONE of: a main idea is missing, an unimportant detail takes the place of a key point, meaning is "generally" accurate but has some inaccuracies, or word count is outside the target range. KEY TEST: Are ALL main ideas present with accurate meaning AND relevant details AND within word count? If ANY fails → remains 3-3.5. SYNTHESIS-SPECIFIC: At least one source text is not referenced or used. KEY TEST: Are ALL source texts referenced? If NO → remains 3-3.5.',
+        '4-4.5': 'Good: Fulfils all task requirements but a little more could be expected. Main ideas present. Meaning mostly accurate, most details relevant. Stays within word count. BOUNDARY — NOT Satisfactory (3-3.5): ALL main ideas are present (no missing points). Meaning is MOSTLY accurate (not just "generally"). MOST details are relevant. Word count is within range. KEY TEST from 3-3.5: Is there ANY missing main idea, ANY significant meaning inaccuracy, ANY irrelevant detail, or ANY word count violation? If ALL NO → 4-4.5 is justified. SYNTHESIS-SPECIFIC: ALL source texts are referenced and integrated (not just listed). KEY TEST: Are ALL source texts used in the synthesis? If YES → synthesis requirement met.',
         '5': 'Excellent: Fulfils all task requirements and exceeds expectations. All main ideas present. Meaning accurate, all details relevant. Stays within word count.',
       }
     },
@@ -225,8 +225,8 @@ const SYNTHESIS_RUBRICS = {
       rubric: {
         '0-1.5': 'Poor: Lacks organization and coherence. Text largely confused and incoherent, challenging for reader to process.',
         '2-2.5': 'Unsatisfactory: Organization and coherence limited. Some re-reading necessary. Most cohesive devices are simple, used inaccurately and mechanically.',
-        '3-3.5': 'Satisfactory: Organization and coherence often adequate, but supporting ideas may be limited. Text may be stilted. Cohesive devices sometimes inaccurate, repetitive, or over/under used.',
-        '4-4.5': 'Good: Organization makes text clear and easy to understand. Cohesive devices almost always used accurately and appropriately within and between sentences.',
+        '3-3.5': 'Satisfactory: Organization and coherence often adequate, but supporting ideas may be limited. Text may be stilted. Cohesive devices sometimes inaccurate, repetitive, or over/under used. BOUNDARY — NOT Good (4-4.5): At least ONE of: supporting ideas are limited, text feels stilted/awkward in places, cohesive devices are sometimes inaccurate or repetitive. KEY TEST: Is the text clear and easy to understand throughout, with accurate cohesive devices? If NO → remains 3-3.5.',
+        '4-4.5': 'Good: Organization makes text clear and easy to understand. Cohesive devices almost always used accurately and appropriately within and between sentences. BOUNDARY — NOT Satisfactory (3-3.5): The text is clear and easy to understand (not just "adequate"). Cohesive devices are ALMOST ALWAYS accurate (not "sometimes inaccurate"). KEY TEST from 3-3.5: Is there ANY section that is stilted or hard to follow, OR ANY inaccurate/repetitive cohesive device? If ALL NO → 4-4.5 is justified.',
         '5': 'Excellent: Effective organization with logical flow throughout. Good range of cohesive devices used accurately and appropriately.',
       }
     },
@@ -235,8 +235,8 @@ const SYNTHESIS_RUBRICS = {
       rubric: {
         '0-1.5': 'Poor: Paraphrasing largely absent. Poor word choice, word form, and spelling prevent communication.',
         '2-2.5': 'Unsatisfactory: Very little paraphrasing; more than 15% directly copied. Inadequate vocabulary range. Errors in word choice, word form, and spelling predominate and affect communication.',
-        '3-3.5': 'Satisfactory: Generally paraphrased; some copying but less than 15%. Limited but adequate vocabulary. Errors in word choice and spelling sometimes affect communication.',
-        '4-4.5': 'Good: Well paraphrased with very little copying. Good vocabulary range. Spelling mostly correct.',
+        '3-3.5': 'Satisfactory: Generally paraphrased; some copying but less than 15%. Limited but adequate vocabulary. Errors in word choice and spelling sometimes affect communication. BOUNDARY — NOT Good (4-4.5): There IS some direct copying (even if under 15%). Vocabulary is "limited but adequate" — NOT yet showing good range. Errors in word choice or spelling sometimes affect communication. KEY TEST: Is the text well paraphrased with VERY LITTLE copying, good vocabulary range, AND no communication-affecting errors? If ANY fails → remains 3-3.5.',
+        '4-4.5': 'Good: Well paraphrased with very little copying. Good vocabulary range. Spelling mostly correct. BOUNDARY — NOT Satisfactory (3-3.5): Paraphrasing is effective with VERY LITTLE copying (not "some copying"). Vocabulary range is GOOD (not "limited but adequate"). KEY TEST from 3-3.5: Is there ANY noticeable copying, ANY limited/repetitive vocabulary, OR ANY word choice errors that affect communication? If ALL NO → 4-4.5 is justified.',
         '5': 'Excellent: Completely and accurately paraphrased. Wider vocabulary range than expected for the level. Spelling accurate.',
       }
     },
@@ -245,8 +245,8 @@ const SYNTHESIS_RUBRICS = {
       rubric: {
         '0-1.5': 'Poor: Inaccurate structures, errors predominate, preventing communication. Punctuation inadequate and/or inaccurate.',
         '2-2.5': 'Unsatisfactory: Very limited structures inadequate for the level. Grammatical errors noticeable and often affect communication. Punctuation may be inadequate/inaccurate.',
-        '3-3.5': 'Satisfactory: Structures sometimes limited but adequate for the task. Grammatical errors may affect communication in places. Punctuation generally correct and effective.',
-        '4-4.5': 'Good: Good range of structures. Some inaccuracy but communication not affected. Punctuation well managed and effective.',
+        '3-3.5': 'Satisfactory: Structures sometimes limited but adequate for the task. Grammatical errors may affect communication in places. Punctuation generally correct and effective. BOUNDARY — NOT Good (4-4.5): Grammar is "sometimes limited" — the student does NOT yet show a good range of structures. Errors "may affect communication in places" — communication is NOT consistently smooth. KEY TEST: Is there a GOOD RANGE of structures (not "sometimes limited") AND do grammar errors NOT affect communication? If EITHER fails → remains 3-3.5.',
+        '4-4.5': 'Good: Good range of structures. Some inaccuracy but communication not affected. Punctuation well managed and effective. BOUNDARY — NOT Satisfactory (3-3.5): The student shows a GOOD RANGE of structures (not "sometimes limited"). Communication is NOT affected by grammar errors (not "may affect in places"). KEY TEST from 3-3.5: Are structures "sometimes limited" OR do grammar errors affect communication? If BOTH NO → 4-4.5 is justified.',
         '5': 'Excellent: Wider range of structures than expected for the level. Most sentences error-free. Punctuation well managed and effective.',
       }
     },
@@ -267,8 +267,8 @@ const LANC2146_RUBRICS = {
       rubric: {
         '1': 'Poor (1-1.5): The analysis and interpretation of the main trend lacks specific details, examples, and statistics. The conclusion is missing or irrelevant.',
         '2': 'Unsatisfactory (2-2.5): The analysis and interpretation of the main trend is supported by few details, examples, and statistics. The conclusion is insufficient, may not refer to previous research, may not restate the aim, and provides irrelevant recommendations.',
-        '3': 'Satisfactory (3-3.5): The analysis and interpretation of one clear main trend is supported by relevant details and examples, including some statistics. The conclusion adequately summarizes the most obvious result, refers to previous research, restates the aim, and provides solutions/general recommendations, but there may be gaps in coverage.',
-        '4': 'Good (4-4.5): The analysis and interpretation of one clear main trend is supported by adequate details, examples, and relevant statistics. The conclusion adequately summarizes the most obvious result, refers to previous research, restates the aim, and provides solutions/general recommendations.',
+        '3': 'Satisfactory (3-3.5): The analysis and interpretation of one clear main trend is supported by relevant details and examples, including some statistics. The conclusion adequately summarizes the most obvious result, refers to previous research, restates the aim, and provides solutions/general recommendations, but there may be gaps in coverage. BOUNDARY — NOT Good (4-4.5): At least ONE of: statistics are present but not specific (e.g., "the numbers went up" without citing exact figures), the conclusion has gaps (missing previous research reference, missing aim restatement, or recommendations are generic rather than specific), or the analysis is surface-level without interpretation. KEY TEST: Are there ADEQUATE specific statistics, is the conclusion COMPLETE (all 4 elements present), and are recommendations SPECIFIC? If ANY fails → remains 3-3.5.',
+        '4': 'Good (4-4.5): The analysis and interpretation of one clear main trend is supported by adequate details, examples, and relevant statistics. The conclusion adequately summarizes the most obvious result, refers to previous research, restates the aim, and provides solutions/general recommendations. BOUNDARY — NOT Satisfactory (3-3.5): Statistics are SPECIFIC and ADEQUATE. The conclusion is COMPLETE (all 4 elements: obvious result, previous research, aim restatement, recommendations). KEY TEST from 3-3.5: Is there ANY missing conclusion element, ANY vague statistics, OR ANY gap in coverage? If ALL NO → 4-4.5 is justified.',
         '5': 'Excellent (5): The analysis and interpretation of one clear main trend is supported by carefully chosen details and examples, including comprehensive statistics. The conclusion provides an insightful and effective summary of the most obvious result, refers to previous research, restates the aim, and provides solutions/specific recommendations.',
       }
     },
@@ -277,8 +277,8 @@ const LANC2146_RUBRICS = {
       rubric: {
         '1': 'Poor (1-1.5): Lacks coherent development of ideas, with disjointed or illogical writing which is largely confused and incoherent. Cohesive devices are missing or used inaccurately. Paragraphs lack clear organization and unity, with ideas scattered or unrelated.',
         '2': 'Unsatisfactory (2-2.5): Only basic understanding of information in the text through illogical and/or incoherent writing with limited development of ideas, and connections between concepts are unclear or inconsistent. Cohesive devices are used inaccurately and inappropriately. Paragraphs demonstrate some attempt at organization.',
-        '3': 'Satisfactory (3-3.5): Generally logical and coherent writing, but may not be completely successful, possibly due to some misunderstanding of the data. Cohesive devices used may be accurate but not appropriate or too simple, over or under used, creating many abrupt or weak transitions. Paragraphs demonstrate development of ideas, but the organization is not sustained.',
-        '4': 'Good (4-4.5): Sufficient depth of analysis and interpretation, but with some abrupt or weak transitions. Cohesive devices are usually used accurately and appropriately. Paragraphs exhibit clear organization and unity.',
+        '3': 'Satisfactory (3-3.5): Generally logical and coherent writing, but may not be completely successful, possibly due to some misunderstanding of the data. Cohesive devices used may be accurate but not appropriate or too simple, over or under used, creating many abrupt or weak transitions. Paragraphs demonstrate development of ideas, but the organization is not sustained. BOUNDARY — NOT Good (4-4.5): At least ONE of: supporting ideas are limited, text feels stilted/awkward in places, cohesive devices are sometimes inaccurate or repetitive. KEY TEST: Is the text clear and easy to understand throughout, with accurate cohesive devices? If NO → remains 3-3.5.',
+        '4': 'Good (4-4.5): Sufficient depth of analysis and interpretation, but with some abrupt or weak transitions. Cohesive devices are usually used accurately and appropriately. Paragraphs exhibit clear organization and unity. BOUNDARY — NOT Satisfactory (3-3.5): The text is clear and easy to understand (not just "adequate"). Cohesive devices are ALMOST ALWAYS accurate (not "sometimes inaccurate"). KEY TEST from 3-3.5: Is there ANY section that is stilted or hard to follow, OR ANY inaccurate/repetitive cohesive device? If ALL NO → 4-4.5 is justified.',
         '5': 'Excellent (5): Seamless flow of ideas with effective transitions that guide the reader through the in-depth analysis and interpretation. An extensive range of cohesive devices is used accurately and appropriately. Paragraphs are exceptionally well-organized and unified.',
       }
     },
@@ -287,8 +287,8 @@ const LANC2146_RUBRICS = {
       rubric: {
         '1': 'Poor (1-1.5): Little control of grammar, with basic faulty sentence structures. Severe grammar errors that significantly impede understanding. Numerous instances of incorrect or missing punctuation throughout the text, hindering readability and comprehension.',
         '2': 'Unsatisfactory (2-2.5): Limited control of grammar, with repetitive sentence structures. Noticeable grammar errors throughout the text, making comprehension difficult. Noticeable errors in punctuation, hindering readability and comprehension.',
-        '3': 'Satisfactory (3-3.5): Adequate control of grammar, with repetitive sentence structures. Occasional errors which impede understanding. Occasional instances of incorrect or missing punctuation, but overall punctuation usage is adequate for understanding.',
-        '4': 'Good (4-4.5): Proficient use of grammar, with a wide range of sentence structures with a few errors that do not impede understanding. The majority of sentences are error-free. Generally correct and appropriately-used punctuation, with only minor errors that do not significantly affect readability and comprehension.',
+        '3': 'Satisfactory (3-3.5): Adequate control of grammar, with repetitive sentence structures. Occasional errors which impede understanding. Occasional instances of incorrect or missing punctuation, but overall punctuation usage is adequate for understanding. BOUNDARY — NOT Good (4-4.5): Grammar is "sometimes limited" — the student does NOT yet show a good range of structures. Errors "may affect communication in places" — communication is NOT consistently smooth. KEY TEST: Is there a GOOD RANGE of structures (not "sometimes limited") AND do grammar errors NOT affect communication? If EITHER fails → remains 3-3.5.',
+        '4': 'Good (4-4.5): Proficient use of grammar, with a wide range of sentence structures with a few errors that do not impede understanding. The majority of sentences are error-free. Generally correct and appropriately-used punctuation, with only minor errors that do not significantly affect readability and comprehension. BOUNDARY — NOT Satisfactory (3-3.5): The student shows a GOOD RANGE of structures (not "sometimes limited"). Communication is NOT affected by grammar errors (not "may affect in places"). KEY TEST from 3-3.5: Are structures "sometimes limited" OR do grammar errors affect communication? If BOTH NO → 4-4.5 is justified.',
         '5': 'Excellent (5): Exemplary command of grammar, with a variety of sentence structures with no errors, allowing for clear and precise communication of ideas. All sentences are error-free. Punctuation is error-free and effectively used to enhance readability and comprehension.',
       }
     },
@@ -297,8 +297,8 @@ const LANC2146_RUBRICS = {
       rubric: {
         '1': 'Poor (1-1.5): Basic vocabulary which may be repetitive or inappropriate for the task, hindering understanding. Limited control of word formation and/or spelling; numerous severe spelling and capitalization errors.',
         '2': 'Unsatisfactory (2-2.5): Uses a limited range of vocabulary (vocabulary choices are often inappropriate or ineffective, detracting from the overall quality of the description), but this is minimally adequate for the task. May make frequent and noticeable errors in spelling and/or word formation throughout the text, making it difficult to understand.',
-        '3': 'Satisfactory (3-3.5): Uses an adequate range of vocabulary for the task (vocabulary choices are generally appropriate with some awareness of style and collocation, but there is some repetition or lack of variety). Makes some errors in spelling and/or word formation that may cause some difficulty for the reader.',
-        '4': 'Good (4-4.5): Uses a wide range of vocabulary with uncommon lexical items to allow some flexibility and precision, but there may be occasional inaccuracies in word choice and collocation. Produces rare errors in spelling and/or word formation and capitalization but they do not impede communication.',
+        '3': 'Satisfactory (3-3.5): Uses an adequate range of vocabulary for the task (vocabulary choices are generally appropriate with some awareness of style and collocation, but there is some repetition or lack of variety). Makes some errors in spelling and/or word formation that may cause some difficulty for the reader. BOUNDARY — NOT Good (4-4.5): There IS some direct copying (even if under 15%). Vocabulary is "limited but adequate" — NOT yet showing good range. Errors in word choice or spelling sometimes affect communication. KEY TEST: Is the text well paraphrased with VERY LITTLE copying, good vocabulary range, AND no communication-affecting errors? If ANY fails → remains 3-3.5.',
+        '4': 'Good (4-4.5): Uses a wide range of vocabulary with uncommon lexical items to allow some flexibility and precision, but there may be occasional inaccuracies in word choice and collocation. Produces rare errors in spelling and/or word formation and capitalization but they do not impede communication. BOUNDARY — NOT Satisfactory (3-3.5): Paraphrasing is effective with VERY LITTLE copying (not "some copying"). Vocabulary range is GOOD (not "limited but adequate"). KEY TEST from 3-3.5: Is there ANY noticeable copying, ANY limited/repetitive vocabulary, OR ANY word choice errors that affect communication? If ALL NO → 4-4.5 is justified.',
         '5': 'Excellent (5): Uses a wide range of vocabulary (rich, varied, and perfectly suited to the context) with very natural and sophisticated control of lexical features; rare minor errors occur only as slips. Produces no errors in spelling and/or word formation and capitalization.',
       }
     },
@@ -448,12 +448,141 @@ FEEDBACK TONE GUARDRAILS:
    - "In English, the verb needs to agree with the subject..."
    - Avoid: "This is a basic grammatical error..."
 
-SCORING FLOW (follow in this order):
-Step 1 — Identify what the student communicated successfully (strengths first).
-Step 2 — Determine the overall CEFR demonstrated level.
-Step 3 — Score each criterion 0-5 (0.5 increments) relative to A2-B1 expectations, not B2+ standards.
-Step 4 — Only deduct for errors that genuinely impede meaning or show a gap below A2 level.
-Step 5 — HOLISTIC CONSISTENCY CHECK: After scoring all criteria, verify the spread between highest and lowest scores does not exceed 2 points. If it does, re-examine whether the low score truly reflects impeding errors or whether expected/non-impeding errors were over-penalized. These are SOFT constraints — genuine outliers can exist but should be justified in the feedback.
+SCORING: Follow the Evidence-First Scoring Protocol provided separately in the prompt. Do NOT skip the Boundary Verification step.
+`;
+
+// ─── Evidence-First Scoring Protocol (Approach 2) ─────────────────────────
+// Replaces the SCORING FLOW sections in both CREDIT_HUMANIZATION and
+// buildFoundationPrompt. Used by all prompt builders.
+const SCORING_PROTOCOL = `
+EVIDENCE-FIRST SCORING PROTOCOL (follow strictly in this order):
+Step 1 — EVIDENCE GATHERING: For each criterion, identify and QUOTE specific text from the essay that is relevant. Quote at least 2 phrases: one that supports a higher band and one that supports a lower band. Do NOT assign a score yet.
+Step 2 — BAND RANGE IDENTIFICATION: Based on the evidence, identify the NARROWEST possible band range (e.g., "between Satisfactory and Good"). State this range explicitly.
+Step 3 — BOUNDARY VERIFICATION (CRITICAL — MANDATORY): If the range spans the Satisfactory/Good boundary, you MUST perform the Boundary Verification Check for that criterion. Check each condition — if ANY check for the higher band fails, the score stays at the lower band.
+Step 4 — EXCLUSION CHECK: Check the BOUNDARY exclusion statements in the rubric. Does the evidence exclude the student from the higher band? If the exclusion statement says "NOT [higher band] if..." and the student's work matches that condition, the score stays at the lower band.
+Step 5 — SCORE ASSIGNMENT: ONLY NOW assign a score. The score must be consistent with the evidence gathered (Step 1), the range identified (Step 2), and the boundary verification (Steps 3-4).
+Step 6 — JUSTIFICATION WITH EVIDENCE: Write the justification citing the quoted evidence from Step 1. Explain WHY the score was assigned, referencing specific boundary conditions or exclusion checks that determined the outcome.
+Step 7 — ERROR CLASSIFICATION: List up to 3 specific errors per criterion with quoted text. Classify each as expected, non-impeding, or impeding. Do NOT provide corrections.
+Step 8 — HOLISTIC CONSISTENCY CHECK: After scoring all criteria, verify: (a) the spread between highest and lowest scores does not exceed 2 points, (b) no criterion score contradicts the evidence, and (c) the boundary verification checks are internally consistent.
+`;
+
+// ─── Boundary Verification Check Tables (Approach 2) ──────────────────────
+// Mandatory binary checks when score falls on Satisfactory/Good boundary.
+
+const FOUNDATION_BOUNDARY_CHECKS = `
+BOUNDARY VERIFICATION CHECKS — Foundation Satisfactory (3.5) → Good (4):
+Before assigning Good (4/6), ALL checks for that criterion must pass. If ANY fails → remains 3.5/6.
+Task Response: □ ALL specific task requirements addressed (no missing elements) □ No underdeveloped or irrelevant supporting points □ Topic is developed, not just mentioned □ Word count is within or near target
+Coherence and Cohesion: □ Reader can follow every idea without re-reading □ Every paragraph has an identifiable main topic □ Cohesive devices are used accurately (not mechanically) □ Ideas progress logically without jumps or repetition
+Lexical Resource: □ Vocabulary is noticeably varied (not repetitive) □ Topic-specific vocabulary is used correctly □ Vocabulary errors do NOT affect communication □ Student attempts less common vocabulary with reasonable success
+Grammatical Range and Accuracy: □ Sentence structures are varied (simple + compound + complex) □ Core grammatical structures are used accurately □ Grammar errors do NOT affect communication □ Punctuation is effective
+`;
+
+const CREDIT_BOUNDARY_CHECKS = `
+BOUNDARY VERIFICATION CHECKS — Credit Satisfactory (3-3.5) → Good (4-4.5):
+Before assigning Good (4-4.5/5), ALL checks for that criterion must pass. If ANY fails → remains 3-3.5/5.
+Task Achievement: □ ALL main ideas present (no missing points) □ Meaning is MOSTLY accurate (not just "generally") □ Details are relevant (no unimportant details taking space) □ Word count is within range
+Coherence and Cohesion: □ Text is clear and easy to understand throughout □ No stilted or awkward sections □ Cohesive devices are ALMOST ALWAYS accurate □ Smooth flow between ideas and paragraphs
+Lexical Resource: □ Well paraphrased with VERY LITTLE copying □ Good vocabulary range (not repetitive) □ Word choice errors do NOT affect communication □ Spelling is mostly correct
+Grammatical Range and Accuracy: □ Good range of structures (not "sometimes limited") □ Grammar errors do NOT affect communication □ Punctuation is well managed
+`;
+
+const SUMMARY_BOUNDARY_CHECKS = `
+BOUNDARY VERIFICATION CHECKS — Summary Satisfactory (2.5-3) → 3.5 → Good (4-4.5):
+Before assigning 3.5 or 4-4.5, ALL checks for that level must pass.
+For 3.5: □ ALL main ideas captured (no missing points) □ Paraphrasing is CONSISTENT (not just "some")
+For 4-4.5: □ Paraphrasing is EFFECTIVE throughout □ Summary is FOCUSED (no unnecessary details) □ Reads as cohesive independent text
+Coherence for 4-4.5: □ Strong progression throughout □ Cohesive devices used naturally and effectively
+Lexical for 4-4.5: □ Varied vocabulary □ Natural paraphrasing □ Strong word choice and collocation
+Grammar for 4-4.5: □ Strong control including complex sentences □ Errors infrequent □ Sentence variety enhances quality
+`;
+
+const SYNTHESIS_BOUNDARY_CHECKS = `
+BOUNDARY VERIFICATION CHECKS — Synthesis Satisfactory (3-3.5) → Good (4-4.5):
+Same as Credit checks, plus:
+Task Achievement synthesis-specific: □ ALL source texts are referenced and integrated (not just listed) □ Ideas are synthesized (not just summarized from each source)
+`;
+
+const REPORT_BOUNDARY_CHECKS = `
+BOUNDARY VERIFICATION CHECKS — Report Writing Satisfactory (3-3.5) → Good (4-4.5):
+Task Response: □ Specific statistics cited (actual numbers/percentages) □ Conclusion includes ALL four elements: (1) most obvious result, (2) reference to previous research, (3) restatement of aim, (4) solutions/recommendations □ Analysis goes beyond surface-level description to interpretation
+Coherence: □ Sufficient depth of analysis and interpretation □ Cohesive devices used accurately and appropriately □ Paragraphs exhibit clear organization and unity
+Grammar: □ Proficient use of grammar with wide range of sentence structures □ Majority of sentences are error-free □ Punctuation is correct and appropriate
+Lexical: □ Wide range of vocabulary with uncommon lexical items □ Vocabulary is precise and appropriate for the genre □ Rare errors in spelling/word formation/capitalization
+`;
+
+// ─── Scored Exemplars as Calibration Anchors (Approach 3) ────────────────
+// Concrete reference points at the Satisfactory/Good boundary for each rubric type.
+
+const FOUNDATION_EXEMPLARS = `
+CALIBRATION EXEMPLARS — Foundation Level (A1-A2):
+These are REALISTIC student excerpts at the boundary. Use them as reference points when deciding between Satisfactory (3.5) and Good (4).
+
+Task Response:
+  SATISFACTORY (3.5/6): "Technology is important in our life. It help us in many ways like education and communication. People use phones and computers every day. Also technology make life easy."
+  → Meets most requirements BUT: thesis is vague ("important in our life"), examples are predictable ("phones and computers"), no depth. KEY TEST: Can you point to a missing/underdeveloped element? YES → remains 3.5.
+  GOOD (4/6): "Technology has become essential in modern education, especially after COVID-19. Students now use online platforms like Zoom and Google Classroom to attend lectures and submit assignments. While this increases access to learning, it also creates challenges for students without reliable internet."
+  → ALL requirements addressed: specific examples, both benefits and challenges, clear thesis. KEY TEST: Is there ANY missing/underdeveloped element? NO → 4 justified.
+
+Coherence and Cohesion:
+  SATISFACTORY (3.5/6): "First, technology help education. Also, people use phones. Also, computers are important. Technology make communication easy. In addition, the internet is good for students."
+  → Underlying coherence present BUT: mechanical devices ("Also... Also... In addition"), no logical progression. KEY TEST: Can the reader follow every idea without re-reading? NO → remains 3.5.
+  GOOD (4/6): "Technology has transformed education in several ways. In the classroom, digital tools like smartboards allow teachers to present interactive lessons. Outside the classroom, students can access online resources at any time. As a result, learning has become more flexible and accessible."
+  → Clear organization: topic sentence → inside → outside → conclusion. Accurate cohesive devices. KEY TEST: ANY unclear paragraph or mechanical device pattern? NO → 4 justified.
+
+Lexical Resource:
+  SATISFACTORY (3.5/6): "Technology is very important and useful. It help people in many ways. Education is good with technology. Communication is easy now. Life is better with technology."
+  → Core vocabulary adequate BUT: highly repetitive ("technology" 3x, "good/easy/better" only descriptors). KEY TEST: Is vocabulary NOTICEABLY varied? NO → remains 3.5.
+  GOOD (4/6): "Technology has revolutionized modern education. Digital tools such as smartboards and tablets have replaced traditional teaching methods. Students can now access a wealth of information online, making research more efficient."
+  → Good range: "revolutionized," "digital tools," "traditional teaching methods," "wealth of information," "efficient." KEY TEST: Is vocabulary noticeably repetitive? NO → 4 justified.
+
+Grammatical Range and Accuracy:
+  SATISFACTORY (3.5/6): "Technology is important. It help students to learn. People can use computer for study. The internet make information easy to find. Student can learn online now."
+  → Simple sentences mostly accurate BUT: repetitive S-V-O, 3rd person singular errors ("help" not "helps"), missing articles. KEY TEST: Is sentence structure noticeably varied? NO → remains 3.5.
+  GOOD (4/6): "Although technology has improved access to education, it also presents challenges. Students who rely solely on online resources may lack face-to-face interaction with teachers. However, when used effectively, digital tools can enhance the learning experience."
+  → Good range: concessive ("Although"), relative clause ("who rely"), conditional ("when used effectively"). No communication-affecting errors. KEY TEST: Varied structures AND no communication-affecting errors? BOTH YES → 4 justified.
+`;
+
+const CREDIT_EXEMPLARS = `
+CALIBRATION EXEMPLARS — Credit Level (A2-B1):
+Task Achievement:
+  SATISFACTORY (3/5): "The article discusses the impact of social media on teenagers. Smith (2023) argues that social media affects mental health. The author also mentions that teenagers spend too much time on phones. I think social media is bad for young people."
+  → Most main ideas present BUT: mental health point mentioned not explained, personal opinion added. KEY TEST: Are ALL main ideas present with accurate meaning? NO → remains 3.
+  GOOD (4/5): "Smith (2023) argues that social media platforms exploit psychological vulnerabilities in teenagers, leading to increased anxiety and depression. The author supports this claim by citing a study showing that teenagers who spend more than three hours daily on social media are twice as likely to report mental health issues."
+  → ALL main ideas present, explained, with supporting evidence. KEY TEST: ANY missing main idea or meaning inaccuracy? NO → 4 justified.
+
+Lexical Resource:
+  SATISFACTORY (3/5): "The author says that social media has a bad effect on teenagers. Young people use phones too much and this make them sad and stressed. Also, they cannot focus on their studies because of social media."
+  → Generally paraphrased BUT: limited vocabulary ("bad effect," "sad and stressed," "too much"), noticeable repetition. KEY TEST: Good vocabulary range? NO → remains 3.
+  GOOD (4/5): "The author contends that social media platforms have a detrimental impact on adolescent well-being. Excessive screen time contributes to elevated levels of anxiety and depression among young users, while simultaneously undermining their academic focus."
+  → Well paraphrased: "detrimental impact," "adolescent well-being," "excessive screen time," "elevated levels." KEY TEST: ANY limited/repetitive vocabulary? NO → 4 justified.
+`;
+
+const SUMMARY_EXEMPLARS = `
+CALIBRATION EXEMPLARS — Summary Writing (A2-B1):
+Task Achievement:
+  SATISFACTORY (3/5): "The article is about climate change and its effects on coastal cities. The author says that sea levels are rising because of global warming. Coastal cities like Miami and Jakarta are at risk of flooding. The article also discusses some solutions that governments can implement."
+  → Captures main ideas BUT: solutions mentioned vaguely, paraphrasing inconsistent ("the article is about," "the author says"). KEY TEST: ALL main ideas with CONSISTENT paraphrasing? NO → remains 2.5-3.
+  GOOD (4/5): "Rising sea levels caused by climate change threaten major coastal cities such as Miami and Jakarta with increased flooding. In response, governments are investing in flood defenses and relocating vulnerable populations, though these measures remain insufficient without significant carbon emission reductions."
+  → All main ideas captured with effective paraphrasing. Reads as independent text. KEY TEST: ANY copied phrases or unfocused content? NO → 4 justified.
+`;
+
+const SYNTHESIS_EXEMPLARS = `
+CALIBRATION EXEMPLARS — Synthesis Writing (A2-B1):
+Task Achievement:
+  SATISFACTORY (3/5): "Technology has both positive and negative effects on education. According to Source 1, online learning helps students access information easily. Source 2 says that technology can be distracting in classrooms. However, it is clear that technology is here to stay."
+  → Only 2 of 3 sources referenced. Ideas listed, not synthesized. Conclusion is vague. KEY TEST: Are ALL source texts referenced? NO → remains 3.
+  GOOD (4/5): "While digital tools have expanded access to education (Source 1), their impact on classroom focus remains contested. Source 2 highlights increased distraction, yet Source 3 demonstrates that structured technology integration actually improves engagement. This suggests that the issue is not technology itself, but how it is implemented."
+  → ALL three sources synthesized into a coherent argument. Ideas integrated, not listed. KEY TEST: ALL source texts referenced? YES → 4 justified.
+`;
+
+const REPORT_EXEMPLARS = `
+CALIBRATION EXEMPLARS — Report Writing (A2-B1):
+Task Response:
+  SATISFACTORY (3/5): "The results show that the experimental group performed better than the control group. The data indicates an upward trend in test scores. The conclusion is that the teaching method was effective. This agrees with previous research. The aim of the study was to test the method. Recommendations include improving the method."
+  → Main trend identified BUT: statistics are vague ("performed better," "upward trend"), recommendations are generic ("improving the method"). KEY TEST: Adequate specific statistics? NO. Specific recommendations? NO → remains 3.
+  GOOD (4/5): "The experimental group (M=78.3, SD=6.2) outperformed the control group (M=65.1, SD=8.4) by an average of 13.2 points, representing a statistically significant difference (p<0.05). This finding is consistent with Al-Rashdi (2022), who reported similar gains with collaborative learning. The study aimed to evaluate the effectiveness of peer tutoring; the results confirm its positive impact. It is recommended that instructors incorporate structured peer tutoring sessions into their lesson plans."
+  → Specific statistics, all 4 conclusion elements present, specific recommendation. KEY TEST: ANY missing element or vague statistics? NO → 4 justified.
 `;
 
 // ─── Prompt Builders (Lean — no JSON formatting instructions) ────────────────
@@ -513,6 +642,9 @@ ASSESSMENT RUBRICS:
 ${buildCriteriaText(rubrics)}
 
 ${CREDIT_HUMANIZATION}
+${REPORT_BOUNDARY_CHECKS}
+${REPORT_EXEMPLARS}
+${SCORING_PROTOCOL}
 SCORING INSTRUCTIONS:
 1. Score each criterion 0-5 (0.5 increments). Use the FULL range — do NOT default to middle scores.
 2. For each criterion: quote at least ONE exact phrase from the student text as evidence in your justification.
@@ -644,18 +776,16 @@ FEEDBACK TONE GUARDRAILS:
    - "In English, the verb needs to agree with the subject..."
    - Avoid: "This is a basic grammatical error..."
 
-SCORING FLOW (follow in this order):
-Step 1 — Identify what the student communicated successfully (strengths first).
-Step 2 — Determine the overall CEFR demonstrated level from the essay.
-Step 3 — Score each criterion 0-6 (0.5 increments) relative to A1-A2 expectations, not B2+ academic standards.
-Step 4 — Only deduct for errors that genuinely impede meaning or show a gap below A1 level.
-Step 5 — For each criterion: quote at least ONE exact phrase from the essay as evidence in your justification.
-Step 6 — List up to 3 specific errors per criterion as { "quote": "[exact text]", "explanation": "[why wrong]" }. Classify each as expected, non-impeding, or impeding. Do NOT provide corrections.
-Step 7 — Write 1-2 specific strengths and 1-2 actionable suggestions per criterion.
-Step 8 — overallFeedback (3-4 sentences): strongest/weakest criterion, what the student communicated well, one prioritized action item.
-Step 9 — For Task Response: address topic adherence and essay structure. If the word count exceeds the target, mention it but do NOT deduct marks.
-Step 10 — Do NOT calculate totalScore or percentage — those are computed automatically.
-Step 11 — HOLISTIC CONSISTENCY CHECK: After scoring all four criteria, verify that the spread between the HIGHEST and LOWEST criterion scores does not exceed 2 points. If it does, re-examine whether the low score truly reflects impeding errors or whether expected/non-impeding errors were over-penalized. Also verify: if Task Response and Coherence are 4+, Grammar and Lexical Resource should generally not be below 3, because successful communication inherently requires some grammatical and lexical competence. These are SOFT constraints — genuine outliers can exist but should be justified in the feedback.`;
+${SCORING_PROTOCOL}
+${FOUNDATION_BOUNDARY_CHECKS}
+${FOUNDATION_EXEMPLARS}
+SCORING INSTRUCTIONS:
+1. Score each criterion 0-6 (0.5 increments). Use the FULL range — do NOT default to middle scores.
+2. List up to 3 specific errors per criterion as { "quote": "[exact text]", "explanation": "[why wrong]" }. Classify each as expected, non-impeding, or impeding. Do NOT provide corrections.
+3. Write 1-2 specific strengths and 1-2 actionable suggestions per criterion.
+4. overallFeedback (3-4 sentences): strongest/weakest criterion, what the student communicated well, one prioritized action item.
+5. For Task Response: address topic adherence and essay structure. If the word count exceeds the target, mention it but do NOT deduct marks.
+6. Do NOT calculate totalScore or percentage — those are computed automatically.`;
 }
 function buildCreditPrompt(text: string, topic: string | null, wordCount: number): string {
   const rubrics = CREDIT_RUBRICS;
@@ -675,6 +805,9 @@ ASSESSMENT RUBRICS (Credit Course — LANC2160):
 ${buildCriteriaText(rubrics)}
 
 ${CREDIT_HUMANIZATION}
+${CREDIT_BOUNDARY_CHECKS}
+${CREDIT_EXEMPLARS}
+${SCORING_PROTOCOL}
 SCORING INSTRUCTIONS:
 1. Score each criterion 0-5 (0.5 increments). Use the FULL range — do NOT default to middle scores.
 2. For each criterion: quote at least ONE exact phrase from the essay as evidence in your justification.
@@ -733,6 +866,9 @@ SUMMARY RULES:
 3. Off-topic summary = Task Achievement 0. Large-scale copying = low TA and LR.
 
 ${CREDIT_HUMANIZATION}
+${SUMMARY_BOUNDARY_CHECKS}
+${SUMMARY_EXEMPLARS}
+${SCORING_PROTOCOL}
 SCORING INSTRUCTIONS:
 1. Score each criterion 0-5 (0.5 increments). Use the FULL range — do NOT default to middle scores.
 2. For each criterion: quote at least ONE exact phrase from the summary as evidence.
@@ -787,6 +923,9 @@ SYNTHESIS RUBRICS:
 ${buildCriteriaText(rubrics)}
 
 ${CREDIT_HUMANIZATION}
+${SYNTHESIS_BOUNDARY_CHECKS}
+${SYNTHESIS_EXEMPLARS}
+${SCORING_PROTOCOL}
 SCORING INSTRUCTIONS:
 1. Score each criterion 0-5 (0.5 increments). Use the FULL range — do NOT default to middle scores.
 2. For each criterion: quote at least ONE exact phrase from the essay as evidence.
@@ -848,6 +987,9 @@ ARTICLE REVIEW RUBRICS:
 ${buildCriteriaText(rubrics)}
 
 ${CREDIT_HUMANIZATION}
+${CREDIT_BOUNDARY_CHECKS}
+${CREDIT_EXEMPLARS}
+${SCORING_PROTOCOL}
 SCORING INSTRUCTIONS:
 1. Score each criterion 0-5 (0.5 increments). Use the FULL range — do NOT default to middle scores.
 2. For Task Achievement: Evaluate whether the student critically analyses the article (not just summarizes), reviews at least 2 points from the author, uses at least 2 excerpts with proper in-text APA citations, and paraphrases effectively (no chunks of 3+ copied words).
@@ -911,6 +1053,9 @@ SYNTHESIS RULES:
 5. Do NOT deduct marks if word count exceeds target. If 10%+ BELOW, lower TA per rubric.
 
 ${CREDIT_HUMANIZATION}
+${SYNTHESIS_BOUNDARY_CHECKS}
+${SYNTHESIS_EXEMPLARS}
+${SCORING_PROTOCOL}
 SCORING INSTRUCTIONS:
 1. Score each criterion 0-5 (0.5 increments). Use the FULL range — do NOT default to middle scores.
 2. For each criterion: quote at least ONE exact phrase from the essay as evidence.
