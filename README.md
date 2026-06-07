@@ -59,7 +59,7 @@ Student Essay → OCR (Gemini Vision) → Extracted Text → AI Assessment (3x c
                                                        ↓
                                               TypeScript Score Normalization
                                                        ↓
-                                              Results + PDF Report
+                                              Results + Word (DOCX) Report
 ```
 
 ### Tri-Mode Gemini Authentication
@@ -102,9 +102,21 @@ The assessment engine applies 9 humanization rules for fair, encouraging, and co
 8. **Feedback Tone Guardrails** — Asset-based language, no judgmental phrasing
 9. **Holistic Consistency Check** — Score spread across criteria must not exceed 2 points
 
-### Boundary Accuracy System (v3.1)
+### Boundary Accuracy System (v3.2)
 
-The most persistent problem in AI-based writing assessment is the **Satisfactory/Good boundary confusion** — the AI's inability to reliably distinguish between adjacent grade levels that share semantically similar descriptors. iAWE v3.1 implements three complementary approaches to solve this:
+The most persistent problem in AI-based writing assessment is the **Satisfactory/Good boundary confusion** — the AI's inability to reliably distinguish between adjacent grade levels that share semantically similar descriptors. A related critical issue is the **off-topic scoring problem**, where completely off-topic essays receive Satisfactory or higher scores for Task Response. iAWE v3.2 implements four complementary approaches to solve these issues:
+
+#### Approach 0: Off-Topic Detection (v3.2)
+
+A mandatory **Step 0** in the Evidence-First Protocol forces the model to classify each essay as on-topic, partially off-topic, or completely off-topic BEFORE any scoring begins. This classification has deterministic scoring consequences:
+
+| Classification | Task Response/Achievement | Lexical Resource | Other Criteria |
+|:--------------:|:-------------------------:|:----------------:|:--------------:|
+| **Completely off-topic** | Capped at 0–1.5 (Very Poor) | Capped at 0–2 (Weak) | Scored normally |
+| **Partially off-topic** | Capped at 50% of max | Capped at 75% of max | Scored normally |
+| **On-topic** | No cap | No cap | No cap |
+
+These caps are enforced **both** by prompt instructions and by deterministic TypeScript post-processing in `route.ts`. The score floor (minimum 1 per criterion) does NOT apply when the essay is off-topic. The off-topic classification is returned in the API response as `offTopicClassification`.
 
 #### Approach 1: Enhanced Rubric Descriptors with Boundary Conditions
 
@@ -119,17 +131,18 @@ Boundary conditions are applied to all 5 rubric types: Foundation (0–6), Credi
 
 #### Approach 2: Evidence-First Scoring Protocol
 
-The scoring process has been restructured into an **8-step Evidence-First Protocol** that forces the model to cite textual evidence and perform boundary verification BEFORE assigning a score:
+The scoring process has been restructured into a **9-step Evidence-First Protocol** (Step 0 + Steps 1–8) that forces the model to detect off-topic content, cite textual evidence, and perform boundary verification BEFORE assigning a score:
 
 | Step | Action | Purpose |
 |:----:|--------|---------|
+| 0 | **Off-Topic Detection** — Classify essay as on-topic, partially off-topic, or completely off-topic | Prevents off-topic essays from receiving Satisfactory+ for Task Response |
 | 1 | **Evidence Gathering** — Quote 2+ relevant phrases (one supporting higher, one supporting lower band) | Prevents pattern-matching without evidence |
 | 2 | **Band Range Identification** — State the narrowest possible band range | Narrows the decision space |
 | 3 | **Boundary Verification** — Mandatory binary check when range spans Satisfactory/Good | Forces explicit boundary decision |
 | 4 | **Exclusion Check** — Check if boundary exclusion statements rule out the higher band | Uses negative definitions |
-| 5 | **Score Assignment** — Only NOW assign a score consistent with Steps 1–4 | Prevents premature scoring |
-| 6 | **Justification with Evidence** — Cite quoted evidence and reference boundary checks | Ensures accountability |
-| 7 | **Error Classification** — List errors as expected/non-impeding/impeding | Consistent error handling |
+| 5 | **Score Assignment** — Only NOW assign a score consistent with Steps 0–4 | Prevents premature scoring |
+| 6 | **Justification with Evidence** — Brief justification (1–2 sentences) citing key evidence | Ensures accountability |
+| 7 | **Error Classification** — List up to 2 errors as expected/non-impeding/impeding | Consistent error handling |
 | 8 | **Holistic Consistency Check** — Verify spread ≤ 2 points, no contradictions | Cross-criterion consistency |
 
 Each rubric type has its own **Boundary Verification Check table** — a set of binary checkboxes (□ ALL requirements met, □ No missing elements, etc.) that the model must complete before assigning a Good score. If ANY checkbox fails, the score remains at Satisfactory.
@@ -162,7 +175,17 @@ For report writing (LANC2146), the Task Response boundary checks include: **Are 
 
 #### Token Budget Impact
 
-The three approaches add approximately 800–1800 tokens per prompt (depending on rubric type), which translates to approximately $0.0004–0.0008 additional cost per assessment at current Gemini 2.5 Flash pricing — negligible for the accuracy improvement gained.
+The four approaches add approximately 1000–2000 tokens per prompt (depending on rubric type), which translates to approximately $0.0005–0.001 additional cost per assessment at current Gemini 2.5 Flash pricing — negligible for the accuracy improvement gained.
+
+### Assessment Reports
+
+Assessment reports are generated as **editable Word (.docx) documents** rather than PDFs. This enables teachers to:
+
+- **Modify scores and feedback** directly in the downloaded Word file before sharing with students
+- **Add personal comments** or annotations alongside the AI-generated feedback
+- **Save changes** and redistribute the customized report
+
+Reports are generated server-side via the `/api/pdf/assessment` endpoint using the `docx` npm package and downloaded with a `.docx` file extension.
 
 ---
 
@@ -178,7 +201,7 @@ The three approaches add approximately 800–1800 tokens per prompt (depending o
 | Assessment | Gemini 2.5 Flash / Pro (tiered fallback) |
 | Scoring | Deterministic TypeScript post-processing |
 | Auth | HMAC-SHA256 tokens via Web Crypto API |
-| PDF | PDFKit |
+| Reports | docx (Word .docx generation) |
 | DB | Prisma + SQLite (local dev), in-memory fallback (Vercel) |
 | Deployment | Vercel (serverless) |
 
@@ -205,7 +228,7 @@ awe-system2/
 │   │   │   ├── courses/route.ts# Course data
 │   │   │   ├── essays/route.ts # Essay CRUD (DB + in-memory fallback)
 │   │   │   ├── ocr/route.ts    # Gemini Vision OCR
-│   │   │   └── pdf/assessment/ # PDF report generation
+│   │   │   └── pdf/assessment/ # Word (DOCX) report generation
 │   │   ├── layout.tsx          # Root layout
 │   │   └── page.tsx            # Main SPA orchestrator
 │   ├── components/
@@ -344,7 +367,7 @@ The app can be installed on mobile devices for a native-like experience:
 - **Email whitelist** — Only pre-approved SQU faculty emails can authenticate
 - **Middleware protection** — `/api/ocr` and `/api/assess` require valid auth tokens; unauthenticated requests receive 401
 - **No third-party data sharing** — Essays and assessments are processed only by Google Gemini via Vertex AI
-- **Client-side storage** — Assessment records are stored in the browser's localStorage; PDF exports are generated client-side
+- **Client-side storage** — Assessment records are stored in the browser's localStorage; Word (DOCX) reports are generated server-side
 
 ---
 
@@ -384,7 +407,7 @@ If you use the **iAWE System** in your research, teaching, or publications, plea
 
 ### APA
 
-> Mandour, W. (2026). *iAWE System: A Multimodal, LLM-based Automated Writing Evaluation System for Formative Assessment* (Version 3.1.0) [Computer software]. Sultan Qaboos University — Center for Preparatory Studies. https://github.com/waleedmandour/awe-system2
+> Mandour, W. (2026). *iAWE System: A Multimodal, LLM-based Automated Writing Evaluation System for Formative Assessment* (Version 3.2.0) [Computer software]. Sultan Qaboos University — Center for Preparatory Studies. https://github.com/waleedmandour/awe-system2
 
 ### BibTeX
 
@@ -393,7 +416,7 @@ If you use the **iAWE System** in your research, teaching, or publications, plea
   author    = {Mandour, Waleed},
   title     = {{iAWE System: A Multimodal, LLM-based Automated Writing Evaluation System for Formative Assessment}},
   year      = {2026},
-  version   = {3.1.0},
+  version   = {3.2.0},
   publisher = {Sultan Qaboos University -- Center for Preparatory Studies},
   url       = {https://github.com/waleedmandour/awe-system2}
 }
