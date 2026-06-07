@@ -115,7 +115,7 @@ const ResultsScreen = ({ assessment, onNewAssessment, onBack }: { assessment: As
     }
   };
 
-  const handleDownloadPDF = async () => {
+  const handleDownloadReport = async () => {
     setIsDownloading(true);
     try {
       const response = await fetch('/api/pdf/assessment', {
@@ -131,31 +131,31 @@ const ResultsScreen = ({ assessment, onNewAssessment, onBack }: { assessment: As
       });
 
       if (!response.ok) {
-        throw new Error('Failed to generate PDF');
+        throw new Error('Failed to generate report');
       }
 
-      // Get the PDF blob
+      // Get the DOCX blob
       const blob = await response.blob();
       
       // Create download link
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `AWE_Assessment_${selectedCourse?.code || 'Report'}_${new Date().toISOString().split('T')[0]}.pdf`;
+      a.download = `AWE_Assessment_${selectedCourse?.code || 'Report'}_${new Date().toISOString().split('T')[0]}.docx`;
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
 
       toast({
-        title: 'PDF Downloaded',
-        description: 'Your assessment report has been downloaded.',
+        title: 'Report Downloaded',
+        description: 'Your Word report has been downloaded. You can edit and save changes.',
       });
     } catch (error) {
-      console.error('PDF download error:', error);
+      console.error('Report download error:', error);
       toast({
         title: 'Download Failed',
-        description: 'Failed to generate PDF report.',
+        description: 'Failed to generate Word report.',
         variant: 'destructive',
       });
     } finally {
@@ -473,7 +473,7 @@ const ResultsScreen = ({ assessment, onNewAssessment, onBack }: { assessment: As
           <div className="flex gap-3">
             <Button
               variant="outline"
-              onClick={handleDownloadPDF}
+              onClick={handleDownloadReport}
               disabled={isDownloading}
               className="flex-1 h-12 rounded-xl ios-press"
             >
@@ -482,7 +482,7 @@ const ResultsScreen = ({ assessment, onNewAssessment, onBack }: { assessment: As
               ) : (
                 <Download className="w-4 h-4 mr-2" />
               )}
-              {isDownloading ? 'Generating...' : 'Download PDF'}
+              {isDownloading ? 'Generating...' : 'Download Word Report'}
             </Button>
             <Button
               onClick={onNewAssessment}

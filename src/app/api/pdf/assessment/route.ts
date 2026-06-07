@@ -1,21 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server';
-import PDFDocument from 'pdfkit';
+import {
+  Document, Packer, Paragraph, TextRun, AlignmentType,
+  BorderStyle, Table, TableRow, TableCell, WidthType, ShadingType,
+  convertInchesToTwip, Footer, PageNumber,
+} from 'docx';
 
-// Prevent Vercel/serverless from timing out the PDF generation
+// Prevent Vercel/serverless from timing out the report generation
 export const maxDuration = 60;
 
 // Color constants
-const PRIMARY_GREEN = '#1e40af';
-const SECONDARY_GREEN = '#3b82f6';
-const GOLD = '#3b82f6';
-const LIGHT_GRAY = '#f5f5f5';
-const DARK_GRAY = '#333333';
-
-// Layout constants — fixed margins so doc.x drift never causes issues
-const LEFT = 50;
-const RIGHT = 50;
-const PAGE_WIDTH_A4 = 595.28;
-const CONTENT_WIDTH = PAGE_WIDTH_A4 - LEFT - RIGHT;
+const PRIMARY_BLUE = '1E40AF';
+const SECONDARY_BLUE = '3B82F6';
+const DARK_GRAY = '333333';
+const MEDIUM_GRAY = '666666';
+const LIGHT_GRAY = 'F5F5F5';
+const ORANGE = 'F97316';
+const RED = 'EF4444';
+const WARNING_BG = 'FFF8E1';
+const WARNING_BORDER = 'FBBF24';
 
 function getScoreLabel(percentage: number): string {
   if (percentage >= 80) return 'Excellent';
@@ -24,23 +26,21 @@ function getScoreLabel(percentage: number): string {
   return 'Needs Improvement';
 }
 
-function getScoreColor(percentage: number): string {
-  if (percentage >= 80) return PRIMARY_GREEN;
-  if (percentage >= 60) return GOLD;
-  if (percentage >= 40) return '#f97316';
-  return '#ef4444';
+function getScoreColorHex(percentage: number): string {
+  if (percentage >= 80) return PRIMARY_BLUE;
+  if (percentage >= 60) return SECONDARY_BLUE;
+  if (percentage >= 40) return ORANGE;
+  return RED;
 }
 
-/** Render text safely — pdfkit handles newlines internally */
-function safeText(doc: PDFDocument, text: string, x: number, y: number, options: any = {}) {
-  doc.text(text, x, y, { width: options.width || CONTENT_WIDTH, lineGap: options.lineGap || 3, ...options });
-}
+// Paragraph border definitions (docx-js format)
+const separatorBorder = {
+  top: { style: BorderStyle.SINGLE, size: 6, color: PRIMARY_BLUE, space: 1 },
+};
 
-/** Move the cursor to an absolute position, ignoring any drift from previous text() calls */
-function moveCursor(doc: PDFDocument, x: number, y: number) {
-  doc.x = x;
-  doc.y = y;
-}
+const thinSeparatorBorder = {
+  top: { style: BorderStyle.SINGLE, size: 2, color: 'CCCCCC', space: 1 },
+};
 
 export async function POST(request: NextRequest) {
   try {
@@ -56,7 +56,7 @@ export async function POST(request: NextRequest) {
 
     const scores: any[] = assessment.scores || [];
 
-    // Recalculate total from individual criterion scores to ensure consistency
+    // Recalculate total from individual criterion scores
     const totalScore = scores.reduce((sum: number, s: any) => sum + (s.score || 0), 0);
     const maxScore = scores.reduce((sum: number, s: any) => sum + (s.maxScore || 0), 0);
     const percentage = maxScore > 0 ? Math.round((totalScore / maxScore) * 100) : 0;
@@ -64,254 +64,359 @@ export async function POST(request: NextRequest) {
     const wordCount = assessment.wordCount || 0;
     const courseName = course?.name || 'Unknown Course';
     const courseCode = course?.code || 'N/A';
+    const offTopicClassification = assessment.offTopicClassification || 'on-topic';
+    const label = getScoreLabel(percentage);
+    const labelColor = getScoreColorHex(percentage);
+    const dateStr = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 
-    // ── Collect PDF bytes directly from doc events (no PassThrough needed) ──
-    const buffers: Buffer[] = [];
+    // ── Build document sections ──
+    const children: (Paragraph | Table)[] = [];
 
-    const doc = new PDFDocument({
-      size: 'A4',
-      margins: { top: 60, bottom: 60, left: LEFT, right: RIGHT },
-      info: {
-        Title: `AWE Assessment Report - ${courseCode}`,
-        Author: 'AWE System - Sultan Qaboos University',
-        Subject: 'Essay Assessment Report',
+    // ── HEADER ──
+    children.push(new Paragraph({
+      alignment: AlignmentType.CENTER,
+      spacing: { after: 80 },
+      children: [
+        new TextRun({ text: 'Automated Writing Evaluation', bold: true, size: 44, color: PRIMARY_BLUE, font: 'Calibri' }),
+      ],
+    }));
+
+    children.push(new Paragraph({
+      alignment: AlignmentType.CENTER,
+      spacing: { after: 200 },
+      children: [
+        new TextRun({ text: 'Assessment Report', size: 26, color: DARK_GRAY, font: 'Calibri' }),
+      ],
+    }));
+
+    // Course info
+    children.push(new Paragraph({
+      spacing: { after: 40 },
+      children: [
+        new TextRun({ text: `Course: ${courseName} (${courseCode})`, size: 20, color: DARK_GRAY, font: 'Calibri' }),
+      ],
+    }));
+
+    children.push(new Paragraph({
+      spacing: { after: 40 },
+      children: [
+        new TextRun({ text: `Date: ${dateStr}`, size: 20, color: DARK_GRAY, font: 'Calibri' }),
+      ],
+    }));
+
+    if (wordCount) {
+      children.push(new Paragraph({
+        spacing: { after: 200 },
+        children: [
+          new TextRun({ text: `Word Count: ${wordCount} words`, size: 20, color: DARK_GRAY, font: 'Calibri' }),
+        ],
+      }));
+    }
+
+    // Off-topic indicator
+    if (offTopicClassification && offTopicClassification !== 'on-topic') {
+      const offTopicLabel = offTopicClassification.includes('completely') ? 'COMPLETELY OFF-TOPIC' : 'PARTIALLY OFF-TOPIC';
+      children.push(new Paragraph({
+        spacing: { after: 200 },
+        children: [
+          new TextRun({ text: `⚠ ${offTopicLabel}`, bold: true, size: 22, color: RED, font: 'Calibri' }),
+        ],
+      }));
+    }
+
+    // Separator
+    children.push(new Paragraph({ border: separatorBorder, spacing: { after: 300 } }));
+
+    // ── SCORE SUMMARY TABLE ──
+    children.push(new Paragraph({
+      spacing: { after: 120 },
+      children: [
+        new TextRun({ text: 'Score Summary', bold: true, size: 30, color: PRIMARY_BLUE, font: 'Calibri' }),
+      ],
+    }));
+
+    const summaryTable = new Table({
+      width: { size: 100, type: WidthType.PERCENTAGE },
+      borders: {
+        top: { style: BorderStyle.SINGLE, size: 1, color: 'DDDDDD' },
+        bottom: { style: BorderStyle.SINGLE, size: 1, color: 'DDDDDD' },
+        left: { style: BorderStyle.SINGLE, size: 1, color: 'DDDDDD' },
+        right: { style: BorderStyle.SINGLE, size: 1, color: 'DDDDDD' },
+        insideHorizontal: { style: BorderStyle.SINGLE, size: 1, color: 'EEEEEE' },
+        insideVertical: { style: BorderStyle.SINGLE, size: 1, color: 'CCCCCC' },
       },
+      rows: [
+        new TableRow({
+          children: [
+            new TableCell({
+              width: { size: 33, type: WidthType.PERCENTAGE },
+              shading: { type: ShadingType.CLEAR, fill: LIGHT_GRAY },
+              children: [
+                new Paragraph({ alignment: AlignmentType.CENTER, spacing: { before: 100, after: 40 }, children: [new TextRun({ text: `${totalScore}/${maxScore}`, bold: true, size: 36, color: PRIMARY_BLUE, font: 'Calibri' })] }),
+                new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 100 }, children: [new TextRun({ text: 'Total Score', size: 18, color: MEDIUM_GRAY, font: 'Calibri' })] }),
+              ],
+            }),
+            new TableCell({
+              width: { size: 33, type: WidthType.PERCENTAGE },
+              shading: { type: ShadingType.CLEAR, fill: LIGHT_GRAY },
+              children: [
+                new Paragraph({ alignment: AlignmentType.CENTER, spacing: { before: 100, after: 40 }, children: [new TextRun({ text: `${percentage}%`, bold: true, size: 36, color: PRIMARY_BLUE, font: 'Calibri' })] }),
+                new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 100 }, children: [new TextRun({ text: 'Percentage', size: 18, color: MEDIUM_GRAY, font: 'Calibri' })] }),
+              ],
+            }),
+            new TableCell({
+              width: { size: 34, type: WidthType.PERCENTAGE },
+              shading: { type: ShadingType.CLEAR, fill: LIGHT_GRAY },
+              children: [
+                new Paragraph({ alignment: AlignmentType.CENTER, spacing: { before: 100, after: 40 }, children: [new TextRun({ text: label, bold: true, size: 28, color: labelColor, font: 'Calibri' })] }),
+                new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 100 }, children: [new TextRun({ text: 'Performance', size: 18, color: MEDIUM_GRAY, font: 'Calibri' })] }),
+              ],
+            }),
+          ],
+        }),
+      ],
     });
 
-    // We register event listeners BEFORE calling doc.end()
-    const pdfBytes = await new Promise<Buffer>((resolve, reject) => {
-      doc.on('data', (chunk: Buffer) => buffers.push(chunk));
-      doc.on('end', () => resolve(Buffer.concat(buffers)));
-      doc.on('error', reject);
+    children.push(summaryTable);
 
-      // ──────────────────── HEADER ────────────────────
-      moveCursor(doc, LEFT, 60);
+    // ── DETAILED CRITERIA ASSESSMENT ──
+    children.push(new Paragraph({ spacing: { before: 300, after: 120 }, children: [
+      new TextRun({ text: 'Detailed Criteria Assessment', bold: true, size: 30, color: PRIMARY_BLUE, font: 'Calibri' }),
+    ]}));
 
-      doc.fontSize(22).fillColor(PRIMARY_GREEN)
-        .text('Automated Writing Evaluation', LEFT, doc.y, { width: CONTENT_WIDTH, align: 'center' });
+    for (let i = 0; i < scores.length; i++) {
+      const score = scores[i];
+      const cName = score.criterionName || `Criterion ${i + 1}`;
+      const cScore = score.score || 0;
+      const cMax = score.maxScore || 6;
+      const cPct = cMax > 0 ? Math.round((cScore / cMax) * 100) : 0;
+      const cColor = getScoreColorHex(cPct);
 
-      doc.fontSize(13).fillColor(DARK_GRAY)
-        .text('Assessment Report', LEFT, doc.y, { width: CONTENT_WIDTH, align: 'center' });
+      // Criterion header with score
+      children.push(new Paragraph({
+        spacing: { before: 200, after: 80 },
+        children: [
+          new TextRun({ text: `${cName}  `, bold: true, size: 24, color: cColor, font: 'Calibri' }),
+          new TextRun({ text: `(${cScore}/${cMax} — ${cPct}%)`, size: 22, color: cColor, font: 'Calibri' }),
+        ],
+      }));
 
-      doc.moveDown(0.5);
+      // Parse and render feedback sections
+      const feedback = score.feedback || 'No feedback provided.';
+      const feedbackLines = feedback.split('\n').filter((l: string) => l.trim());
 
-      // Course info
-      doc.fontSize(10).fillColor(DARK_GRAY);
-      doc.text(`Course: ${courseName} (${courseCode})`, LEFT, doc.y, { width: CONTENT_WIDTH });
-      doc.text(`Date: ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}`, LEFT, doc.y, { width: CONTENT_WIDTH });
-      if (wordCount) doc.text(`Word Count: ${wordCount} words`, LEFT, doc.y, { width: CONTENT_WIDTH });
+      for (const line of feedbackLines) {
+        const trimmed = line.trim();
+        if (!trimmed) continue;
 
-      doc.moveDown(0.8);
-
-      // Divider line
-      doc.moveTo(LEFT, doc.y).lineTo(LEFT + CONTENT_WIDTH, doc.y)
-        .strokeColor(PRIMARY_GREEN).lineWidth(2).stroke();
-
-      doc.moveDown(0.8);
-
-      // ──────────────────── SCORE SUMMARY ────────────────────
-      doc.fontSize(15).fillColor(PRIMARY_GREEN)
-        .text('Score Summary', LEFT, doc.y, { width: CONTENT_WIDTH });
-      doc.moveDown(0.4);
-
-      // Score summary box — all positions are absolute from LEFT
-      const boxY = doc.y;
-      const boxHeight = 55;
-      doc.roundedRect(LEFT, boxY, CONTENT_WIDTH, boxHeight, 5)
-        .fillAndStroke(LIGHT_GRAY, '#dddddd');
-
-      // Total Score (column 1)
-      doc.fillColor(PRIMARY_GREEN).fontSize(18)
-        .text(`${totalScore}/${maxScore}`, LEFT + 30, boxY + 16, { width: 120, align: 'center' });
-      doc.fontSize(9).fillColor('#666666')
-        .text('Total Score', LEFT + 30, boxY + 38, { width: 120, align: 'center' });
-
-      // Vertical separator 1
-      doc.moveTo(LEFT + 160, boxY + 10).lineTo(LEFT + 160, boxY + boxHeight - 10)
-        .strokeColor('#cccccc').lineWidth(1).stroke();
-
-      // Percentage (column 2)
-      doc.fillColor(PRIMARY_GREEN).fontSize(18)
-        .text(`${percentage}%`, LEFT + 170, boxY + 16, { width: 120, align: 'center' });
-      doc.fontSize(9).fillColor('#666666')
-        .text('Percentage', LEFT + 170, boxY + 38, { width: 120, align: 'center' });
-
-      // Vertical separator 2
-      doc.moveTo(LEFT + 300, boxY + 10).lineTo(LEFT + 300, boxY + boxHeight - 10)
-        .strokeColor('#cccccc').lineWidth(1).stroke();
-
-      // Performance label (column 3)
-      const label = getScoreLabel(percentage);
-      const labelColor = getScoreColor(percentage);
-      doc.fillColor(labelColor).fontSize(14)
-        .text(label, LEFT + 310, boxY + 20, { width: 130, align: 'center' });
-      doc.fontSize(9).fillColor('#666666')
-        .text('Performance', LEFT + 310, boxY + 38, { width: 130, align: 'center' });
-
-      // Reset cursor below the box
-      moveCursor(doc, LEFT, boxY + boxHeight + 15);
-
-      // ──────────────────── CRITERIA BREAKDOWN ────────────────────
-      doc.fontSize(15).fillColor(PRIMARY_GREEN)
-        .text('Detailed Criteria Assessment', LEFT, doc.y, { width: CONTENT_WIDTH });
-      doc.moveDown(0.4);
-
-      for (let i = 0; i < scores.length; i++) {
-        const score = scores[i];
-        const cName = score.criterionName || `Criterion ${i + 1}`;
-        const cScore = score.score || 0;
-        const cMax = score.maxScore || 6;
-        const cPct = cMax > 0 ? Math.round((cScore / cMax) * 100) : 0;
-        const cColor = getScoreColor(cPct);
-
-        // Check if we need a new page (leave room for header + some content)
-        if (doc.y > 600) {
-          doc.addPage();
-          moveCursor(doc, LEFT, 60);
+        // Check for section headers
+        if (trimmed.startsWith('Justification:')) {
+          children.push(new Paragraph({
+            spacing: { after: 40 },
+            children: [
+              new TextRun({ text: 'Justification: ', bold: true, size: 18, color: DARK_GRAY, font: 'Calibri' }),
+              new TextRun({ text: trimmed.replace('Justification:', '').trim(), size: 18, color: DARK_GRAY, font: 'Calibri' }),
+            ],
+          }));
+        } else if (trimmed.startsWith('Strengths:')) {
+          children.push(new Paragraph({
+            spacing: { after: 40 },
+            children: [
+              new TextRun({ text: 'Strengths: ', bold: true, size: 18, color: '16A34A', font: 'Calibri' }),
+              new TextRun({ text: trimmed.replace('Strengths:', '').trim(), size: 18, color: DARK_GRAY, font: 'Calibri' }),
+            ],
+          }));
+        } else if (trimmed.startsWith('Mistakes:')) {
+          children.push(new Paragraph({
+            spacing: { after: 40 },
+            children: [
+              new TextRun({ text: 'Mistakes: ', bold: true, size: 18, color: RED, font: 'Calibri' }),
+              new TextRun({ text: trimmed.replace('Mistakes:', '').trim(), size: 18, color: DARK_GRAY, font: 'Calibri' }),
+            ],
+          }));
+        } else if (trimmed.startsWith('Suggestions:')) {
+          children.push(new Paragraph({
+            spacing: { after: 40 },
+            children: [
+              new TextRun({ text: 'Suggestions: ', bold: true, size: 18, color: SECONDARY_BLUE, font: 'Calibri' }),
+              new TextRun({ text: trimmed.replace('Suggestions:', '').trim(), size: 18, color: DARK_GRAY, font: 'Calibri' }),
+            ],
+          }));
+        } else {
+          children.push(new Paragraph({
+            spacing: { after: 40 },
+            children: [
+              new TextRun({ text: trimmed, size: 18, color: DARK_GRAY, font: 'Calibri' }),
+            ],
+          }));
         }
-
-        // Criterion header
-        doc.fontSize(12).fillColor(cColor);
-        safeText(doc, `${cName}  (${cScore}/${cMax} — ${cPct}%)`, LEFT, doc.y, { width: CONTENT_WIDTH });
-        doc.moveDown(0.2);
-
-        // Progress bar
-        const barWidth = CONTENT_WIDTH;
-        const filledWidth = barWidth * (cPct / 100);
-        doc.roundedRect(LEFT, doc.y, barWidth, 6, 3).fillAndStroke('#eeeeee', '#eeeeee');
-        if (filledWidth > 0) {
-          doc.roundedRect(LEFT, doc.y, Math.max(filledWidth, 6), 6, 3).fill(cColor);
-        }
-        doc.y += 12;
-        doc.moveDown(0.3);
-
-        // Feedback — render the structured feedback string
-        const feedback = score.feedback || 'No feedback provided.';
-        doc.fontSize(9).fillColor(DARK_GRAY);
-        safeText(doc, feedback, LEFT, doc.y, { width: CONTENT_WIDTH, lineGap: 2 });
-        doc.moveDown(0.5);
       }
+    }
 
-      // ──────────────────── OVERALL FEEDBACK ────────────────────
-      if (doc.y > 550) {
-        doc.addPage();
-        moveCursor(doc, LEFT, 60);
-      }
+    // ── OVERALL FEEDBACK ──
+    children.push(new Paragraph({ border: thinSeparatorBorder, spacing: { before: 300, after: 200 } }));
 
-      doc.moveDown(0.3);
-      doc.moveTo(LEFT, doc.y).lineTo(LEFT + CONTENT_WIDTH, doc.y)
-        .strokeColor(GOLD).lineWidth(1).stroke();
-      doc.moveDown(0.5);
+    children.push(new Paragraph({
+      spacing: { after: 80 },
+      children: [
+        new TextRun({ text: 'Overall Feedback', bold: true, size: 30, color: PRIMARY_BLUE, font: 'Calibri' }),
+      ],
+    }));
 
-      doc.fontSize(15).fillColor(PRIMARY_GREEN)
-        .text('Overall Feedback', LEFT, doc.y, { width: CONTENT_WIDTH });
-      doc.moveDown(0.3);
+    children.push(new Paragraph({
+      spacing: { after: 200 },
+      children: [
+        new TextRun({ text: overallFeedback, size: 20, color: DARK_GRAY, font: 'Calibri' }),
+      ],
+    }));
 
-      doc.fontSize(10).fillColor(DARK_GRAY);
-      safeText(doc, overallFeedback, LEFT, doc.y, { width: CONTENT_WIDTH, lineGap: 3 });
+    // ── SUBMITTED ESSAY ──
+    if (essayText && essayText.trim()) {
+      children.push(new Paragraph({ border: thinSeparatorBorder, spacing: { before: 200, after: 200 } }));
 
-      // ──────────────────── ESSAY TEXT ────────────────────
-      if (essayText && essayText.trim()) {
-        if (doc.y > 500) {
-          doc.addPage();
-          moveCursor(doc, LEFT, 60);
-        }
+      children.push(new Paragraph({
+        spacing: { after: 80 },
+        children: [
+          new TextRun({ text: 'Submitted Essay', bold: true, size: 30, color: PRIMARY_BLUE, font: 'Calibri' }),
+        ],
+      }));
 
-        doc.moveDown(0.5);
-        doc.moveTo(LEFT, doc.y).lineTo(LEFT + CONTENT_WIDTH, doc.y)
-          .strokeColor(GOLD).lineWidth(1).stroke();
-        doc.moveDown(0.5);
+      const essayWordCount = essayText.trim().split(/\s+/).filter((w: string) => w.length > 0).length;
+      children.push(new Paragraph({
+        spacing: { after: 80 },
+        children: [
+          new TextRun({ text: `Word Count: ${essayWordCount} words`, size: 18, color: MEDIUM_GRAY, font: 'Calibri' }),
+        ],
+      }));
 
-        doc.fontSize(15).fillColor(PRIMARY_GREEN)
-          .text('Submitted Essay', LEFT, doc.y, { width: CONTENT_WIDTH });
-        doc.moveDown(0.3);
+      const displayText = essayText.length > 3000 ? essayText.substring(0, 3000) + '...' : essayText;
+      children.push(new Paragraph({
+        spacing: { after: 200 },
+        children: [
+          new TextRun({ text: displayText, size: 18, color: DARK_GRAY, font: 'Calibri' }),
+        ],
+      }));
+    }
 
-        doc.fontSize(9).fillColor('#666666');
-        const essayWordCount = essayText.trim().split(/\s+/).filter(w => w.length > 0).length;
-        doc.text(`Word Count: ${essayWordCount} words`, LEFT, doc.y, { width: CONTENT_WIDTH });
-        doc.moveDown(0.3);
+    // ── AI DISCLAIMER ──
+    children.push(new Paragraph({ border: thinSeparatorBorder, spacing: { before: 200, after: 200 } }));
 
-        const displayText = essayText.length > 3000 ? essayText.substring(0, 3000) + '...' : essayText;
-        doc.fontSize(9).fillColor(DARK_GRAY);
-        safeText(doc, displayText, LEFT, doc.y, { width: CONTENT_WIDTH, lineGap: 2 });
-      }
-
-      // ──────────────────── AI DISCLAIMER ────────────────────
-      if (doc.y > 620) {
-        doc.addPage();
-        moveCursor(doc, LEFT, 60);
-      }
-
-      doc.moveDown(1);
-
-      // Disclaimer box
-      const disclaimerY = doc.y;
-      const disclaimerPadding = 10;
-      const disclaimerText = 'This assessment was generated by artificial intelligence and may contain inaccuracies or inconsistencies. Scores and feedback should be reviewed by a qualified instructor before being used for grading or placement decisions.';
-
-      // Calculate text height for box sizing
-      const disclaimerTextHeight = doc.heightOfString(disclaimerText, {
-        width: CONTENT_WIDTH - disclaimerPadding * 2 - 20, // account for icon space
-        fontSize: 8,
-      });
-      const disclaimerBoxHeight = disclaimerTextHeight + disclaimerPadding * 2 + 4;
-
-      doc.roundedRect(LEFT, disclaimerY, CONTENT_WIDTH, disclaimerBoxHeight, 4)
-        .fillAndStroke('#fffbeb', '#fbbf24');
-
-      // Warning icon circle
-      doc.circle(LEFT + disclaimerPadding + 6, disclaimerY + disclaimerPadding + 6, 6)
-        .fill('#f59e0b');
-      doc.fontSize(8).fillColor('#ffffff')
-        .text('!', LEFT + disclaimerPadding + 3.5, disclaimerY + disclaimerPadding + 1.5, { width: 8, align: 'center' });
-
-      // Disclaimer text
-      doc.fontSize(8).fillColor('#92400e');
-      doc.text(disclaimerText, LEFT + disclaimerPadding + 18, disclaimerY + disclaimerPadding, {
-        width: CONTENT_WIDTH - disclaimerPadding * 2 - 20,
-        lineGap: 2,
-      });
-
-      moveCursor(doc, LEFT, disclaimerY + disclaimerBoxHeight + 8);
-
-      // ──────────────────── CREDENTIALS FOOTER ────────────────────
-      if (doc.y > 700) {
-        doc.addPage();
-        moveCursor(doc, LEFT, 60);
-      }
-
-      doc.moveTo(LEFT, doc.y).lineTo(LEFT + CONTENT_WIDTH, doc.y)
-        .strokeColor('#cccccc').lineWidth(0.5).stroke();
-      doc.moveDown(0.5);
-
-      doc.fontSize(7).fillColor('#999999');
-      doc.text('AWE System — Automated Writing Evaluation Platform', LEFT, doc.y, { width: CONTENT_WIDTH, align: 'center' });
-      doc.text('Sultan Qaboos University — Center for Preparatory Studies', LEFT, doc.y, { width: CONTENT_WIDTH, align: 'center' });
-      doc.text('AI Co-Marker Assistance Project, 2026', LEFT, doc.y, { width: CONTENT_WIDTH, align: 'center' });
-      doc.moveDown(0.2);
-      doc.fontSize(6).fillColor('#bbbbbb');
-      doc.text('Developed by: Dr. Waleed Mandour | Powered by Google Gemini AI | This report is auto-generated for educational assessment purposes only.', LEFT, doc.y, { width: CONTENT_WIDTH, align: 'center' });
-
-      // Finalize — this triggers 'data' and 'end' events
-      doc.end();
+    const disclaimerTable = new Table({
+      width: { size: 100, type: WidthType.PERCENTAGE },
+      borders: {
+        top: { style: BorderStyle.SINGLE, size: 1, color: WARNING_BORDER },
+        bottom: { style: BorderStyle.SINGLE, size: 1, color: WARNING_BORDER },
+        left: { style: BorderStyle.SINGLE, size: 1, color: WARNING_BORDER },
+        right: { style: BorderStyle.SINGLE, size: 1, color: WARNING_BORDER },
+      },
+      rows: [
+        new TableRow({
+          children: [
+            new TableCell({
+              width: { size: 100, type: WidthType.PERCENTAGE },
+              shading: { type: ShadingType.CLEAR, fill: WARNING_BG },
+              children: [
+                new Paragraph({
+                  spacing: { before: 80, after: 80 },
+                  children: [
+                    new TextRun({ text: '⚠ ', bold: true, size: 16, color: 'F59E0B', font: 'Calibri' }),
+                    new TextRun({ text: 'This assessment was generated by artificial intelligence and may contain inaccuracies or inconsistencies. Scores and feedback should be reviewed by a qualified instructor before being used for grading or placement decisions.', size: 16, color: '92400E', font: 'Calibri' }),
+                  ],
+                }),
+              ],
+            }),
+          ],
+        }),
+      ],
     });
 
-    // ── Return PDF as downloadable response ──
-    const dateStr = new Date().toISOString().split('T')[0];
-    // Buffer is not a valid BodyInit in Next.js 16 — convert to Uint8Array
-    return new NextResponse(new Uint8Array(pdfBytes), {
+    children.push(disclaimerTable);
+
+    // ── FOOTER CREDENTIALS ──
+    children.push(new Paragraph({ border: thinSeparatorBorder, spacing: { before: 200, after: 100 } }));
+
+    children.push(new Paragraph({
+      alignment: AlignmentType.CENTER,
+      spacing: { after: 20 },
+      children: [
+        new TextRun({ text: 'AWE System — Automated Writing Evaluation Platform', size: 14, color: '999999', font: 'Calibri' }),
+      ],
+    }));
+
+    children.push(new Paragraph({
+      alignment: AlignmentType.CENTER,
+      spacing: { after: 20 },
+      children: [
+        new TextRun({ text: 'Sultan Qaboos University — Center for Preparatory Studies', size: 14, color: '999999', font: 'Calibri' }),
+      ],
+    }));
+
+    children.push(new Paragraph({
+      alignment: AlignmentType.CENTER,
+      spacing: { after: 20 },
+      children: [
+        new TextRun({ text: 'AI Co-Marker Assistance Project, 2026', size: 14, color: '999999', font: 'Calibri' }),
+      ],
+    }));
+
+    children.push(new Paragraph({
+      alignment: AlignmentType.CENTER,
+      spacing: { after: 0 },
+      children: [
+        new TextRun({ text: 'Developed by: Dr. Waleed Mandour | Powered by Google Gemini AI | This report is auto-generated for educational assessment purposes only.', size: 12, color: 'BBBBBB', font: 'Calibri' }),
+      ],
+    }));
+
+    // ── Build DOCX ──
+    const doc = new Document({
+      creator: 'AWE System - Sultan Qaboos University',
+      title: `AWE Assessment Report - ${courseCode}`,
+      description: 'Essay Assessment Report',
+      sections: [{
+        properties: {
+          page: {
+            margin: {
+              top: convertInchesToTwip(0.8),
+              bottom: convertInchesToTwip(0.8),
+              left: convertInchesToTwip(0.7),
+              right: convertInchesToTwip(0.7),
+            },
+          },
+        },
+        footers: {
+          default: new Footer({
+            children: [
+              new Paragraph({
+                alignment: AlignmentType.CENTER,
+                children: [
+                  new TextRun({ text: 'Page ', size: 14, color: '999999', font: 'Calibri' }),
+                  new TextRun({ children: [PageNumber.CURRENT], size: 14, color: '999999', font: 'Calibri' }),
+                ],
+              }),
+            ],
+          }),
+        },
+        children,
+      }],
+    });
+
+    const docxBuffer = await Packer.toBuffer(doc);
+
+    // ── Return DOCX as downloadable response ──
+    const dateFileStr = new Date().toISOString().split('T')[0];
+    return new NextResponse(new Uint8Array(docxBuffer), {
       status: 200,
       headers: {
-        'Content-Type': 'application/pdf',
-        'Content-Disposition': `attachment; filename="AWE_Assessment_${courseCode}_${dateStr}.pdf"`,
-        'Content-Length': String(pdfBytes.length),
+        'Content-Type': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'Content-Disposition': `attachment; filename="AWE_Assessment_${courseCode}_${dateFileStr}.docx"`,
+        'Content-Length': String(docxBuffer.length),
       },
     });
   } catch (error) {
-    console.error('PDF generation error:', error);
+    console.error('DOCX generation error:', error);
     return NextResponse.json(
       {
-        error: 'Failed to generate PDF',
+        error: 'Failed to generate DOCX',
         details: error instanceof Error ? error.message : 'Unknown error',
       },
       { status: 500 }

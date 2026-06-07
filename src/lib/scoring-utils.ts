@@ -70,8 +70,11 @@ export const parseFeedback = (feedback: string): ParsedFeedback => {
       if (/^mistakes?\s*(found)?:/i.test(lower)) {
         const mistakeText = para.replace(/^mistakes?\s*(found)?:\s*/i, '');
         // Parse mistake lines: "quoted text": explanation  OR  - "quoted text": explanation
-        const lines = mistakeText.split('\n');
-        lines.forEach((line) => {
+        // Also support semicolon-separated format: "quote1": exp1; "quote2": exp2
+        const segments = mistakeText.includes(';') && mistakeText.includes('"')
+          ? mistakeText.split(/;\s*(?=")/)
+          : mistakeText.split('\n');
+        segments.forEach((line) => {
           line = line.trim();
           if (!line) return;
           // Strip leading list marker (-, *, •)

@@ -95,7 +95,7 @@ const RecordsScreen = ({ onBack, onNewAssessment }: { onBack: () => void; onNewA
   // Sparkline data (last 10)
   const sparklineData = filteredRecords.slice(0, 10).reverse().map((r) => r.assessment.percentage);
 
-  const handleDownloadPDF = async (record: AssessmentRecord) => {
+  const handleDownloadReport = async (record: AssessmentRecord) => {
     setIsDownloading(true);
     try {
       const response = await fetch('/api/pdf/assessment', {
@@ -107,19 +107,19 @@ const RecordsScreen = ({ onBack, onNewAssessment }: { onBack: () => void; onNewA
           essayText: record.essayText,
         }),
       });
-      if (!response.ok) throw new Error('Failed to generate PDF');
+      if (!response.ok) throw new Error('Failed to generate report');
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `AWE_Assessment_${record.course?.code || 'Report'}_${new Date(record.createdAt).toISOString().split('T')[0]}.pdf`;
+      a.download = `AWE_Assessment_${record.course?.code || 'Report'}_${new Date(record.createdAt).toISOString().split('T')[0]}.docx`;
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
-      toast({ title: 'PDF Downloaded', description: 'Your assessment report has been downloaded.' });
+      toast({ title: 'Report Downloaded', description: 'Your Word report has been downloaded. You can edit and save changes.' });
     } catch (error) {
-      toast({ title: 'Download Failed', description: 'Failed to generate PDF report.', variant: 'destructive' });
+      toast({ title: 'Download Failed', description: 'Failed to generate Word report.', variant: 'destructive' });
     } finally {
       setIsDownloading(false);
     }
@@ -514,12 +514,12 @@ const RecordsScreen = ({ onBack, onNewAssessment }: { onBack: () => void; onNewA
                                       <Button
                                         variant="outline"
                                         size="sm"
-                                        onClick={() => handleDownloadPDF(record)}
+                                        onClick={() => handleDownloadReport(record)}
                                         disabled={isDownloading}
                                         className="flex-1 h-9 text-xs rounded-lg"
                                       >
                                         <Download className="w-3.5 h-3.5 mr-1" />
-                                        PDF
+                                        Word
                                       </Button>
                                       <Button
                                         variant="outline"

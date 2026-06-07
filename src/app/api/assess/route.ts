@@ -340,8 +340,12 @@ function buildScoreSchema(enumValues: string[], description: string) {
           },
         },
         suggestions: { type: Type.STRING },
+        isOffTopic: {
+          type: Type.BOOLEAN,
+          description: 'Set to true ONLY for Task Response/Achievement if the essay is partially or completely off-topic. Set to false for all other criteria and for on-topic essays.',
+        },
       },
-      required: ['criterionName', 'score', 'maxScore', 'justification', 'strengths', 'mistakes', 'suggestions'],
+      required: ['criterionName', 'score', 'maxScore', 'justification', 'strengths', 'mistakes', 'suggestions', 'isOffTopic'],
     },
   };
 }
@@ -354,9 +358,13 @@ const FOUNDATION_SCHEMA = {
       ['0', '0.5', '1', '1.5', '2', '2.5', '3', '3.5', '4', '4.5', '5', '5.5', '6'],
       'Rubric score. You MUST select ONLY from the allowed 0.5 increment values between 0 and 6.',
     ),
+    offTopicClassification: {
+      type: Type.STRING,
+      description: 'Classify the essay: "on-topic", "partially-off-topic", or "completely-off-topic". A completely different topic or wrong essay type = completely-off-topic.',
+    },
     overallFeedback: { type: Type.STRING },
   },
-  required: ['scores', 'overallFeedback'],
+  required: ['scores', 'offTopicClassification', 'overallFeedback'],
 };
 
 // Schema for Credit/Post-Foundation Courses — Strict 0–5 scale in 0.5 increments
@@ -367,9 +375,13 @@ const CREDIT_SCHEMA = {
       ['0', '0.5', '1', '1.5', '2', '2.5', '3', '3.5', '4', '4.5', '5'],
       'Rubric score. You MUST select ONLY from the allowed 0.5 increment values between 0 and 5.',
     ),
+    offTopicClassification: {
+      type: Type.STRING,
+      description: 'Classify the essay: "on-topic", "partially-off-topic", or "completely-off-topic". A completely different topic or wrong essay type = completely-off-topic.',
+    },
     overallFeedback: { type: Type.STRING },
   },
-  required: ['scores', 'overallFeedback'],
+  required: ['scores', 'offTopicClassification', 'overallFeedback'],
 };
 
 const CREDIT_HUMANIZATION = `
@@ -456,13 +468,26 @@ SCORING: Follow the Evidence-First Scoring Protocol provided separately in the p
 // buildFoundationPrompt. Used by all prompt builders.
 const SCORING_PROTOCOL = `
 EVIDENCE-FIRST SCORING PROTOCOL (follow strictly in this order):
+Step 0 — OFF-TOPIC DETECTION (MANDATORY — DO THIS FIRST, BEFORE ANY SCORING):
+  Compare the student essay against the given essay topic/prompt. Classify the essay as one of:
+  (a) ON-TOPIC: The essay directly addresses the given prompt topic and essay type.
+  (b) PARTIALLY OFF-TOPIC: The essay addresses a related but different topic, or uses a different essay type (e.g., writes a descriptive essay when a problem-solution essay was required).
+  (c) COMPLETELY OFF-TOPIC: The essay addresses an entirely different topic with no connection to the prompt, OR the essay type is fundamentally wrong (e.g., writes a narrative when an argumentative essay was required).
+
+  SCORING CONSEQUENCES OF OFF-TOPIC CLASSIFICATION:
+  - If COMPLETELY OFF-TOPIC: Task Response/Achievement = 0–1.5 (Very Poor/Poor). Lexical Resource = 0–2 (Very Poor/Weak). Other criteria scored normally.
+  - If PARTIALLY OFF-TOPIC: Task Response/Achievement = deduct at least 50% from what the score would otherwise be. Lexical Resource = deduct at least 25%. Other criteria scored normally.
+  - If ON-TOPIC: Score all criteria normally with no off-topic penalty.
+
+  CRITICAL: An essay that writes about a completely different topic (e.g., prompt says "problem-solution essay on global warming" but the student writes about "my favorite restaurant") is COMPLETELY OFF-TOPIC regardless of how well-written it is. Task Response MUST receive 0–1.5 in this case. Do NOT give Satisfactory or higher to a completely off-topic essay.
+
 Step 1 — EVIDENCE GATHERING: For each criterion, identify and QUOTE specific text from the essay that is relevant. Quote at least 2 phrases: one that supports a higher band and one that supports a lower band. Do NOT assign a score yet.
 Step 2 — BAND RANGE IDENTIFICATION: Based on the evidence, identify the NARROWEST possible band range (e.g., "between Satisfactory and Good"). State this range explicitly.
 Step 3 — BOUNDARY VERIFICATION (CRITICAL — MANDATORY): If the range spans the Satisfactory/Good boundary, you MUST perform the Boundary Verification Check for that criterion. Check each condition — if ANY check for the higher band fails, the score stays at the lower band.
 Step 4 — EXCLUSION CHECK: Check the BOUNDARY exclusion statements in the rubric. Does the evidence exclude the student from the higher band? If the exclusion statement says "NOT [higher band] if..." and the student's work matches that condition, the score stays at the lower band.
-Step 5 — SCORE ASSIGNMENT: ONLY NOW assign a score. The score must be consistent with the evidence gathered (Step 1), the range identified (Step 2), and the boundary verification (Steps 3-4).
-Step 6 — JUSTIFICATION WITH EVIDENCE: Write the justification citing the quoted evidence from Step 1. Explain WHY the score was assigned, referencing specific boundary conditions or exclusion checks that determined the outcome.
-Step 7 — ERROR CLASSIFICATION: List up to 3 specific errors per criterion with quoted text. Classify each as expected, non-impeding, or impeding. Do NOT provide corrections.
+Step 5 — SCORE ASSIGNMENT: ONLY NOW assign a score. The score must be consistent with the evidence gathered (Step 1), the range identified (Step 2), the boundary verification (Steps 3-4), AND the off-topic classification (Step 0).
+Step 6 — JUSTIFICATION WITH EVIDENCE: Write a BRIEF justification (1-2 sentences max) citing the most important evidence. If the essay is off-topic, the justification MUST state this explicitly.
+Step 7 — ERROR CLASSIFICATION: List up to 2 specific errors per criterion with quoted text. Classify each as expected, non-impeding, or impeding. Do NOT provide corrections.
 Step 8 — HOLISTIC CONSISTENCY CHECK: After scoring all criteria, verify: (a) the spread between highest and lowest scores does not exceed 2 points, (b) no criterion score contradicts the evidence, and (c) the boundary verification checks are internally consistent.
 `;
 
@@ -648,9 +673,9 @@ ${SCORING_PROTOCOL}
 SCORING INSTRUCTIONS:
 1. Score each criterion 0-5 (0.5 increments). Use the FULL range — do NOT default to middle scores.
 2. For each criterion: quote at least ONE exact phrase from the student text as evidence in your justification.
-3. List up to 3 specific errors per criterion as { "quote": "[exact text]", "explanation": "[why wrong]" }. Do NOT provide corrections.
-4. Write 1-2 specific strengths and 1-2 actionable suggestions per criterion.
-5. overallFeedback (3-4 sentences): strongest/weakest criterion, Discussion analysis quality, Conclusion adequacy, one prioritized action item.
+3. List up to 2 specific errors per criterion as { "quote": "[exact text]", "explanation": "[why wrong]" }. Do NOT provide corrections.
+4. Write 1 specific strength and 1 actionable suggestion per criterion. Keep these CONCISE — 1 sentence each.
+5. overallFeedback (2-3 sentences): strongest/weakest criterion, one prioritized action item.
 6. Do NOT calculate totalScore or percentage — those are computed automatically.`;
 }
 
@@ -781,9 +806,9 @@ ${FOUNDATION_BOUNDARY_CHECKS}
 ${FOUNDATION_EXEMPLARS}
 SCORING INSTRUCTIONS:
 1. Score each criterion 0-6 (0.5 increments). Use the FULL range — do NOT default to middle scores.
-2. List up to 3 specific errors per criterion as { "quote": "[exact text]", "explanation": "[why wrong]" }. Classify each as expected, non-impeding, or impeding. Do NOT provide corrections.
-3. Write 1-2 specific strengths and 1-2 actionable suggestions per criterion.
-4. overallFeedback (3-4 sentences): strongest/weakest criterion, what the student communicated well, one prioritized action item.
+2. List up to 2 specific errors per criterion as { "quote": "[exact text]", "explanation": "[why wrong]" }. Classify each as expected, non-impeding, or impeding. Do NOT provide corrections.
+3. Write 1 specific strength and 1 actionable suggestion per criterion. Keep these CONCISE — 1 sentence each.
+4. overallFeedback (2-3 sentences): strongest/weakest criterion, one prioritized action item.
 5. For Task Response: address topic adherence and essay structure. If the word count exceeds the target, mention it but do NOT deduct marks.
 6. Do NOT calculate totalScore or percentage — those are computed automatically.`;
 }
@@ -811,9 +836,9 @@ ${SCORING_PROTOCOL}
 SCORING INSTRUCTIONS:
 1. Score each criterion 0-5 (0.5 increments). Use the FULL range — do NOT default to middle scores.
 2. For each criterion: quote at least ONE exact phrase from the essay as evidence in your justification.
-3. List up to 3 specific errors per criterion as { "quote": "[exact text]", "explanation": "[why wrong]" }. Do NOT provide corrections.
-4. Write 1-2 specific strengths and 1-2 actionable suggestions per criterion.
-5. overallFeedback (3-4 sentences): strongest/weakest criterion, one prioritized action item.
+3. List up to 2 specific errors per criterion as { "quote": "[exact text]", "explanation": "[why wrong]" }. Do NOT provide corrections.
+4. Write 1 specific strength and 1 actionable suggestion per criterion. Keep these CONCISE — 1 sentence each.
+5. overallFeedback (2-3 sentences): strongest/weakest criterion, one prioritized action item.
 6. Do NOT calculate totalScore or percentage — those are computed automatically.`;
 }
 
@@ -872,9 +897,9 @@ ${SCORING_PROTOCOL}
 SCORING INSTRUCTIONS:
 1. Score each criterion 0-5 (0.5 increments). Use the FULL range — do NOT default to middle scores.
 2. For each criterion: quote at least ONE exact phrase from the summary as evidence.
-3. List up to 3 specific errors per criterion as { "quote": "[exact text]", "explanation": "[why wrong]" }. Do NOT provide corrections.
-4. Write 1-2 specific strengths and 1-2 actionable suggestions per criterion.
-5. overallFeedback (3-4 sentences): which main ideas were captured/missed, strongest/weakest criterion, paraphrasing quality, one prioritized action item.
+3. List up to 2 specific errors per criterion as { "quote": "[exact text]", "explanation": "[why wrong]" }. Do NOT provide corrections.
+4. Write 1 specific strength and 1 actionable suggestion per criterion. Keep these CONCISE — 1 sentence each.
+5. overallFeedback (2-3 sentences): which main ideas were captured/missed, one prioritized action item.
 6. Do NOT calculate totalScore or percentage — those are computed automatically.`;
 }
 
@@ -929,9 +954,9 @@ ${SCORING_PROTOCOL}
 SCORING INSTRUCTIONS:
 1. Score each criterion 0-5 (0.5 increments). Use the FULL range — do NOT default to middle scores.
 2. For each criterion: quote at least ONE exact phrase from the essay as evidence.
-3. List up to 3 specific errors per criterion as { "quote": "[exact text]", "explanation": "[why wrong]" }. Do NOT provide corrections.
-4. Write 1-2 specific strengths and 1-2 actionable suggestions per criterion.
-5. overallFeedback (3-4 sentences): strongest/weakest criterion, discussion points addressed, paraphrasing quality, one prioritized action item.
+3. List up to 2 specific errors per criterion as { "quote": "[exact text]", "explanation": "[why wrong]" }. Do NOT provide corrections.
+4. Write 1 specific strength and 1 actionable suggestion per criterion. Keep these CONCISE — 1 sentence each.
+5. overallFeedback (2-3 sentences): strongest/weakest criterion, one prioritized action item.
 6. Do NOT calculate totalScore or percentage — those are computed automatically.`;
 }
 
@@ -994,9 +1019,9 @@ SCORING INSTRUCTIONS:
 1. Score each criterion 0-5 (0.5 increments). Use the FULL range — do NOT default to middle scores.
 2. For Task Achievement: Evaluate whether the student critically analyses the article (not just summarizes), reviews at least 2 points from the author, uses at least 2 excerpts with proper in-text APA citations, and paraphrases effectively (no chunks of 3+ copied words).
 3. For each criterion: quote at least ONE exact phrase from the student's review as evidence.
-4. List up to 3 specific errors per criterion as { "quote": "[exact text]", "explanation": "[why wrong]" }. Do NOT provide corrections.
-5. Write 1-2 specific strengths and 1-2 actionable suggestions per criterion.
-6. overallFeedback (3-4 sentences): strongest/weakest criterion, quality of critical analysis vs summary, paraphrasing quality, one prioritized action item.
+4. List up to 2 specific errors per criterion as { "quote": "[exact text]", "explanation": "[why wrong]" }. Do NOT provide corrections.
+5. Write 1 specific strength and 1 actionable suggestion per criterion. Keep these CONCISE — 1 sentence each.
+6. overallFeedback (2-3 sentences): strongest/weakest criterion, one prioritized action item.
 7. Do NOT calculate totalScore or percentage — those are computed automatically.`;
 }
 
@@ -1059,9 +1084,9 @@ ${SCORING_PROTOCOL}
 SCORING INSTRUCTIONS:
 1. Score each criterion 0-5 (0.5 increments). Use the FULL range — do NOT default to middle scores.
 2. For each criterion: quote at least ONE exact phrase from the essay as evidence.
-3. List up to 3 specific errors per criterion as { "quote": "[exact text]", "explanation": "[why wrong]" }. Do NOT provide corrections.
-4. Write 1-2 specific strengths and 1-2 actionable suggestions per criterion.
-5. overallFeedback (3-4 sentences): which sources were used (all 3?), strongest/weakest criterion, paraphrasing/copied text %, one prioritized action item.
+3. List up to 2 specific errors per criterion as { "quote": "[exact text]", "explanation": "[why wrong]" }. Do NOT provide corrections.
+4. Write 1 specific strength and 1 actionable suggestion per criterion. Keep these CONCISE — 1 sentence each.
+5. overallFeedback (2-3 sentences): which sources were used, one prioritized action item.
 6. Do NOT calculate totalScore or percentage — those are computed automatically.`;
 }
 
@@ -1126,13 +1151,13 @@ function buildFeedback(s: any): string {
   if (s.strengths) parts.push(`Strengths: ${s.strengths}`);
   if (Array.isArray(s.mistakes) && s.mistakes.length > 0) {
     const lines = s.mistakes
-      .map((m: any) => m.quote ? `- "${m.quote}": ${m.explanation}` : `- ${m.explanation}`)
-      .join('\n');
-    parts.push(`Mistakes found:\n${lines}`);
+      .map((m: any) => m.quote ? `"${m.quote}": ${m.explanation}` : m.explanation)
+      .join('; ');
+    parts.push(`Mistakes: ${lines}`);
   }
   if (s.suggestions) parts.push(`Suggestions: ${s.suggestions}`);
 
-  return parts.length > 0 ? parts.join('\n\n') : 'No feedback provided.';
+  return parts.length > 0 ? parts.join('\n') : 'No feedback provided.';
 }
 
 // ─── POST Handler ────────────────────────────────────────────────────────────
@@ -1547,6 +1572,14 @@ export async function POST(request: NextRequest) {
       });
     }
 
+    // ── Off-Topic Deterministic Post-Processing ──────────────────────────────
+    // Extract the off-topic classification from the AI response.
+    // This backs up the prompt-based Step 0 with a deterministic TypeScript check.
+    const offTopicClass = String(assessment.offTopicClassification || '').toLowerCase().trim();
+    const isCompletelyOffTopic = offTopicClass.includes('completely');
+    const isPartiallyOffTopic = offTopicClass.includes('partially');
+    const isOffTopic = isCompletelyOffTopic || isPartiallyOffTopic;
+
     // Normalize each score
     assessment.scores.forEach((s: any) => {
       // Clamp score to [0, maxScore] rounded to nearest 0.5
@@ -1555,15 +1588,51 @@ export async function POST(request: NextRequest) {
       s.score = Math.max(0, Math.min(Math.round(rawScore * 2) / 2, maxScore));
       s.maxScore = maxScore;
 
+      const isTaskCriterion = s.criterionName === 'Task Response' || s.criterionName === 'Task Achievement';
+      const isLexicalCriterion = s.criterionName === 'Lexical Resource';
+
+      // ── Off-Topic Score Cap (deterministic, overrides AI if needed) ──
+      if (isCompletelyOffTopic) {
+        if (isTaskCriterion) {
+          // Completely off-topic: Task Response capped at 1.5 (Very Poor/Poor)
+          if (s.score > 1.5) {
+            s.score = 1.5;
+            s.justification = `COMPLETELY OFF-TOPIC: The essay does not address the given prompt. ${s.justification}`;
+          }
+        } else if (isLexicalCriterion) {
+          // Completely off-topic: Lexical Resource capped at 2 (Weak)
+          if (s.score > 2) {
+            s.score = 2;
+          }
+        }
+      } else if (isPartiallyOffTopic) {
+        if (isTaskCriterion) {
+          // Partially off-topic: Task Response capped at 50% of max (3 for Foundation, 2.5 for Credit)
+          const taskCap = maxScore > 5 ? 3 : 2.5;
+          if (s.score > taskCap) {
+            s.score = taskCap;
+            s.justification = `PARTIALLY OFF-TOPIC: The essay does not fully address the given prompt. ${s.justification}`;
+          }
+        } else if (isLexicalCriterion) {
+          // Partially off-topic: Lexical Resource capped at 75% of max
+          const lexCap = Math.round(maxScore * 0.75 * 2) / 2;
+          if (s.score > lexCap) {
+            s.score = lexCap;
+          }
+        }
+      }
+
       // ── Score Floor: enforce minimum 1 for on-topic essays with sufficient words ──
       // This backs up the prompt-based Score Floor rule with a deterministic TypeScript check.
-      // Note: Foundation uses "Task Response", Credit/Summary/Synthesis use "Task Achievement", LANC2146 uses "Task Response".
-      const isTaskCriterion = s.criterionName === 'Task Response' || s.criterionName === 'Task Achievement';
-      if (wordCount >= Math.round((activeTargetWordCount?.min ?? 0) * 0.5) && !isTaskCriterion && s.score === 0 && maxScore > 0) {
-        s.score = 1; // Floor of 1 for non-task criteria
-      }
-      if (wordCount >= Math.round((activeTargetWordCount?.min ?? 0) * 0.5) && isTaskCriterion && s.score === 0 && maxScore > 0) {
-        s.score = maxScore > 5 ? 2 : 1; // Floor of 2 for Task criterion on Foundation (0-6 scale); floor of 1 on Credit (0-5 scale)
+      // Note: Score floor does NOT apply when the essay is off-topic.
+      // Foundation uses "Task Response", Credit/Summary/Synthesis use "Task Achievement", LANC2146 uses "Task Response".
+      if (!isOffTopic) {
+        if (wordCount >= Math.round((activeTargetWordCount?.min ?? 0) * 0.5) && !isTaskCriterion && s.score === 0 && maxScore > 0) {
+          s.score = 1; // Floor of 1 for non-task criteria
+        }
+        if (wordCount >= Math.round((activeTargetWordCount?.min ?? 0) * 0.5) && isTaskCriterion && s.score === 0 && maxScore > 0) {
+          s.score = maxScore > 5 ? 2 : 1; // Floor of 2 for Task criterion on Foundation (0-6 scale); floor of 1 on Credit (0-5 scale)
+        }
       }
 
       // Clean text fields (strip markdown, handle arrays/objects)
@@ -1616,6 +1685,7 @@ export async function POST(request: NextRequest) {
         overallFeedback,
         wordCount,
         targetWordCount: (isFoundation || isSummaryWriting || isSynthesisWriting || isLanc1070 || isLanc2146) ? activeTargetWordCount : null,
+        offTopicClassification: offTopicClass || 'on-topic',
         modelUsed: usedModelName,
         consensusConfidence,
         vertexAI: useVertexAI || useVertexExpress,
