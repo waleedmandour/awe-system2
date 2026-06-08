@@ -6,6 +6,13 @@ import { NextRequest, NextResponse } from 'next/server';
  * Protects paid API routes (/api/ocr, /api/assess) by verifying the
  * authentication token cookie. Unauthenticated requests receive 401.
  *
+ * Two auth methods are supported:
+ *   1. Email whitelist auth (awe-auth-token cookie) — for direct app access
+ *   2. LTI session auth (awe-lti-session cookie) — for Moodle LTI launches
+ *
+ * LTI routes (/api/lti/*) are excluded from auth checks as they handle
+ * their own session management.
+ *
  * The /api/auth route is excluded from protection so users can authenticate.
  * Other routes (/api/courses, /api/essays, /api/pdf, /api) are public.
  */
@@ -15,6 +22,15 @@ export const config = {
 };
 
 export async function middleware(request: NextRequest) {
+  // ── Check LTI session auth ─────────────────────────────────────────────
+  const ltiSession = request.cookies.get('awe-lti-session')?.value;
+  if (ltiSession) {
+    // LTI session cookie present — allow access (session validation
+    // happens in the route handlers themselves)
+    return NextResponse.next();
+  }
+
+  // ── Check email whitelist auth ─────────────────────────────────────────
   const token = request.cookies.get('awe-auth-token')?.value;
   const email = request.cookies.get('awe-auth-email')?.value;
 
