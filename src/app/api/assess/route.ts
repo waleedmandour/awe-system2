@@ -481,6 +481,8 @@ Step 0 — OFF-TOPIC DETECTION (MANDATORY — DO THIS FIRST, BEFORE ANY SCORING)
 
   CRITICAL: An essay that writes about a completely different topic (e.g., prompt says "problem-solution essay on global warming" but the student writes about "my favorite restaurant") is COMPLETELY OFF-TOPIC regardless of how well-written it is. Task Response MUST receive 0–1.5 in this case. Do NOT give Satisfactory or higher to a completely off-topic essay.
 
+  IMPORTANT — CONSISTENCY REQUIREMENT: Your offTopicClassification value MUST be consistent with the isOffTopic boolean in each criterion's score. If you classify the essay as completely-off-topic or partially-off-topic, then the Task Response/Achievement criterion's isOffTopic MUST be true. Conversely, if you set isOffTopic=true for the Task criterion, the top-level offTopicClassification MUST NOT be "on-topic". Failure to maintain this consistency will result in automatic score correction by the system.
+
 Step 1 — EVIDENCE GATHERING: For each criterion, identify and QUOTE specific text from the essay that is relevant. Quote at least 2 phrases: one that supports a higher band and one that supports a lower band. Do NOT assign a score yet.
 Step 2 — BAND RANGE IDENTIFICATION: Based on the evidence, identify the NARROWEST possible band range (e.g., "between Satisfactory and Good"). State this range explicitly.
 Step 3 — BOUNDARY VERIFICATION (CRITICAL — MANDATORY): If the range spans the Satisfactory/Good boundary, you MUST perform the Boundary Verification Check for that criterion. Check each condition — if ANY check for the higher band fails, the score stays at the lower band.
@@ -540,7 +542,7 @@ Lexical: □ Wide range of vocabulary with uncommon lexical items □ Vocabulary
 // Concrete reference points at the Satisfactory/Good boundary for each rubric type.
 
 const FOUNDATION_EXEMPLARS = `
-CALIBRATION EXEMPLARS — Foundation Level (A1-A2):
+CALIBRATION EXEMPLARS — Foundation Level (A1):
 These are REALISTIC student excerpts at the boundary. Use them as reference points when deciding between Satisfactory (3.5) and Good (4).
 
 Task Response:
@@ -700,7 +702,7 @@ function buildFoundationPrompt(
     ? `Word count (${wordCount}) is slightly above ${targetWordCount.min}-${targetWordCount.max} (within tolerance). Do NOT deduct marks.`
     : `Word count (${wordCount}) is within ${targetWordCount.min}-${targetWordCount.max}.`;
 
-  return `You are an expert, encouraging writing assessor for Foundation level students at Sultan Qaboos University. CEFR A1-A2 level.
+  return `You are an expert, encouraging writing assessor for Foundation level students at Sultan Qaboos University. CEFR A1 level.
 
 EXAM TYPE: ${examLabel}
 ${topic ? `Essay Topic: ${topic}` : 'No specific topic provided.'}
@@ -730,15 +732,15 @@ The student text was extracted via OCR from handwritten scripts. Many apparent "
 3. Only flag a spelling issue as a genuine student error if the exact same error appears 3+ times in a consistent pattern (e.g., "thier" repeated throughout) — this indicates it is clearly the student's own spelling rather than OCR noise.
 4. When uncertain whether an error is OCR or student-originated, always give the student the benefit of the doubt.
 
-BAND CALIBRATION FOR CEFR A1-A2 (what each band looks like at this level):
-- 5-6/6 (Excellent): Exceptional for A1-A2. Near-fluent grammar, rich vocabulary, perfect structure. Very rare at this level.
-- 4-4.5/6 (Good): Strong for A1-A2. Clear communication with minor expected errors. This is the typical range for strong foundation students.
-- 3-3.5/6 (Satisfactory): Average for A1-A2. Meaning is usually clear despite frequent grammar/vocabulary errors. Most foundation students score here.
-- 2-2.5/6 (Weak): Below expectations even for A1-A2. Meaning often unclear, very limited vocabulary or severe structural issues.
+BAND CALIBRATION FOR CEFR A1 (what each band looks like at this level):
+- 5-6/6 (Excellent): Exceptional for A1. Near-fluent grammar, rich vocabulary, perfect structure. Very rare at this level.
+- 4-4.5/6 (Good): Strong for A1. Clear communication with minor expected errors. This is the typical range for strong foundation students.
+- 3-3.5/6 (Satisfactory): Average for A1. Meaning is usually clear despite frequent grammar/vocabulary errors. Most foundation students score here.
+- 2-2.5/6 (Weak): Below expectations even for A1. Meaning often unclear, very limited vocabulary or severe structural issues.
 - 0-1.5/6 (Very Poor): Incomprehensible or completely off-topic. Reserve for genuine failures to communicate.
 
 ERROR CLASSIFICATION (apply per criterion — this is critical):
-1. Expected A1/A2 errors (e.g., missing articles, wrong preposition, subject-verb agreement for 3rd person singular, incorrect word order in complex sentences) → Do NOT lower the score. These are normal developmental errors at this level.
+1. Expected A1 errors (e.g., missing articles, wrong preposition, subject-verb agreement for 3rd person singular, incorrect word order in complex sentences) → Do NOT lower the score. These are normal developmental errors at this level.
    ARABIC L1 TRANSFER ERRORS (also Expected — do NOT lower score):
    The students are Arabic L1 speakers. The following patterns are normal developmental transfer, NOT poor writing:
    - Missing copula "be" (e.g., "She happy" instead of "She is happy") — Arabic has no copula in present tense
@@ -748,7 +750,7 @@ ERROR CLASSIFICATION (apply per criterion — this is critical):
    - Adjective-noun word order reversal (e.g., "car big" instead of "big car") — Arabic places adjectives after nouns
    - Preposition substitution (e.g., "in Monday" instead of "on Monday") — Arabic preposition usage differs significantly
    - Missing "it/there" expletive subjects (e.g., "Is hot today") — Arabic is pro-drop
-   If these errors appear but meaning is still clear, classify them as expected A1/A2 errors. Only flag them if they genuinely impede comprehension.
+   If these errors appear but meaning is still clear, classify them as expected A1 errors. Only flag them if they genuinely impede comprehension.
 2. Non-impeding errors (meaning is still clear despite the error; e.g., wrong tense form, spelling that does not obscure meaning) → Only minor score impact if the error is frequent.
 3. Impeding errors (reader genuinely cannot understand the intended meaning) → Significant score impact.
 Rate each criterion based primarily on COMMUNICATION SUCCESS and IMPEDING errors, not total error count.
@@ -776,7 +778,7 @@ SCORE FLOOR FOR GENUINE ATTEMPTS:
 
 SPECIAL RULES:
 1. Deduct marks for Task Response ONLY IF the text is severely off-topic. Do not penalize minor tangents.
-2. Reward successful communication of ideas. Do not be overly harsh on minor A1/A2 grammatical/spelling errors if the overall meaning is clear.
+2. Reward successful communication of ideas. Do not be overly harsh on minor A1 grammatical/spelling errors if the overall meaning is clear.
 
 BORDERLINE DECISIONS — BENEFIT OF THE DOUBT:
 1. When a student's performance sits on the borderline between two bands (e.g., 3 vs 3.5, or 4 vs 4.5), award the HIGHER band if:
@@ -1375,7 +1377,7 @@ export async function POST(request: NextRequest) {
       : isLanc2146
       ? 'You are an expert writing assessment AI for LANC2146 (Report Writing) at Sultan Qaboos University. CEFR A2-B1 level. Evaluate Discussion (analysis/interpretation) and Conclusion (summary, recommendations). Quote exact words as evidence. Justify every score against the rubric. List specific errors with quoted text.'
       : isFoundation
-      ? 'You are an expert, encouraging writing assessor for Foundation courses (FP0230, FP0340) at Sultan Qaboos University. CEFR A1-A2 level. Score relative to A1-A2 expectations — reward successful communication and only penalize impeding errors. Quote exact words as evidence for EVERY score.'
+      ? 'You are an expert, encouraging writing assessor for Foundation courses (FP0230, FP0340) at Sultan Qaboos University. CEFR A1 level. Score relative to A1 expectations — reward successful communication and only penalize impeding errors. Quote exact words as evidence for EVERY score.'
       : 'You are an expert writing assessment AI at Sultan Qaboos University. CEFR A2-B1 level. Quote exact words from the student essay as evidence. Justify every score against the rubric. List specific errors with quoted text.';
 
     // ── Single model call with retry + rate-limit handling ───────────────────
@@ -1575,7 +1577,47 @@ export async function POST(request: NextRequest) {
     // ── Off-Topic Deterministic Post-Processing ──────────────────────────────
     // Extract the off-topic classification from the AI response.
     // This backs up the prompt-based Step 0 with a deterministic TypeScript check.
-    const offTopicClass = String(assessment.offTopicClassification || '').toLowerCase().trim();
+    let offTopicClass = String(assessment.offTopicClassification || '').toLowerCase().trim();
+
+    // ── Cross-check: if ANY criterion's isOffTopic flag is true but the top-level
+    // classification says "on-topic", the AI was inconsistent. Force the classification
+    // to at least "partially-off-topic". If the TASK criterion itself has isOffTopic=true,
+    // force "completely-off-topic" — because the essay failed the fundamental prompt requirement.
+    const anyCriterionOffTopic = assessment.scores.some((s: any) => s.isOffTopic === true);
+    const taskCriterionOffTopic = assessment.scores.some((s: any) =>
+      s.isOffTopic === true && (s.criterionName === 'Task Response' || s.criterionName === 'Task Achievement')
+    );
+    if (taskCriterionOffTopic && !offTopicClass.includes('completely')) {
+      offTopicClass = 'completely-off-topic';
+    } else if (anyCriterionOffTopic && offTopicClass === 'on-topic') {
+      offTopicClass = 'partially-off-topic';
+    }
+
+    // ── Cross-check: if the task criterion justification explicitly says off-topic but
+    // the classification missed it, force the classification. This catches cases where
+    // the AI correctly describes the issue in prose but fails to set the right enum value.
+    const taskJustification = String(
+      assessment.scores.find((s: any) =>
+        s.criterionName === 'Task Response' || s.criterionName === 'Task Achievement'
+      )?.justification || ''
+    ).toLowerCase();
+    if (!offTopicClass.includes('completely') && !offTopicClass.includes('partially')) {
+      const justificationSignalsOffTopic =
+        taskJustification.includes('off-topic') ||
+        taskJustification.includes('off topic') ||
+        taskJustification.includes('does not address') ||
+        taskJustification.includes('does not respond') ||
+        taskJustification.includes('not address the prompt') ||
+        taskJustification.includes('not address the topic') ||
+        taskJustification.includes('different topic') ||
+        taskJustification.includes('wrong topic') ||
+        taskJustification.includes('unrelated to the prompt') ||
+        taskJustification.includes('fails to address the task');
+      if (justificationSignalsOffTopic) {
+        offTopicClass = 'completely-off-topic';
+      }
+    }
+
     const isCompletelyOffTopic = offTopicClass.includes('completely');
     const isPartiallyOffTopic = offTopicClass.includes('partially');
     const isOffTopic = isCompletelyOffTopic || isPartiallyOffTopic;
@@ -1625,12 +1667,14 @@ export async function POST(request: NextRequest) {
       // ── Score Floor: enforce minimum 1 for on-topic essays with sufficient words ──
       // This backs up the prompt-based Score Floor rule with a deterministic TypeScript check.
       // Note: Score floor does NOT apply when the essay is off-topic.
+      // Note: Score floor only applies when there is a defined target word count (activeTargetWordCount !== null).
       // Foundation uses "Task Response", Credit/Summary/Synthesis use "Task Achievement", LANC2146 uses "Task Response".
-      if (!isOffTopic) {
-        if (wordCount >= Math.round((activeTargetWordCount?.min ?? 0) * 0.5) && !isTaskCriterion && s.score === 0 && maxScore > 0) {
+      const minWordThreshold = activeTargetWordCount ? Math.round(activeTargetWordCount.min * 0.5) : 0;
+      if (!isOffTopic && activeTargetWordCount && wordCount >= minWordThreshold) {
+        if (!isTaskCriterion && s.score === 0 && maxScore > 0) {
           s.score = 1; // Floor of 1 for non-task criteria
         }
-        if (wordCount >= Math.round((activeTargetWordCount?.min ?? 0) * 0.5) && isTaskCriterion && s.score === 0 && maxScore > 0) {
+        if (isTaskCriterion && s.score === 0 && maxScore > 0) {
           s.score = maxScore > 5 ? 2 : 1; // Floor of 2 for Task criterion on Foundation (0-6 scale); floor of 1 on Credit (0-5 scale)
         }
       }
@@ -1684,7 +1728,7 @@ export async function POST(request: NextRequest) {
         percentage,
         overallFeedback,
         wordCount,
-        targetWordCount: (isFoundation || isSummaryWriting || isSynthesisWriting || isLanc1070 || isLanc2146) ? activeTargetWordCount : null,
+        targetWordCount: activeTargetWordCount,
         offTopicClassification: offTopicClass || 'on-topic',
         modelUsed: usedModelName,
         consensusConfidence,
